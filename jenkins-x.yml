@@ -1,5 +1,5 @@
 buildPack: go-cli
-dockerRegistryOwner: jenkinsxio-labs-private
+dockerRegistryOwner: jenkinsxio
 pipelineConfig:
   pipelines:
     overrides:
@@ -19,7 +19,7 @@ pipelineConfig:
       pipeline:
         stages:
         - agent:
-            image: gcr.io/jenkinsxio-labs-private/jxl
+            image: gcr.io/jenkinsxio/jxl
           name: chart
           steps:
           - name: release-binary
@@ -34,12 +34,12 @@ pipelineConfig:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: ""
             - name: DOCKER_REGISTRY_ORG
-              value: jenkinsxio-labs-private
+              value: jenkinsxio
           - name: changelog
             command: jx step changelog --verbose --header-file=hack/changelog-header.md --version=$VERSION --rev=$PULL_BASE_SHA --output-markdown=changelog.md --update-release=false
           - name: upload-binaries
             command: make goreleaser
-            image: gcr.io/jenkinsxio-labs-private/step-go-releaser:0.0.5
+            image: gcr.io/jenkinsxio/step-go-releaser
           - command: ./promote.sh
             dir: /workspace/source
             name: promote-release
