@@ -19,7 +19,7 @@ pipelineConfig:
       pipeline:
         stages:
         - agent:
-            image: gcr.io/jenkinsxio/jx-cli
+            image: gcr.io/jenkinsxio/builder-go
           name: chart
           steps:
           - name: release-binary
