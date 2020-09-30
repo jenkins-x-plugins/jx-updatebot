@@ -1,0 +1,12 @@
+apiVersion: updatebot.jenkins-x.io/v1alpha1
+kind: UpdateConfig
+spec:
+  rules:
+    - urls:
+        - https://github.com/jx3-gitops-repositories/jx3-kubernetes
+      changes:
+        - regex:
+            pattern: "\\s+image: gcr.io/jenkinsxio/jx-cli:(.*)"
+            files:
+              - "versionStream/jenkins-x-*.yml"
+              - "versionStream/git-operator/job.yaml"
