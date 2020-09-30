@@ -169,11 +169,20 @@ lint: ## Lint the code
 .PHONY: all
 all: fmt build lint test
 
+install-refdocs:
+	$(GO) get github.com/jenkins-x/gen-crd-api-reference-docs
+
+generate-refdocs: install-refdocs
+	${GOHOME}/bin/gen-crd-api-reference-docs -config "hack/configdocs/config.json" \
+	-template-dir hack/configdocs/templates \
+    -api-dir "./pkg/apis/updatebot/v1alpha1" \
+    -out-file docs/config.md
+
 bin/docs:
 	go build $(LDFLAGS) -v -o bin/docs cmd/docs/*.go
 
 .PHONY: docs
-docs: bin/docs ## update docs
+docs: bin/docs generate-refdocs ## update docs
 	@echo "Generating docs"
 	@./bin/docs --target=./docs/cmd
 	@./bin/docs --target=./docs/man/man1 --kind=man
@@ -182,10 +191,4 @@ docs: bin/docs ## update docs
 CODEGEN_BIN := $(GOPATH)/bin/codegen
 $(CODEGEN_BIN):
 	$(GO_NOMOD) get github.com/jenkins-x/jx/cmd/codegen
-
-generate-client: codegen-clientset fmt ## Generate the client
-
-codegen-clientset: $(CODEGEN_BIN) ## Generate the k8s types and clients
-	@echo "Generating Kubernetes Clients for pkg/apis/jxtest/v1alpha1 in pkg/client for jxtest.jenkins.io:v1alpha1"
-	$(CODEGEN_BIN) --generator-version $(CLIENTSET_GENERATOR_VERSION) clientset --output-package=pkg/client --input-package=pkg/apis --group-with-version=jxtest:v1alpha1
 
