@@ -16,6 +16,14 @@ Download the [jx-updatebot binary](https://github.com/jenkins-x-plugins/jx-updat
 Or you can use `jx updatebot` directly in the [Jenkins X 3.x CLI](https://github.com/jenkins-x/jx-cli)
 
 
+## Configuration
+
+By default the [jx uppdatebot pr]() command looks in for the `.jx/updatebot.yaml` file to find the repositories to modify along with the list of change rules to make.
+
+You can see the [configuration documentation here](https://github.com/jenkins-x-plugins/jx-updatebot/blob/master/docs/config.md#updatebot.jenkins-x.io/v1alpha1.UpdateConfig) for how to format your `.jx/updatebot.yaml` file.
+
+Here's an example: [.jx/updatebot.yaml](https://github.com/jenkins-x/jx-cli/blob/master/.jx/updatebot.yaml)
+ 
 ## Commands
 
 See the [jx-updatebot command reference](https://github.com/jenkins-x-plugins/jx-updatebot/blob/master/docs/cmd/jx-updatebot.md)
