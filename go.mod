@@ -5,7 +5,7 @@ require (
 	github.com/jenkins-x/go-scm v1.5.177
 	github.com/jenkins-x/jx-helpers v1.0.86
 	github.com/jenkins-x/jx-logging v0.0.11
-	github.com/jenkins-x/jx-promote v0.0.126
+	github.com/jenkins-x/jx-promote v0.0.128
 	github.com/jenkins-x/jx-test v0.0.18 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0
