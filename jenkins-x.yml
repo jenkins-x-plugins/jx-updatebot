@@ -19,7 +19,7 @@ pipelineConfig:
       pipeline:
         stages:
         - agent:
-            image: gcr.io/jenkinsxio/jxl
+            image: gcr.io/jenkinsxio/jxl:latest
           name: chart
           steps:
           - name: release-binary
