@@ -67,9 +67,12 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 		},
 	}
 	cmd.Flags().StringVarP(&o.Dir, "dir", "d", ".", "the directory look for the VERSION file")
+	cmd.Flags().StringVarP(&o.ConfigFile, "config-file", "", "", "the updatebot config file. If none specified defaults to .jx/updatebot.yaml")
 	cmd.Flags().StringVarP(&o.Version, "version", "", "", "the version number to promote. If not specified uses $VERSION or the version file")
 	cmd.Flags().StringVarP(&o.VersionFile, "version-file", "", "", "the file to load the version from if not specified directly or via a $VERSION environment variable. Defaults to VERSION in the current dir")
-	cmd.Flags().StringVarP(&o.ConfigFile, "config-file", "", "", "the updatebot config file. If none specified defaults to .jx/updatebot.yaml")
+	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "", "the PR title")
+	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
+	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
 
