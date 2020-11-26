@@ -97,6 +97,9 @@ func (o *Options) Run() error {
 				continue
 			}
 
+			// lets clear the branch name so we create a new one each time in a loop
+			o.BranchName = ""
+
 			if o.PullRequestTitle == "" {
 				o.PullRequestTitle = fmt.Sprintf("fix: upgrade to version %s", o.Version)
 			}
