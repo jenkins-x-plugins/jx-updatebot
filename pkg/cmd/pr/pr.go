@@ -182,13 +182,13 @@ func (o *Options) Validate() error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to check for file %s", o.ConfigFile)
 	}
-	if !exists {
-		return errors.Errorf("file %s does not exist", o.ConfigFile)
-	}
-
-	err = yamls.LoadFile(o.ConfigFile, &o.UpdateConfig)
-	if err != nil {
-		return errors.Wrapf(err, "failed to load config file %s", o.ConfigFile)
+	if exists {
+		err = yamls.LoadFile(o.ConfigFile, &o.UpdateConfig)
+		if err != nil {
+			return errors.Wrapf(err, "failed to load config file %s", o.ConfigFile)
+		}
+	} else {
+		log.Logger().Warnf("file %s does not exist so cannot create any updatebot Pull Requests", o.ConfigFile)
 	}
 
 	// lazy create the git client
