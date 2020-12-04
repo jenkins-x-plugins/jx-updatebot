@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/pipeline"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/pr"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/version"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/rootcmd"
@@ -21,6 +22,7 @@ func Main() *cobra.Command {
 			}
 		},
 	}
+	cmd.AddCommand(cobras.SplitCommand(pipeline.NewCmdUpgradePipeline()))
 	cmd.AddCommand(cobras.SplitCommand(pr.NewCmdPullRequest()))
 	cmd.AddCommand(cobras.SplitCommand(version.NewCmdVersion()))
 	return cmd
