@@ -5,8 +5,8 @@ import (
 
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/pr"
 	"github.com/jenkins-x/go-scm/scm/driver/fake"
-	"github.com/jenkins-x/jx-helpers/pkg/cmdrunner"
-	"github.com/jenkins-x/jx-helpers/pkg/cmdrunner/fakerunner"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/cmdrunner"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/cmdrunner/fakerunner"
 	"github.com/stretchr/testify/require"
 )
 
