@@ -12,7 +12,7 @@ import (
 func TestVersionTemplate(t *testing.T) {
 	prNumber := 123
 	owner := "myorg"
-	repo := "myrepo"
+	repo := "my-repo"
 	sha := "b054df5"
 	fullName := scm.Join(owner, repo)
 	prBranch := "my-pr-branch-name"
@@ -39,7 +39,11 @@ func TestVersionTemplate(t *testing.T) {
 		expected string
 	}{
 		{
-			template: "{{ .PullRequests.myrepo.Sha }}",
+			template: `{{ pullRequestSha "my-repo" }}`,
+			expected: "b054df5",
+		},
+		{
+			template: `{{ pullRequestSha "myorg/my-repo" }}`,
 			expected: "b054df5",
 		},
 		{

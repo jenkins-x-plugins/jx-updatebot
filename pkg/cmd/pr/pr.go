@@ -50,6 +50,7 @@ type Options struct {
 	AutoMerge        bool
 	Labels           []string
 	TemplateData     map[string]interface{}
+	PullRequestSHAs  map[string]string
 
 	UpdateConfig v1alpha1.UpdateConfig
 }
@@ -153,6 +154,9 @@ func (o *Options) Run() error {
 func (o *Options) Validate() error {
 	if o.TemplateData == nil {
 		o.TemplateData = map[string]interface{}{}
+	}
+	if o.PullRequestSHAs == nil {
+		o.PullRequestSHAs = map[string]string{}
 	}
 	if o.Version == "" {
 		if o.VersionFile == "" {
