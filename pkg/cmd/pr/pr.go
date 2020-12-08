@@ -22,6 +22,7 @@ import (
 	"github.com/jenkins-x/jx-promote/pkg/environments"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/yargevad/filepathx"
 )
 
 var (
@@ -48,6 +49,7 @@ type Options struct {
 	PullRequestBody  string
 	AutoMerge        bool
 	Labels           []string
+	TemplateData     map[string]interface{}
 
 	UpdateConfig v1alpha1.UpdateConfig
 }
@@ -125,7 +127,7 @@ func (o *Options) Run() error {
 				dir := o.OutDir
 
 				for _, ch := range rule.Changes {
-					err := o.ApplyChanges(dir, ch)
+					err := o.ApplyChanges(dir, gitURL, ch)
 					if err != nil {
 						return errors.Wrapf(err, "failed to apply change")
 					}
@@ -142,13 +144,16 @@ func (o *Options) Run() error {
 				log.Logger().Infof("no Pull Request created")
 				continue
 			}
-			log.Logger().Infof("created Pull Request %s", info(pr.Link))
+			o.AddPullRequest(pr)
 		}
 	}
 	return nil
 }
 
 func (o *Options) Validate() error {
+	if o.TemplateData == nil {
+		o.TemplateData = map[string]interface{}{}
+	}
 	if o.Version == "" {
 		if o.VersionFile == "" {
 			o.VersionFile = filepath.Join(o.Dir, "VERSION")
@@ -197,7 +202,7 @@ func (o *Options) Validate() error {
 }
 
 // ApplyChanges applies the changes to the given dir
-func (o *Options) ApplyChanges(dir string, change v1alpha1.Change) error {
+func (o *Options) ApplyChanges(dir, gitURL string, change v1alpha1.Change) error {
 	if change.Regex == nil {
 		log.Logger().Infof("ignoring unknown change %#v", change)
 		return nil
@@ -226,7 +231,7 @@ func (o *Options) ApplyChanges(dir string, change v1alpha1.Change) error {
 
 	for _, g := range change.Regex.Globs {
 		path := filepath.Join(dir, g)
-		matches, err := filepath.Glob(path)
+		matches, err := filepathx.Glob(path)
 		if err != nil {
 			return errors.Wrapf(err, "failed to evaluate glob %s", path)
 		}
@@ -240,6 +245,13 @@ func (o *Options) ApplyChanges(dir string, change v1alpha1.Change) error {
 
 			text := string(data)
 			version := o.Version
+			if change.VersionTemplate != "" {
+				version, err = o.EvaluateVersionTemplate(change.VersionTemplate, gitURL)
+				if err != nil {
+					return errors.Wrapf(err, "failed to valuate version template %s", change.VersionTemplate)
+				}
+			}
+
 			oldVersions := make([]string, 0)
 
 			text2 := stringhelpers.ReplaceAllStringSubmatchFunc(r, text, func(groups []stringhelpers.Group) []string {

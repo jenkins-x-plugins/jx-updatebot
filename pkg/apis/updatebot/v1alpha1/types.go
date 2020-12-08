@@ -40,6 +40,9 @@ type Rule struct {
 type Change struct {
 	// Regex a regex based modification
 	Regex *Regex `json:"regex,omitempty"`
+
+	// VersionTemplate an optional template if the version is coming from a previous Pull Request SHA
+	VersionTemplate string `json:"versionTemplate,omitempty"`
 }
 
 // Regex a regex based modification
