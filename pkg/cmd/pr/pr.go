@@ -14,6 +14,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/templates"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient/gitdiscovery"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
@@ -91,6 +92,23 @@ func (o *Options) Run() error {
 	err := o.Validate()
 	if err != nil {
 		return errors.Wrapf(err, "failed to validate")
+	}
+
+	if o.PullRequestBody == "" || o.CommitMessage == "" {
+		// lets try discover the current git URL
+		gitURL, err := gitdiscovery.FindGitURLFromDir(o.Dir)
+		if err != nil {
+			log.Logger().Warnf("failed to find git URL %s", err.Error())
+
+		} else if gitURL != "" {
+			message := fmt.Sprintf("from: %s\n", gitURL)
+			if o.PullRequestBody == "" {
+				o.PullRequestBody = message
+			}
+			if o.CommitMessage == "" {
+				o.CommitMessage = message
+			}
+		}
 	}
 
 	for i, rule := range o.UpdateConfig.Spec.Rules {
