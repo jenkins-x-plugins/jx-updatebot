@@ -2,10 +2,10 @@ package pr
 
 import (
 	"fmt"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
@@ -16,14 +16,12 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient/gitdiscovery"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/yamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 	"github.com/jenkins-x/jx-promote/pkg/environments"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/yargevad/filepathx"
 )
 
 var (
@@ -52,6 +50,7 @@ type Options struct {
 	Labels           []string
 	TemplateData     map[string]interface{}
 	PullRequestSHAs  map[string]string
+	Helmer           helmer.Helmer
 
 	UpdateConfig v1alpha1.UpdateConfig
 }
@@ -71,7 +70,7 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 		},
 	}
 	cmd.Flags().StringVarP(&o.Dir, "dir", "d", ".", "the directory look for the VERSION file")
-	cmd.Flags().StringVarP(&o.ConfigFile, "config-file", "", "", "the updatebot config file. If none specified defaults to .jx/updatebot.yaml")
+	cmd.Flags().StringVarP(&o.ConfigFile, "config-file", "c", "", "the updatebot config file. If none specified defaults to .jx/updatebot.yaml")
 	cmd.Flags().StringVarP(&o.Version, "version", "", "", "the version number to promote. If not specified uses $VERSION or the version file")
 	cmd.Flags().StringVarP(&o.VersionFile, "version-file", "", "", "the file to load the version from if not specified directly or via a $VERSION environment variable. Defaults to VERSION in the current dir")
 	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "", "the PR title")
@@ -121,12 +120,6 @@ func (o *Options) Run() error {
 			// lets clear the branch name so we create a new one each time in a loop
 			o.BranchName = ""
 
-			if o.PullRequestTitle == "" {
-				o.PullRequestTitle = fmt.Sprintf("fix: upgrade to version %s", o.Version)
-			}
-			if o.CommitTitle == "" {
-				o.CommitTitle = o.PullRequestTitle
-			}
 			source := ""
 			details := &scm.PullRequest{
 				Source: source,
@@ -151,6 +144,12 @@ func (o *Options) Run() error {
 						return errors.Wrapf(err, "failed to apply change")
 					}
 
+				}
+				if o.PullRequestTitle == "" {
+					o.PullRequestTitle = fmt.Sprintf("fix: upgrade to version %s", o.Version)
+				}
+				if o.CommitTitle == "" {
+					o.CommitTitle = o.PullRequestTitle
 				}
 				return nil
 			}
@@ -218,6 +217,10 @@ func (o *Options) Validate() error {
 		log.Logger().Warnf("file %s does not exist so cannot create any updatebot Pull Requests", o.ConfigFile)
 	}
 
+	if o.Helmer == nil {
+		o.Helmer = helmer.NewHelmCLIWithRunner(o.CommandRunner, "helm", o.Dir, false)
+	}
+
 	// lazy create the git client
 	o.EnvironmentPullRequestOptions.Git()
 	return nil
@@ -225,84 +228,12 @@ func (o *Options) Validate() error {
 
 // ApplyChanges applies the changes to the given dir
 func (o *Options) ApplyChanges(dir, gitURL string, change v1alpha1.Change) error {
-	if change.Regex == nil {
-		log.Logger().Infof("ignoring unknown change %#v", change)
-		return nil
+	if change.Regex != nil {
+		return o.ApplyRegex(dir, gitURL, change, change.Regex)
 	}
-	pattern := change.Regex.Pattern
-	if pattern == "" {
-		return errors.Errorf("no pattern for regex change %#v", change)
+	if change.VersionStream != nil {
+		return o.ApplyVersionStream(dir, gitURL, change, change.VersionStream)
 	}
-	r, err := regexp.Compile(pattern)
-	if err != nil {
-		return errors.Wrapf(err, "failed to parse change regex: %s", pattern)
-	}
-
-	namedCaptures := make([]bool, 0)
-	namedCapture := false
-	for i, n := range r.SubexpNames() {
-		if i == 0 {
-			continue
-		} else if n == "version" {
-			namedCaptures = append(namedCaptures, true)
-			namedCapture = true
-		} else {
-			namedCaptures = append(namedCaptures, false)
-		}
-	}
-
-	for _, g := range change.Regex.Globs {
-		path := filepath.Join(dir, g)
-		matches, err := filepathx.Glob(path)
-		if err != nil {
-			return errors.Wrapf(err, "failed to evaluate glob %s", path)
-		}
-		for _, f := range matches {
-			log.Logger().Infof("found file %s", f)
-
-			data, err := ioutil.ReadFile(f)
-			if err != nil {
-				return errors.Wrapf(err, "failed to load file %s", f)
-			}
-
-			text := string(data)
-			version := o.Version
-			if change.VersionTemplate != "" {
-				version, err = o.EvaluateVersionTemplate(change.VersionTemplate, gitURL)
-				if err != nil {
-					return errors.Wrapf(err, "failed to valuate version template %s", change.VersionTemplate)
-				}
-			}
-
-			oldVersions := make([]string, 0)
-
-			text2 := stringhelpers.ReplaceAllStringSubmatchFunc(r, text, func(groups []stringhelpers.Group) []string {
-				answer := make([]string, 0)
-				for i, group := range groups {
-					if namedCapture {
-						// If we are using named capture, then replace only the named captures that have the right name
-						if namedCaptures[i] {
-							oldVersions = append(oldVersions, group.Value)
-							answer = append(answer, version)
-						} else {
-							answer = append(answer, group.Value)
-						}
-					} else {
-						oldVersions = append(oldVersions, group.Value)
-						answer = append(answer, version)
-					}
-				}
-				return answer
-			})
-
-			if text2 != text {
-				err = ioutil.WriteFile(f, []byte(text2), files.DefaultFileWritePermissions)
-				if err != nil {
-					return errors.Wrapf(err, "failed to save file %s", f)
-				}
-				log.Logger().Infof("modified file %s", info(f))
-			}
-		}
-	}
+	log.Logger().Infof("ignoring unknown change %#v", change)
 	return nil
 }

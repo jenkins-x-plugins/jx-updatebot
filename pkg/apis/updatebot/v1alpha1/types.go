@@ -41,6 +41,9 @@ type Change struct {
 	// Regex a regex based modification
 	Regex *Regex `json:"regex,omitempty"`
 
+	// VersionStream updates the charts in a version stream repository
+	VersionStream *VersionStreamChange `json:"versionStream,omitempty"`
+
 	// VersionTemplate an optional template if the version is coming from a previous Pull Request SHA
 	VersionTemplate string `json:"versionTemplate,omitempty"`
 }
@@ -51,4 +54,18 @@ type Regex struct {
 	Pattern string `json:"pattern,omitempty"`
 	// Globs the files to apply this to
 	Globs []string `json:"files,omitempty"`
+}
+
+// VersionStreamChange for upgrading versions in a version stream
+type VersionStreamChange struct {
+	// Kind the kind of resources to change (charts, git, package etc)
+	Kind string `json:"kind,omitempty"`
+	// Name
+	Name string `json:"name,omitempty"`
+	// Includes patterns to include in changing
+	Includes []string `json:"include,omitempty"`
+	// Excludes patterns to exclude from upgrading
+	Excludes []string `json:"exclude,omitempty"`
+	// UpdateTektonImages if we should update the pipeline images too
+	UpdateTektonImages bool `json:"updateTektonImages,omitempty"`
 }
