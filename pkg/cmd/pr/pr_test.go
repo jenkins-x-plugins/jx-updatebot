@@ -18,7 +18,11 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	excludeTests := strings.Split(os.Getenv("JX_EXCLUDE_TEST"), ",")
+	ev := os.Getenv("JX_EXCLUDE_TEST")
+	if ev == "" {
+		ev = "go"
+	}
+	excludeTests := strings.Split(ev, ",")
 	runner := &fakerunner.FakeRunner{
 		CommandRunner: func(c *cmdrunner.Command) (string, error) {
 			if c.Name == "git" && len(c.Args) > 0 && c.Args[0] == "push" {

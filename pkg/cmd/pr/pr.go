@@ -3,6 +3,7 @@ package pr
 import (
 	"fmt"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
+	"github.com/shurcooL/githubv4"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -51,8 +52,8 @@ type Options struct {
 	TemplateData     map[string]interface{}
 	PullRequestSHAs  map[string]string
 	Helmer           helmer.Helmer
-
-	UpdateConfig v1alpha1.UpdateConfig
+	GraphQLClient    *githubv4.Client
+	UpdateConfig     v1alpha1.UpdateConfig
 }
 
 // NewCmdPullRequest creates a command object for the command
@@ -110,7 +111,16 @@ func (o *Options) Run() error {
 		}
 	}
 
-	for i, rule := range o.UpdateConfig.Spec.Rules {
+	for i := range o.UpdateConfig.Spec.Rules {
+		rule := &o.UpdateConfig.Spec.Rules[i]
+		err = o.FindURLs(rule)
+		if err != nil {
+			return errors.Wrapf(err, "failed to find URLs")
+		}
+
+		if len(rule.URLs) == 0 {
+			log.Logger().Warnf("no URLs to process for rule %d", i)
+		}
 		for _, gitURL := range rule.URLs {
 			if gitURL == "" {
 				log.Logger().Warnf("missing out repository %d as it has no git URL", i)
@@ -228,6 +238,9 @@ func (o *Options) Validate() error {
 
 // ApplyChanges applies the changes to the given dir
 func (o *Options) ApplyChanges(dir, gitURL string, change v1alpha1.Change) error {
+	if change.Go != nil {
+		return o.ApplyGo(dir, gitURL, change, change.Go)
+	}
 	if change.Regex != nil {
 		return o.ApplyRegex(dir, gitURL, change, change.Regex)
 	}
@@ -235,5 +248,18 @@ func (o *Options) ApplyChanges(dir, gitURL string, change v1alpha1.Change) error
 		return o.ApplyVersionStream(dir, gitURL, change, change.VersionStream)
 	}
 	log.Logger().Infof("ignoring unknown change %#v", change)
+	return nil
+}
+
+func (o *Options) FindURLs(rule *v1alpha1.Rule) error {
+	for _, change := range rule.Changes {
+		if change.Go != nil {
+			err := o.GoFindURLs(rule, change, change.Go)
+			if err != nil {
+				return errors.Wrapf(err, "failed to find go repositories to update")
+			}
+
+		}
+	}
 	return nil
 }
