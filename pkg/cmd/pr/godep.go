@@ -97,35 +97,49 @@ func queryRepositoriesWithGoMod(ctx context.Context, client *githubv4.Client, ru
 						} `graphql:"object(expression: $fileFilter)"`
 					}
 				}
-			} `graphql:"repositories(first: 10)"`
+				PageInfo struct {
+					EndCursor   githubv4.String
+					HasNextPage bool
+				}
+			} `graphql:"repositories(first: 100, after: $commentsCursor)"`
 		} `graphql:"organization(login: $owner)"`
 	}
 	v := map[string]interface{}{
-		"owner":      githubv4.String(owner),
-		"fileFilter": githubv4.String("HEAD:go.mod"),
-	}
-	if err := client.Query(ctx, &q, v); err != nil {
-		return errors.Wrapf(err, "error while query")
+		"owner":          githubv4.String(owner),
+		"fileFilter":     githubv4.String("HEAD:go.mod"),
+		"commentsCursor": (*githubv4.String)(nil), // Null after argument to get first page.
 	}
 
-	for _, edge := range q.Organisation.Repositories.Edges {
-		name := edge.Node.Name
-		text := edge.Node.Object.Blob.Text
-		if text == "" {
-			continue
+	for {
+		err := client.Query(ctx, &q, v)
+		if err != nil {
+			return errors.Wrapf(err, "github query failed")
 		}
-		if !gc.Repositories.Matches(name) {
-			continue
-		}
-		requirementsText := stripGoModuleLines(text)
-		if strings.Contains(requirementsText, gc.Package) {
-			log.Logger().Infof("about to process %s/%s", owner, name)
 
-			u := fmt.Sprintf("https://github.com/%s/%s", owner, name)
-			if stringhelpers.StringArrayIndex(rule.URLs, u) < 0 && stringhelpers.StringArrayIndex(rule.URLs, u+".git") < 0 {
-				rule.URLs = append(rule.URLs, u)
+		for _, edge := range q.Organisation.Repositories.Edges {
+			name := edge.Node.Name
+			text := edge.Node.Object.Blob.Text
+			if text == "" {
+				continue
+			}
+			if !gc.Repositories.Matches(name) {
+				continue
+			}
+			requirementsText := stripGoModuleLines(text)
+			if strings.Contains(requirementsText, gc.Package) {
+				log.Logger().Infof("about to process %s/%s", owner, name)
+
+				u := fmt.Sprintf("https://github.com/%s/%s", owner, name)
+				if stringhelpers.StringArrayIndex(rule.URLs, u) < 0 && stringhelpers.StringArrayIndex(rule.URLs, u+".git") < 0 {
+					rule.URLs = append(rule.URLs, u)
+				}
 			}
 		}
+
+		if !q.Organisation.Repositories.PageInfo.HasNextPage {
+			break
+		}
+		v["commentsCursor"] = githubv4.NewString(q.Organisation.Repositories.PageInfo.EndCursor)
 	}
 	return nil
 }
