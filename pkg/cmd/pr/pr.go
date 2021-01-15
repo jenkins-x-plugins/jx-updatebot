@@ -249,26 +249,28 @@ func (o *Options) Validate() error {
 		return errors.Wrapf(err, "failed to setup git user and email")
 	}
 
-	if o.GitCredentials {
-		if o.ScmClientFactory.GitToken == "" {
-			err = o.ScmClientFactory.FindGitToken()
-			if err != nil {
-				return errors.Wrapf(err, "failed to find git token")
-			}
+	// lets try default the git user/token
+	if o.ScmClientFactory.GitToken == "" {
+		err = o.ScmClientFactory.FindGitToken()
+		if err != nil {
+			return errors.Wrapf(err, "failed to find git token")
 		}
+	}
+	if o.GitCommitUsername == "" {
+		o.GitCommitUsername = o.ScmClientFactory.GitUsername
+	}
+	if o.GitCommitUsername == "" {
+		o.GitCommitUsername = os.Getenv("GIT_USERNAME")
+	}
+	if o.GitCommitUsername == "" {
+		o.GitCommitUsername = "jenkins-x-bot"
+	}
+
+	if o.GitCredentials {
 		_, gc := setup.NewCmdGitSetup()
 		gc.Dir = o.Dir
 		gc.DisableInClusterTest = true
 		gc.UserEmail = o.GitCommitUserEmail
-		if o.GitCommitUsername == "" {
-			o.GitCommitUsername = o.ScmClientFactory.GitUsername
-		}
-		if o.GitCommitUsername == "" {
-			o.GitCommitUsername = os.Getenv("GIT_USERNAME")
-		}
-		if o.GitCommitUsername == "" {
-			o.GitCommitUsername = "jenkins-x-bot"
-		}
 		gc.UserName = o.GitCommitUsername
 		gc.Password = o.ScmClientFactory.GitToken
 		gc.GitProviderURL = "https://github.com"

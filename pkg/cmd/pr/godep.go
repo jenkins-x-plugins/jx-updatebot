@@ -19,7 +19,13 @@ func (o *Options) GoFindURLs(rule *v1alpha1.Rule, change v1alpha1.Change, gc *v1
 	ctx := context.Background()
 
 	if o.GraphQLClient == nil {
-		token := os.Getenv("GITHUB_TOKEN")
+		token := o.ScmClientFactory.GitToken
+		if token == "" {
+			token = os.Getenv("GIT_TOKEN")
+		}
+		if token == "" {
+			token = os.Getenv("GITHUB_TOKEN")
+		}
 		ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 		hc := oauth2.NewClient(ctx, ts)
 		o.GraphQLClient = githubv4.NewClient(hc)
