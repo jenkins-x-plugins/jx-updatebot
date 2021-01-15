@@ -55,6 +55,7 @@ func (o *Options) applyVersionStreamCharts(dir string, url string, change v1alph
 	paths = append(paths, morePaths...)
 
 	o.CommitTitle = "chore: upgrade charts"
+	o.CommitMessage = ""
 
 	chartInfos := map[string]*chartInfo{}
 	for _, path := range paths {
