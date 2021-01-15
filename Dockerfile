@@ -1,4 +1,4 @@
-FROM gcr.io/jenkinsxio/jx-cli-base:0.0.23
+FROM golang:1.15
 
 ENTRYPOINT ["jx-updatebot"]
 
