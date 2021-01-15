@@ -2,6 +2,7 @@ package pr
 
 import (
 	"fmt"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
 	"github.com/shurcooL/githubv4"
 	"io/ioutil"
@@ -41,20 +42,22 @@ var (
 type Options struct {
 	environments.EnvironmentPullRequestOptions
 
-	Dir              string
-	ConfigFile       string
-	Version          string
-	VersionFile      string
-	PullRequestTitle string
-	PullRequestBody  string
-	AutoMerge        bool
-	NoVersion        bool
-	Labels           []string
-	TemplateData     map[string]interface{}
-	PullRequestSHAs  map[string]string
-	Helmer           helmer.Helmer
-	GraphQLClient    *githubv4.Client
-	UpdateConfig     v1alpha1.UpdateConfig
+	Dir                string
+	ConfigFile         string
+	Version            string
+	VersionFile        string
+	PullRequestTitle   string
+	PullRequestBody    string
+	GitCommitUsername  string
+	GitCommitUserEmail string
+	AutoMerge          bool
+	NoVersion          bool
+	Labels             []string
+	TemplateData       map[string]interface{}
+	PullRequestSHAs    map[string]string
+	Helmer             helmer.Helmer
+	GraphQLClient      *githubv4.Client
+	UpdateConfig       v1alpha1.UpdateConfig
 }
 
 // NewCmdPullRequest creates a command object for the command
@@ -77,6 +80,8 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 	cmd.Flags().StringVarP(&o.VersionFile, "version-file", "", "", "the file to load the version from if not specified directly or via a $VERSION environment variable. Defaults to VERSION in the current dir")
 	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "", "the PR title")
 	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
+	cmd.Flags().StringVarP(&o.GitCommitUsername, "git-user-name", "", "", "the user name to git commit")
+	cmd.Flags().StringVarP(&o.GitCommitUserEmail, "git-user-email", "", "", "the user email to git commit")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
 	cmd.Flags().BoolVarP(&o.NoVersion, "no-version", "", false, "disables validation on requiring a '--version' option or environment variable to be required")
@@ -234,7 +239,12 @@ func (o *Options) Validate() error {
 	}
 
 	// lazy create the git client
-	o.EnvironmentPullRequestOptions.Git()
+	g := o.EnvironmentPullRequestOptions.Git()
+
+	_, _, err = gitclient.EnsureUserAndEmailSetup(g, o.Dir, o.GitCommitUsername, o.GitCommitUserEmail)
+	if err != nil {
+		return errors.Wrapf(err, "failed to setup git user and email")
+	}
 	return nil
 }
 
