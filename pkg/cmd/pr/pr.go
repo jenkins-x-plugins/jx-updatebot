@@ -250,11 +250,18 @@ func (o *Options) Validate() error {
 	}
 
 	if o.GitCredentials {
+		if o.ScmClientFactory.GitToken == "" {
+			err = o.ScmClientFactory.FindGitToken()
+			if err != nil {
+				return errors.Wrapf(err, "failed to find git token")
+			}
+		}
 		_, gc := setup.NewCmdGitSetup()
+		gc.Dir = o.Dir
 		gc.DisableInClusterTest = true
 		gc.UserEmail = o.GitCommitUserEmail
 		gc.UserName = o.GitCommitUsername
-		gc.Dir = o.Dir
+		gc.Password = o.ScmClientFactory.GitToken
 		err = gc.Run()
 		if err != nil {
 			return errors.Wrapf(err, "failed to setup git credentials file")

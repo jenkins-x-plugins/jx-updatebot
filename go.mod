@@ -4,7 +4,7 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/cpuguy83/go-md2man v1.0.10
 	github.com/jenkins-x/go-scm v1.5.209
-	github.com/jenkins-x/jx-gitops v0.0.520
+	github.com/jenkins-x/jx-gitops v0.0.521
 	github.com/jenkins-x/jx-helpers/v3 v3.0.60
 	github.com/jenkins-x/jx-logging/v3 v3.0.2
 	github.com/jenkins-x/jx-promote v0.0.167
