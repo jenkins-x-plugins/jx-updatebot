@@ -2,6 +2,7 @@ package pr
 
 import (
 	"fmt"
+	"github.com/jenkins-x/jx-gitops/pkg/cmd/git/setup"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
 	"github.com/shurcooL/githubv4"
@@ -52,6 +53,7 @@ type Options struct {
 	GitCommitUserEmail string
 	AutoMerge          bool
 	NoVersion          bool
+	GitCredentials     bool
 	Labels             []string
 	TemplateData       map[string]interface{}
 	PullRequestSHAs    map[string]string
@@ -85,6 +87,7 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
 	cmd.Flags().BoolVarP(&o.NoVersion, "no-version", "", false, "disables validation on requiring a '--version' option or environment variable to be required")
+	cmd.Flags().BoolVarP(&o.GitCredentials, "git-credentials", "", false, "ensures the git credentials are setup so we can push to git")
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
 
 	eo := &o.EnvironmentPullRequestOptions
@@ -244,6 +247,19 @@ func (o *Options) Validate() error {
 	_, _, err = gitclient.EnsureUserAndEmailSetup(g, o.Dir, o.GitCommitUsername, o.GitCommitUserEmail)
 	if err != nil {
 		return errors.Wrapf(err, "failed to setup git user and email")
+	}
+
+	if o.GitCredentials {
+		_, gc := setup.NewCmdGitSetup()
+		gc.DisableInClusterTest = true
+		gc.UserEmail = o.GitCommitUserEmail
+		gc.UserName = o.GitCommitUsername
+		gc.Dir = o.Dir
+		err = gc.Run()
+		if err != nil {
+			return errors.Wrapf(err, "failed to setup git credentials file")
+		}
+		log.Logger().Infof("setup git credentials file")
 	}
 	return nil
 }
