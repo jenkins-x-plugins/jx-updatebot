@@ -63,6 +63,15 @@ func (o *Options) ApplyGo(dir string, gitURL string, change v1alpha1.Change, gc 
 			if err != nil {
 				log.Logger().Warnf("failed to update %s: %s", line, err.Error())
 			}
+			c = &cmdrunner.Command{
+				Dir:  dir,
+				Name: "go",
+				Args: []string{"mod", "tidy"},
+			}
+			text, err = runner(c)
+			if err != nil {
+				log.Logger().Warnf("failed to update %s: %s", line, err.Error())
+			}
 		}
 	}
 	return nil
@@ -97,6 +106,9 @@ func queryRepositoriesWithGoMod(ctx context.Context, client *githubv4.Client, ru
 		name := edge.Node.Name
 		text := edge.Node.Object.Blob.Text
 		if text == "" {
+			continue
+		}
+		if !gc.Repositories.Matches(name) {
 			continue
 		}
 		requirementsText := stripGoModuleLines(text)

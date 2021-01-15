@@ -72,7 +72,10 @@ type Pattern struct {
 
 // Matches returns true if the text matches the given text
 func (p *Pattern) Matches(text string) bool {
-	return text == p.Name || stringhelpers.StringMatchesAny(text, p.Includes, p.Excludes)
+	if p.Name != "" {
+		return text == p.Name
+	}
+	return stringhelpers.StringMatchesAny(text, p.Includes, p.Excludes)
 }
 
 // VersionStreamChange for upgrading versions in a version stream
