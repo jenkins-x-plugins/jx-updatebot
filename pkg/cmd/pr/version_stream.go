@@ -140,8 +140,8 @@ func (o *Options) applyVersionStreamCharts(dir string, url string, change v1alph
 				}
 				log.Logger().Infof("updated chart %s from %s to %s", name, oldVersion, version)
 
-				if o.CommitTitle != "" {
-					o.CommitTitle += "\n"
+				if o.CommitMessage != "" {
+					o.CommitMessage += "\n"
 				}
 				chartText := name
 				chartURL := sv.GitURL
@@ -151,7 +151,7 @@ func (o *Options) applyVersionStreamCharts(dir string, url string, change v1alph
 				if chartURL != "" {
 					chartText = fmt.Sprintf("[%s](%s)", name, chartURL)
 				}
-				o.CommitTitle += fmt.Sprintf("* updated chart %s from `%s` to `%s`", chartText, oldVersion, version)
+				o.CommitMessage += fmt.Sprintf("* updated chart %s from `%s` to `%s`", chartText, oldVersion, version)
 			}
 		}
 	}
