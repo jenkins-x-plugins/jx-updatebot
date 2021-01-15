@@ -48,6 +48,7 @@ type Options struct {
 	PullRequestTitle string
 	PullRequestBody  string
 	AutoMerge        bool
+	NoVersion        bool
 	Labels           []string
 	TemplateData     map[string]interface{}
 	PullRequestSHAs  map[string]string
@@ -78,6 +79,7 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
+	cmd.Flags().BoolVarP(&o.NoVersion, "no-version", "", false, "disables validation on requiring a '--version' option or environment variable to be required")
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
 
 	eo := &o.EnvironmentPullRequestOptions
@@ -205,7 +207,7 @@ func (o *Options) Validate() error {
 	}
 	if o.Version == "" {
 		o.Version = os.Getenv("VERSION")
-		if o.Version == "" {
+		if o.Version == "" && !o.NoVersion {
 			return options.MissingOption("version")
 		}
 	}
