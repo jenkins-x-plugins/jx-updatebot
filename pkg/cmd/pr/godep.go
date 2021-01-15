@@ -53,7 +53,8 @@ func (o *Options) ApplyGo(dir string, gitURL string, change v1alpha1.Change, gc 
 	}
 	text, err := runner(c)
 	if err != nil {
-		return errors.Wrapf(err, "failed to run command %s on %s", c.CLI(), gitURL)
+		log.Logger().Warnf("failed to run command %s on %s", c.CLI(), gitURL)
+		return nil
 	}
 
 	lines := strings.Split(text, "\n")
