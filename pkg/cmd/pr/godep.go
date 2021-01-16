@@ -90,8 +90,9 @@ func queryRepositoriesWithGoMod(ctx context.Context, client *githubv4.Client, ru
 			Repositories struct {
 				Edges []struct {
 					Node struct {
-						Name   string
-						Object struct {
+						Name       string
+						IsArchived bool
+						Object     struct {
 							Blob struct {
 								Text string
 							} `graphql:"... on Blob"`
@@ -124,6 +125,10 @@ func queryRepositoriesWithGoMod(ctx context.Context, client *githubv4.Client, ru
 				continue
 			}
 			if !gc.Repositories.Matches(name) {
+				continue
+			}
+			if edge.Node.IsArchived {
+				log.Logger().Infof("ignoring archived repository: %s/%s", owner, name)
 				continue
 			}
 			requirementsText := stripGoModuleLines(text)
