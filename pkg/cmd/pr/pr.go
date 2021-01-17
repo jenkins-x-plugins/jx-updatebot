@@ -5,6 +5,7 @@ import (
 	"github.com/jenkins-x/jx-gitops/pkg/cmd/git/setup"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/shurcooL/githubv4"
 	"io/ioutil"
 	"os"
@@ -172,6 +173,16 @@ func (o *Options) Run() error {
 					o.CommitTitle = o.PullRequestTitle
 				}
 				return nil
+			}
+
+			// reuse existing PullRequest
+			if o.AutoMerge {
+				if o.PullRequestFilter == nil {
+					o.PullRequestFilter = &environments.PullRequestFilter{}
+				}
+				if stringhelpers.StringArrayIndex(o.PullRequestFilter.Labels, environments.LabelUpdatebot) < 0 {
+					o.PullRequestFilter.Labels = append(o.PullRequestFilter.Labels, environments.LabelUpdatebot)
+				}
 			}
 
 			pr, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
