@@ -3,12 +3,11 @@ module github.com/jenkins-x-plugins/jx-updatebot
 require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/cpuguy83/go-md2man v1.0.10
-	github.com/jenkins-x/go-scm v1.5.211
-	github.com/jenkins-x/jx-api/v4 v4.0.23 // indirect
-	github.com/jenkins-x/jx-gitops v0.0.528
-	github.com/jenkins-x/jx-helpers/v3 v3.0.63
+	github.com/jenkins-x/go-scm v1.5.213
+	github.com/jenkins-x/jx-gitops v0.0.530
+	github.com/jenkins-x/jx-helpers/v3 v3.0.64
 	github.com/jenkins-x/jx-logging/v3 v3.0.3
-	github.com/jenkins-x/jx-promote v0.0.174
+	github.com/jenkins-x/jx-promote v0.0.176
 	github.com/pkg/errors v0.9.1
 	github.com/shurcooL/githubv4 v0.0.0-20191102174205-af46314aec7b
 	github.com/spf13/cobra v1.1.1
@@ -20,8 +19,6 @@ require (
 )
 
 replace (
-	github.com/jenkins-x/lighthouse => github.com/jstrachan/lighthouse v0.0.0-20210117125431-b895e82778b3
-
 	k8s.io/api => k8s.io/api v0.20.2
 	k8s.io/apimachinery => k8s.io/apimachinery v0.20.2
 	k8s.io/client-go => k8s.io/client-go v0.20.2

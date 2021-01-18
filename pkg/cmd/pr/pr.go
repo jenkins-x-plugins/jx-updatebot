@@ -5,6 +5,7 @@ import (
 	"github.com/jenkins-x/jx-gitops/pkg/cmd/git/setup"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/scmhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/shurcooL/githubv4"
 	"io/ioutil"
@@ -262,6 +263,24 @@ func (o *Options) Validate() error {
 
 	// lets try default the git user/token
 	if o.ScmClientFactory.GitToken == "" {
+		if o.ScmClientFactory.GitServerURL == "" {
+			// lets try discover the git URL
+			discover := &scmhelpers.Options{
+				Dir:             o.Dir,
+				GitClient:       o.Git(),
+				CommandRunner:   o.CommandRunner,
+				DiscoverFromGit: true,
+			}
+			err := discover.Validate()
+			if err != nil {
+				return errors.Wrapf(err, "failed to discover repository details")
+			}
+			o.ScmClientFactory.GitServerURL = discover.GitServerURL
+			o.ScmClientFactory.GitToken = discover.GitToken
+		}
+		if o.ScmClientFactory.GitServerURL == "" {
+			return errors.Errorf("no git-server could be found")
+		}
 		err = o.ScmClientFactory.FindGitToken()
 		if err != nil {
 			return errors.Wrapf(err, "failed to find git token")
