@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"fmt"
+	"github.com/jenkins-x/lighthouse-client/pkg/triggerconfig/inrepo"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -96,7 +97,7 @@ func (o *Options) Run() error {
 			}
 			err := o.UpgradeRepository(config, group, repo)
 			if err != nil {
-				return errors.Wrapf(err, "failed to upgrade repository %s", repo.Name)
+				log.Logger().Errorf("failed to upgrade repository %s due to: %s", repo.Name, err.Error())
 			}
 		}
 	}
@@ -120,6 +121,13 @@ func (o *Options) Validate() error {
 
 	// lazy create the git client
 	o.EnvironmentPullRequestOptions.Git()
+
+	if !o.NoConvert {
+		defaultCatalog := "jenkins-x/jx3-pipeline-catalog"
+		if inrepo.VersionStreamVersions[defaultCatalog] == "" {
+			inrepo.VersionStreamVersions[defaultCatalog] = "HEAD"
+		}
+	}
 	return nil
 }
 
@@ -246,12 +254,21 @@ func (o *Options) upgradePipelinesViaKpt(dir string) error {
 }
 
 func (o *Options) convertPipelines(gitURL, dir string) error {
+	lhDir := filepath.Join(dir, ".lighthouse")
+	exists, err := files.DirExists(lhDir)
+	if err != nil {
+		return errors.Wrapf(err, "failed to check if dir %s exists", lhDir)
+	}
+	if !exists {
+		return nil
+	}
+
 	_, co := convert.NewCmdPipelineConvert()
 
 	co.ScmOptions.SourceURL = gitURL
 	co.ScmOptions.Dir = dir
 
-	err := co.Run()
+	err = co.Run()
 	if err != nil {
 		return errors.Wrapf(err, "failed to update pipelines for repository %s in dir %s", gitURL, dir)
 	}
