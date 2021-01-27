@@ -17,6 +17,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/yamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
+	"github.com/jenkins-x/jx-pipeline/pkg/cmd/convert"
 	"github.com/jenkins-x/jx-promote/pkg/environments"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -33,6 +34,7 @@ type Options struct {
 	PullRequestTitle string
 	PullRequestBody  string
 	AutoMerge        bool
+	NoConvert        bool
 	environments.EnvironmentPullRequestOptions
 }
 
@@ -61,6 +63,7 @@ func NewCmdUpgradePipeline() (*cobra.Command, *Options) {
 	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "", "the PR title")
 	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
+	cmd.Flags().BoolVarP(&o.NoConvert, "no-convert", "", false, "disables converting from Kptfile based pipelines to the uses:sourceURI notation for reusing pipelines across repositories")
 	cmd.Flags().StringVarP(&o.KptBinary, "bin", "", "", "the 'kpt' binary name to use. If not specified this command will download the jx binary plugin into ~/.jx3/plugins/bin and use that")
 
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
@@ -175,7 +178,10 @@ func (o *Options) UpgradeRepository(config *v1alpha1.SourceConfig, group *v1alph
 
 	o.Function = func() error {
 		dir := o.OutDir
-		return o.upgradePipelines(dir)
+		if o.NoConvert {
+			return o.upgradePipelinesViaKpt(dir)
+		}
+		return o.convertPipelines(gitURL, dir)
 	}
 
 	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
@@ -185,7 +191,7 @@ func (o *Options) UpgradeRepository(config *v1alpha1.SourceConfig, group *v1alph
 	return nil
 }
 
-func (o *Options) upgradePipelines(dir string) error {
+func (o *Options) upgradePipelinesViaKpt(dir string) error {
 	lhDir := filepath.Join(dir, ".lighthouse")
 	exists, err := files.DirExists(lhDir)
 	if err != nil {
@@ -205,7 +211,6 @@ func (o *Options) upgradePipelines(dir string) error {
 		}
 
 		name := f.Name()
-
 		kptFile := filepath.Join(lhDir, name, "Kptfile")
 		exists, err := files.FileExists(kptFile)
 		if err != nil {
@@ -236,6 +241,19 @@ func (o *Options) upgradePipelines(dir string) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed to run %s", c.CLI())
 		}
+	}
+	return nil
+}
+
+func (o *Options) convertPipelines(gitURL, dir string) error {
+	_, co := convert.NewCmdPipelineConvert()
+
+	co.ScmOptions.SourceURL = gitURL
+	co.ScmOptions.Dir = dir
+
+	err := co.Run()
+	if err != nil {
+		return errors.Wrapf(err, "failed to update pipelines for repository %s in dir %s", gitURL, dir)
 	}
 	return nil
 }
