@@ -108,7 +108,7 @@ func (o *Options) Run() error {
 
 	if o.PullRequestBody == "" || o.CommitMessage == "" {
 		// lets try discover the current git URL
-		gitURL, err := gitdiscovery.FindGitURLFromDir(o.Dir)
+		gitURL, err := gitdiscovery.FindGitURLFromDir(o.Dir, true)
 		if err != nil {
 			log.Logger().Warnf("failed to find git URL %s", err.Error())
 
