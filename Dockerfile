@@ -9,4 +9,4 @@ RUN curl -f -L https://get.helm.sh/helm-v${HELM3_VERSION}-linux-386.tar.gz | tar
 
 COPY ./build/linux/jx-updatebot /usr/bin/jx-updatebot
 
-ENV XDG_CONFIG_HOME /home/.config
+#ENV XDG_CONFIG_HOME /home/.config
