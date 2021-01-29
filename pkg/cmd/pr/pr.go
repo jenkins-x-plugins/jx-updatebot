@@ -297,6 +297,9 @@ func (o *Options) Validate() error {
 	}
 
 	if o.GitCredentials {
+		if o.ScmClientFactory.GitToken == "" {
+			return errors.Errorf("missing git token environment variable. Try setting GIT_TOKEN or GITHUB_TOKEN")
+		}
 		_, gc := setup.NewCmdGitSetup()
 		gc.Dir = o.Dir
 		gc.DisableInClusterTest = true
@@ -308,7 +311,7 @@ func (o *Options) Validate() error {
 		if err != nil {
 			return errors.Wrapf(err, "failed to setup git credentials file")
 		}
-		log.Logger().Infof("setup git credentials file")
+		log.Logger().Infof("setup git credentials file for user %s and email %s", gc.UserName, gc.UserEmail)
 	}
 	return nil
 }

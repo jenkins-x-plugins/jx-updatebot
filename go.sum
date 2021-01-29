@@ -806,8 +806,9 @@ github.com/jenkins-x/jx-api/v4 v4.0.23 h1:GpgytvBXbHVGaeqsRLGl9f1v8vpxMsTWlZNPyh
 github.com/jenkins-x/jx-api/v4 v4.0.23/go.mod h1:IC88X+24Nmexuj7lRNRgzfrchzlo0qysfwkICpqDmMQ=
 github.com/jenkins-x/jx-gitops v0.0.531 h1:0UEuvAf40TBmA3lQOWJ4iFUP8re/qygs17Pgpc69+yM=
 github.com/jenkins-x/jx-gitops v0.0.531/go.mod h1:GONXzTOpVG0e51/clom1j8MdOWHBhh67NvboIzfbANI=
-github.com/jenkins-x/jx-gitops v0.0.532 h1:jkGbUBiEQcqCm0qzlp86Xs29ZHrquqMzrr6t4sIDfs8=
-github.com/jenkins-x/jx-gitops v0.0.532/go.mod h1:GONXzTOpVG0e51/clom1j8MdOWHBhh67NvboIzfbANI=
+github.com/jenkins-x/jx-gitops v0.0.537/go.mod h1:dH9vrfUqk/ObYeEtsdDw52x8PC01bFNXng6BcDHf1DM=
+github.com/jenkins-x/jx-gitops v0.0.540 h1:2A2B5qAnwKemgwJVmsf/0V1qCiq3qSi49Myot4PV3ok=
+github.com/jenkins-x/jx-gitops v0.0.540/go.mod h1:C6VBk7uQ0vuTH+vsK2Eo49UF04xhjc1zqwRmYcu8nf4=
 github.com/jenkins-x/jx-helpers/v3 v3.0.64 h1:2tKXtb3B20hZzB+pnhptU/Zb5HzFm2G4/CJLZLZRnTE=
 github.com/jenkins-x/jx-helpers/v3 v3.0.64/go.mod h1:J3nlpCzSkrVayft16okG3bX9BtWdC7sFWBseKUyC+F8=
 github.com/jenkins-x/jx-helpers/v3 v3.0.72 h1:H2ZtaAgbApDxO0qN9hPG51wcQr02QtV5DTF+STEHJL0=
@@ -818,13 +819,15 @@ github.com/jenkins-x/jx-kube-client/v3 v3.0.2 h1:sJs6FaIwycDYwE4UsA7j9tpdXOxXEta
 github.com/jenkins-x/jx-kube-client/v3 v3.0.2/go.mod h1:C/mKnCT5wvolX61eLKJVBNev9sqnkGNpi4skTQ1Gr3Q=
 github.com/jenkins-x/jx-logging/v3 v3.0.3 h1:sVACbwiKuaDFYPfJeVAU10MJI4DA6LcH1RqJKwfNozc=
 github.com/jenkins-x/jx-logging/v3 v3.0.3/go.mod h1:Vp2ER2SYgGhAgEEHlLwfi2ZB54tz6ya1qExq0A4CKMI=
-github.com/jenkins-x/jx-pipeline v0.0.88 h1:pPHiS5mdwmswVZYXD2j9j75MHbWAOXx7X7tqGSQHbYw=
-github.com/jenkins-x/jx-pipeline v0.0.88/go.mod h1:Z39I+kQQY9vDKLbUU4UwGYueuZYxAdVH1w0Yc7qTSjo=
-github.com/jenkins-x/jx-promote v0.0.179 h1:qj48Cs50hk/IlVAYEewVPgKiZ58lo4ME9FX2wbWBt4Q=
-github.com/jenkins-x/jx-promote v0.0.179/go.mod h1:aSQNYrJmSxWnCN3zcYf6e6/FRs8s4kXQL7z7dZ7e7g8=
+github.com/jenkins-x/jx-pipeline v0.0.89 h1:mHGnPTNdOXKhSFA1jHuw3LrYCg9VEbsS2sjPFM3nChw=
+github.com/jenkins-x/jx-pipeline v0.0.89/go.mod h1:Z39I+kQQY9vDKLbUU4UwGYueuZYxAdVH1w0Yc7qTSjo=
+github.com/jenkins-x/jx-promote v0.0.228 h1:3uJT+3XHTmUP4wd/U1YFJxZVVmOYJtLqbgYlNWKjmF8=
+github.com/jenkins-x/jx-promote v0.0.228/go.mod h1:zSgba2CKBgQOVpvNqdH3+RCyE9iYqkrrDqJ2p3uL9ms=
 github.com/jenkins-x/lighthouse-client v0.0.0-20210118141307-27a29c02a663/go.mod h1:/WznhRHiNIYjfd647yPuPnrQZ9z0lEGM5ipR7E+eYG0=
 github.com/jenkins-x/lighthouse-client v0.0.14 h1:a/v/U9LITOCG5wf8b2hZli7cMt37Xsx1234PfDx3PaU=
 github.com/jenkins-x/lighthouse-client v0.0.14/go.mod h1:xr0nj9xyh1BfU3MaIpRq42IFKdVRaLuSKNPSx2F9dm0=
+github.com/jenkins-x/lighthouse-client v0.0.16 h1:hcGIlmxdZ6ybLi4FhXutUn+sLpnVnjPHEoWxxqqycZk=
+github.com/jenkins-x/lighthouse-client v0.0.16/go.mod h1:xr0nj9xyh1BfU3MaIpRq42IFKdVRaLuSKNPSx2F9dm0=
 github.com/jenkins-x/logrus-stackdriver-formatter v0.2.3 h1:NuRWKUPCEX1wKlXA8ZYSG28qGKd41R7BK11YDQkPwqo=
 github.com/jenkins-x/logrus-stackdriver-formatter v0.2.3/go.mod h1:litPp7VZWDRCl8LvXuqGngy+65kkg/+T23TgFnDmfTk=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
@@ -1144,6 +1147,7 @@ github.com/remyoudompheng/bigfft v0.0.0-20170806203942-52369c62f446/go.mod h1:uY
 github.com/rickar/props v0.0.0-20170718221555-0b06aeb2f037 h1:HFsTO5S+nnw/Xs9lRYF+UUJvH8wMSRMRal321W0hfdY=
 github.com/rickar/props v0.0.0-20170718221555-0b06aeb2f037/go.mod h1:F1p8BNM4IXv2UcptwSp8HJOapKurodd/PYu1D6Gtn9Y=
 github.com/roboll/helmfile v0.135.1-0.20201213020320-54eb73b4239a/go.mod h1:FN/KWtPfyp2tVBylTrBcEu1255rZzBcUVb2lci2I6S8=
+github.com/roboll/helmfile v0.138.2/go.mod h1:ojJk9SozHd5abTH0AiIKpI6OiRl03RtO2+U3ldy43SI=
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.1.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
@@ -1243,6 +1247,8 @@ github.com/stretchr/testify v1.5.0/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
+github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/syndtr/gocapability v0.0.0-20170704070218-db04d3cc01c8/go.mod h1:hkRG7XYTFWNJGYcbNJQlaLq0fg1yr4J4t/NcTQtrfww=
 github.com/tatsushid/go-prettytable v0.0.0-20141013043238-ed2d14c29939/go.mod h1:omGxs4/6hNjxPKUTjmaNkPzehSnNJOJN6pMEbrlYIT4=
@@ -1276,8 +1282,10 @@ github.com/valyala/fasthttp v1.2.0/go.mod h1:4vX61m6KN+xDduDNwXrhIAVZaZaZiQ1luJk
 github.com/valyala/quicktemplate v1.2.0/go.mod h1:EH+4AkTd43SvgIbQHYu59/cJyxDoOVRUAfrukLPuGJ4=
 github.com/valyala/tcplisten v0.0.0-20161114210144-ceec8f93295a/go.mod h1:v3UYOV9WzVtRmSR+PDvWpU/qWl4Wa5LApYYX4ZtKbio=
 github.com/variantdev/chartify v0.5.0/go.mod h1:jqlUJIzcrIVSfg8FC4g+IoC5WB83TBl8rnVVEv6g8MQ=
+github.com/variantdev/chartify v0.6.0/go.mod h1:qF4XzQlkfH/6k2jAi1hLas+lK4zSCa8kY+r5JdmLA68=
 github.com/variantdev/dag v0.0.0-20191028002400-bb0b3c785363/go.mod h1:pH1TQsNSLj2uxMo9NNl9zdGy01Wtn+/2MT96BrKmVyE=
 github.com/variantdev/vals v0.11.0/go.mod h1:pZ0ZJZnOwB5aCJmXZgwrgMMMKMfIYMrhpsHllInRQ8c=
+github.com/variantdev/vals v0.12.0/go.mod h1:KHSazZ2M3pFiwu6mw4O56YdjNatCZpJZkk4s23rexW8=
 github.com/vdemeester/k8s-pkg-credentialprovider v1.18.1-0.20201019120933-f1d16962a4db/go.mod h1:grWy0bkr1XO6hqbaaCKaPXqkBVlMGHYG6PGykktwbJc=
 github.com/vektah/gqlparser v1.1.2/go.mod h1:1ycwN7Ij5njmMkPPAOaRFY4rET2Enx7IkVv3vaXspKw=
 github.com/vektra/mockery v1.1.2/go.mod h1:VcfZjKaFOPO+MpN4ZvwPjs4c48lkq1o3Ym8yHZJu0jU=
@@ -2002,6 +2010,7 @@ mvdan.cc/unparam v0.0.0-20190720180237-d51796306d8f/go.mod h1:4G1h5nDURzA3bwVMZI
 nhooyr.io/websocket v1.8.6/go.mod h1:B70DZP8IakI65RVQ51MsWP/8jndNma26DVA/nFSCgW0=
 pgregory.net/rapid v0.3.3/go.mod h1:UYpPVyjFHzYBGHIxLFoupi8vwk6rXNzRY9OMvVxFIOU=
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
+rsc.io/letsencrypt v0.0.3/go.mod h1:buyQKZ6IXrRnB7TdkHP0RyEybLx18HHyOSoTyoOLqNY=
 rsc.io/quote/v3 v3.1.0/go.mod h1:yEA65RcK8LyAZtP9Kv3t0HmxON59tX3rD+tICJqUlj0=
 rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=
 sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.7/go.mod h1:PHgbrJT7lCHcxMU+mDHEm+nx46H4zuuHZkDP6icnhu0=
