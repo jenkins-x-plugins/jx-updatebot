@@ -4,12 +4,12 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/cpuguy83/go-md2man v1.0.10
 	github.com/jenkins-x/go-scm v1.5.216
-	github.com/jenkins-x/jx-gitops v0.0.540
-	github.com/jenkins-x/jx-helpers/v3 v3.0.72
+	github.com/jenkins-x/jx-gitops v0.0.547
+	github.com/jenkins-x/jx-helpers/v3 v3.0.73
 	github.com/jenkins-x/jx-logging/v3 v3.0.3
-	github.com/jenkins-x/jx-pipeline v0.0.89
-	github.com/jenkins-x/jx-promote v0.0.228
-	github.com/jenkins-x/lighthouse-client v0.0.16
+	github.com/jenkins-x/jx-pipeline v0.0.101
+	github.com/jenkins-x/jx-promote v0.0.232
+	github.com/jenkins-x/lighthouse-client v0.0.23
 	github.com/pkg/errors v0.9.1
 	github.com/shurcooL/githubv4 v0.0.0-20191102174205-af46314aec7b
 	github.com/spf13/cobra v1.1.1

@@ -265,8 +265,7 @@ func (o *Options) convertPipelines(gitURL, dir string) error {
 
 	_, co := convert.NewCmdPipelineConvert()
 
-	co.ScmOptions.SourceURL = gitURL
-	co.ScmOptions.Dir = dir
+	co.Dir = dir
 
 	err = co.Run()
 	if err != nil {
