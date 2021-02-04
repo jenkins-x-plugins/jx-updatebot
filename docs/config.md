@@ -114,6 +114,19 @@ UpdateConfigSpec
 <tbody>
 <tr>
 <td>
+<code>go</code></br>
+<em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.GoChange">
+GoChange
+</a>
+</em>
+</td>
+<td>
+<p>Go for go lang based dependency upgrades</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>regex</code></br>
 <em>
 <a href="#updatebot.jenkins-x.io/v1alpha1.Regex">
@@ -123,6 +136,150 @@ Regex
 </td>
 <td>
 <p>Regex a regex based modification</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>versionStream</code></br>
+<em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.VersionStreamChange">
+VersionStreamChange
+</a>
+</em>
+</td>
+<td>
+<p>VersionStream updates the charts in a version stream repository</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>versionTemplate</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>VersionTemplate an optional template if the version is coming from a previous Pull Request SHA</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="updatebot.jenkins-x.io/v1alpha1.GoChange">GoChange
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.Change">Change</a>)
+</p>
+<p>
+<p>GoChange for upgrading go dependencies</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>owner</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>Owners the git owners to query</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code></br>
+<em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.Pattern">
+Pattern
+</a>
+</em>
+</td>
+<td>
+<p>Repositories the repositories to match</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>package</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Package the text in the go.mod to filter on to perform an upgrade</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>upgradePackages</code></br>
+<em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.Pattern">
+Pattern
+</a>
+</em>
+</td>
+<td>
+<p>UpgradePackages the packages to upgrade</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="updatebot.jenkins-x.io/v1alpha1.Pattern">Pattern
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.GoChange">GoChange</a>, 
+<a href="#updatebot.jenkins-x.io/v1alpha1.VersionStreamChange">VersionStreamChange</a>)
+</p>
+<p>
+<p>Pattern for matching strings</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Name</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>include</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>Includes patterns to include in changing</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>exclude</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>Excludes patterns to exclude from upgrading</p>
 </td>
 </tr>
 </tbody>
@@ -243,8 +400,50 @@ string
 </tr>
 </tbody>
 </table>
+<h3 id="updatebot.jenkins-x.io/v1alpha1.VersionStreamChange">VersionStreamChange
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.Change">Change</a>)
+</p>
+<p>
+<p>VersionStreamChange for upgrading versions in a version stream</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>Pattern</code></br>
+<em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.Pattern">
+Pattern
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>kind</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Kind the kind of resources to change (charts, git, package etc)</p>
+</td>
+</tr>
+</tbody>
+</table>
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>2e776f6</code>.
+on git commit <code>52eee40</code>.
 </em></p>

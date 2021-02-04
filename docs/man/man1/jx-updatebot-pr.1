@@ -32,12 +32,16 @@ Create a Pull Request on each downstream repository
     the commit title
 
 .PP
-\fB\-\-config\-file\fP=""
+\fB\-c\fP, \fB\-\-config\-file\fP=""
     the updatebot config file. If none specified defaults to .jx/updatebot.yaml
 
 .PP
 \fB\-d\fP, \fB\-\-dir\fP="."
     the directory look for the VERSION file
+
+.PP
+\fB\-\-git\-credentials\fP[=false]
+    ensures the git credentials are setup so we can push to git
 
 .PP
 \fB\-\-git\-kind\fP=""
@@ -52,12 +56,36 @@ Create a Pull Request on each downstream repository
     the git token used to operate on the git repository. If not specified it's loaded from the git credentials file
 
 .PP
-\fB\-\-git\-user\fP=""
-    the git username used to operate on the git repository
+\fB\-\-git\-user\-email\fP=""
+    the user email to git commit
+
+.PP
+\fB\-\-git\-user\-name\fP=""
+    the user name to git commit
+
+.PP
+\fB\-\-git\-username\fP=""
+    the git username used to operate on the git repository. If not specified it's loaded from the git credentials file
 
 .PP
 \fB\-h\fP, \fB\-\-help\fP[=false]
     help for pr
+
+.PP
+\fB\-\-labels\fP=[]
+    a list of labels to apply to the PR
+
+.PP
+\fB\-\-no\-version\fP[=false]
+    disables validation on requiring a '\-\-version' option or environment variable to be required
+
+.PP
+\fB\-\-pull\-request\-body\fP=""
+    the PR body
+
+.PP
+\fB\-\-pull\-request\-title\fP=""
+    the PR title
 
 .PP
 \fB\-\-version\fP=""
