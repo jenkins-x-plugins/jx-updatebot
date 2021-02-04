@@ -2,16 +2,17 @@ package pr
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/jenkins-x/jx-gitops/pkg/cmd/git/setup"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/scmhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/shurcooL/githubv4"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/rootcmd"
@@ -168,7 +169,9 @@ func (o *Options) Run() error {
 
 				}
 				if o.PullRequestTitle == "" {
-					o.PullRequestTitle = fmt.Sprintf("fix: upgrade to version %s", o.Version)
+					gitURLpart := strings.Split(gitURL, "/")
+					repository := gitURLpart[len(gitURLpart)-2] + "/" + gitURLpart[len(gitURLpart)-1]
+					o.PullRequestTitle = fmt.Sprintf("chore: upgrade %s to version %s", repository, o.Version)
 				}
 				if o.CommitTitle == "" {
 					o.CommitTitle = o.PullRequestTitle
