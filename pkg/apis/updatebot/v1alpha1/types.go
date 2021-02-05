@@ -99,4 +99,7 @@ type GoChange struct {
 
 	// UpgradePackages the packages to upgrade
 	UpgradePackages Pattern `json:"upgradePackages,omitempty"`
+
+	// NoPatch disables patch upgrades so we can import to new minor releases
+	NoPatch bool `json:"noPatch,omitempty"`
 }

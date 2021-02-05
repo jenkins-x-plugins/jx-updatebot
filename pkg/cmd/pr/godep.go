@@ -61,10 +61,14 @@ func (o *Options) ApplyGo(dir string, gitURL string, change v1alpha1.Change, gc 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line != "" && gc.UpgradePackages.Matches(line) {
+			patch := "-u=patch"
+			if gc.NoPatch {
+				patch = "-u"
+			}
 			c = &cmdrunner.Command{
 				Dir:  dir,
 				Name: "go",
-				Args: []string{"get", "-u=patch", line},
+				Args: []string{"get", patch, line},
 			}
 			text, err = runner(c)
 			if err != nil {

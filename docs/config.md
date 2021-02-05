@@ -229,6 +229,17 @@ Pattern
 <p>UpgradePackages the packages to upgrade</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>noPatch</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>NoPatch disables patch upgrades so we can import to new minor releases</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="updatebot.jenkins-x.io/v1alpha1.Pattern">Pattern
@@ -445,5 +456,5 @@ string
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>52eee40</code>.
+on git commit <code>e1a2fd4</code>.
 </em></p>
