@@ -9,3 +9,10 @@ spec:
             pattern: "jenkinsxio/jx-updatebot:(.*)"
             files:
               - "**/*.yaml"
+    - urls:
+        - https://github.com/jenkins-x/jx3-versions
+      changes:
+        - regex:
+            pattern: "version: (.*)"
+            files:
+              - "docker/gcr.io/jenkinsxio/jx-updatebot.yml"
