@@ -24,6 +24,7 @@ type Options struct {
 	PullRequestTitle string
 	PullRequestBody  string
 	AutoMerge        bool
+	GitSetup         bool
 	environments.EnvironmentPullRequestOptions
 }
 
@@ -51,6 +52,7 @@ func NewCmdUpgradeEnvironment() (*cobra.Command, *Options) {
 	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")
 	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", false, "should we automatically merge if the PR pipeline is green")
+	cmd.Flags().BoolVarP(&o.GitSetup, "git-setup", "", false, "should we setup git first so that we can create Pull Requests")
 
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
 
@@ -67,6 +69,12 @@ func (o *Options) Run() error {
 		return errors.Wrapf(err, "failed to validate options")
 	}
 
+	if o.GitSetup {
+		err = o.gitSetup()
+		if err != nil {
+			return errors.Wrapf(err, "failed to setup git")
+		}
+	}
 	ns := o.EnvironmentPullRequestOptions.Namespace
 	envMap, envNames, err := jxenv.GetEnvironments(o.EnvironmentPullRequestOptions.JXClient, ns)
 	if err != nil {
@@ -146,6 +154,21 @@ func (o *Options) gitopsUpgrade(dir string) error {
 	}
 	c := &cmdrunner.Command{
 		Dir:  dir,
+		Name: "jx",
+		Args: args,
+		Out:  os.Stdout,
+		Err:  os.Stdin,
+	}
+	_, err := o.CommandRunner(c)
+	if err != nil {
+		return errors.Wrapf(err, "failed to run command %s", c.CLI())
+	}
+	return nil
+}
+
+func (o *Options) gitSetup() error {
+	args := []string{"gitops", "git", "setup"}
+	c := &cmdrunner.Command{
 		Name: "jx",
 		Args: args,
 		Out:  os.Stdout,
