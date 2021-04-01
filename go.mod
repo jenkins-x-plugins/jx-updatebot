@@ -7,6 +7,7 @@ require (
 	github.com/jenkins-x-plugins/jx-pipeline v0.0.122
 	github.com/jenkins-x-plugins/jx-promote v0.0.249
 	github.com/jenkins-x/go-scm v1.6.9
+	github.com/jenkins-x/jx-api/v4 v4.0.25
 	github.com/jenkins-x/jx-helpers/v3 v3.0.94
 	github.com/jenkins-x/jx-logging/v3 v3.0.3
 	github.com/jenkins-x/lighthouse-client v0.0.87
