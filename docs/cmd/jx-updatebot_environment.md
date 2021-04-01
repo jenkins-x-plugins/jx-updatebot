@@ -23,6 +23,7 @@ Creates a Pull Request to upgrade the environment git repository from the versio
   -e, --env string                  the name of the environment to upgrade (default "dev")
       --git-kind string             the kind of git server to connect to
       --git-server string           the git server URL to create the scm client
+      --git-setup                   should we setup git first so that we can create Pull Requests
       --git-token string            the git token used to operate on the git repository. If not specified it's loaded from the git credentials file
       --git-username string         the git username used to operate on the git repository. If not specified it's loaded from the git credentials file
   -h, --help                        help for environment
