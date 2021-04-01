@@ -2,6 +2,10 @@ package pr
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
 	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
@@ -10,9 +14,6 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/versionstream"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 	"github.com/pkg/errors"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 // ApplyVersionStream applies the version stream change

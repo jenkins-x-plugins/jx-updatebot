@@ -1,15 +1,16 @@
 package pr
 
 import (
+	"io/ioutil"
+	"path/filepath"
+	"regexp"
+
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 	"github.com/pkg/errors"
 	"github.com/yargevad/filepathx"
-	"io/ioutil"
-	"path/filepath"
-	"regexp"
 )
 
 // ApplyRegex applies the regex change

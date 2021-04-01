@@ -3,6 +3,9 @@ package pr
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cmdrunner"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
@@ -10,8 +13,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
-	"os"
-	"strings"
 )
 
 // GoFindURLs find the git URLs for the given go dependency change

@@ -1,13 +1,14 @@
 package pr_test
 
 import (
-	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/pr"
 	"github.com/jenkins-x/go-scm/scm/driver/fake"

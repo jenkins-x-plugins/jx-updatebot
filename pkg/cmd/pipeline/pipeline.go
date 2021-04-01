@@ -2,11 +2,12 @@ package pipeline
 
 import (
 	"fmt"
-	"github.com/jenkins-x/lighthouse-client/pkg/triggerconfig/inrepo"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/jenkins-x/lighthouse-client/pkg/triggerconfig/inrepo"
 
 	"github.com/jenkins-x-plugins/jx-gitops/pkg/apis/gitops/v1alpha1"
 	"github.com/jenkins-x-plugins/jx-gitops/pkg/plugins"
