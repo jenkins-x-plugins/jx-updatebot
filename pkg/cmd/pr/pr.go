@@ -7,13 +7,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jenkins-x/jx-gitops/pkg/cmd/git/setup"
+	"github.com/jenkins-x-plugins/jx-gitops/pkg/cmd/git/setup"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/scmhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/shurcooL/githubv4"
 
+	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/rootcmd"
 	"github.com/jenkins-x/go-scm/scm"
@@ -25,7 +26,6 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/yamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
-	"github.com/jenkins-x/jx-promote/pkg/environments"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
