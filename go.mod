@@ -3,14 +3,14 @@ module github.com/jenkins-x-plugins/jx-updatebot
 require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/cpuguy83/go-md2man v1.0.10
-	github.com/jenkins-x-plugins/jx-gitops v0.2.41
+	github.com/jenkins-x-plugins/jx-gitops v0.2.43
 	github.com/jenkins-x-plugins/jx-pipeline v0.0.122
-	github.com/jenkins-x-plugins/jx-promote v0.0.249
-	github.com/jenkins-x/go-scm v1.6.9
-	github.com/jenkins-x/jx-api/v4 v4.0.25
+	github.com/jenkins-x-plugins/jx-promote v0.0.251
+	github.com/jenkins-x/go-scm v1.6.13
+	github.com/jenkins-x/jx-api/v4 v4.0.27
 	github.com/jenkins-x/jx-helpers/v3 v3.0.94
 	github.com/jenkins-x/jx-logging/v3 v3.0.3
-	github.com/jenkins-x/lighthouse-client v0.0.87
+	github.com/jenkins-x/lighthouse-client v0.0.88
 	github.com/pkg/errors v0.9.1
 	github.com/shurcooL/githubv4 v0.0.0-20191102174205-af46314aec7b
 	github.com/spf13/cobra v1.1.1

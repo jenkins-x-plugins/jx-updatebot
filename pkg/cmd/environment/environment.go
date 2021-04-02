@@ -48,6 +48,7 @@ func NewCmdUpgradeEnvironment() (*cobra.Command, *Options) {
 
 	cmd.Flags().StringVarP(&o.Env, "env", "e", "dev", "the name of the environment to upgrade")
 	cmd.Flags().StringVarP(&o.Strategy, "strategy", "s", "", "the 'kpt' strategy to use. To see available strategies type 'kpt pkg update --help'. Typical values are: resource-merge, fast-forward, alpha-git-patch, force-delete-replace")
+	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{"jx-boot-upgrade"}, "a list of labels to apply to the PR")
 
 	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")
 	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
