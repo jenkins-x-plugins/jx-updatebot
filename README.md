@@ -13,7 +13,7 @@
 
 Download the [jx-updatebot binary](https://github.com/jenkins-x-plugins/jx-updatebot/releases) for your operating system and add it to your `$PATH`.
 
-Or you can use `jx updatebot` directly in the [Jenkins X 3.x CLI](https://github.com/jenkins-x/jx-cli)
+Or you can use `jx updatebot` directly in the [Jenkins X 3.x CLI](https://github.com/jenkins-x/jx)
 
 
 ## Configuration
