@@ -1,4 +1,4 @@
-FROM ghcr.io/jenkins-x/jx-go:3.1.353
+FROM hcr.io/jenkins-x/jx-go:3.2.42
 
 ENTRYPOINT ["jx-updatebot"]
 
