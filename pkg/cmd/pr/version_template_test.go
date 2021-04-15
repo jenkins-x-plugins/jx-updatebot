@@ -54,6 +54,7 @@ func TestVersionTemplate(t *testing.T) {
 
 	for _, tc := range testCases {
 		o := &pr.Options{}
+		o.ScmClientFactory.NoWriteGitCredentialsFile = true
 
 		o.AddPullRequest(pullRequest)
 

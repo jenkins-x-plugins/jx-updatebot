@@ -61,6 +61,7 @@ func TestCreate(t *testing.T) {
 			o.CommandRunner = runner.Run
 			o.ScmClient = scmClient
 			o.ScmClientFactory.ScmClient = scmClient
+			o.ScmClientFactory.NoWriteGitCredentialsFile = true
 			o.Helmer = fakeHelmer
 			o.Version = "1.2.3"
 			o.EnvironmentPullRequestOptions.ScmClientFactory.GitServerURL = "https://github.com"
