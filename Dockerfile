@@ -2,6 +2,6 @@ FROM ghcr.io/jenkins-x/jx-go:3.2.42
 
 ENTRYPOINT ["jx-updatebot"]
 
-COPY ./build/linux/jx-updatebot /usr/bin/jx-updatebot
+RUN jx gitops plugin upgrade
 
-ENV XDG_CONFIG_HOME /home/.config
+COPY ./build/linux/jx-updatebot /usr/bin/jx-updatebot
