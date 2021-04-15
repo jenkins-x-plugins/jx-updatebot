@@ -158,7 +158,7 @@ func (o *Options) gitopsUpgrade(dir string) error {
 		Name: "jx",
 		Args: args,
 		Out:  os.Stdout,
-		Err:  os.Stdin,
+		Err:  os.Stderr,
 	}
 	_, err := o.CommandRunner(c)
 	if err != nil {
