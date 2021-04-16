@@ -172,7 +172,7 @@ func (o *Options) Run() error {
 				if o.PullRequestTitle == "" {
 					gitURLpart := strings.Split(gitURL, "/")
 					repository := gitURLpart[len(gitURLpart)-2] + "/" + gitURLpart[len(gitURLpart)-1]
-					o.PullRequestTitle = fmt.Sprintf("chore: upgrade %s to version %s", repository, o.Version)
+					o.PullRequestTitle = fmt.Sprintf("chore(deps): upgrade %s to version %s", repository, o.Version)
 				}
 				if o.CommitTitle == "" {
 					o.CommitTitle = o.PullRequestTitle

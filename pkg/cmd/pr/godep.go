@@ -42,7 +42,7 @@ func (o *Options) GoFindURLs(rule *v1alpha1.Rule, change v1alpha1.Change, gc *v1
 
 // ApplyGo applies the go change
 func (o *Options) ApplyGo(dir string, gitURL string, change v1alpha1.Change, gc *v1alpha1.GoChange) error {
-	o.CommitTitle = "chore: upgrade go dependencies"
+	o.CommitTitle = "chore(deps): upgrade go dependencies"
 
 	log.Logger().Infof("finding all the go dependences for repository: %s", gitURL)
 
