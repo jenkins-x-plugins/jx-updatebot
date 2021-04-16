@@ -131,6 +131,7 @@ func (o *Options) Run() error {
 			return errors.Wrapf(err, "failed to find URLs")
 		}
 
+		o.Fork = rule.Fork
 		if len(rule.URLs) == 0 {
 			log.Logger().Warnf("no URLs to process for rule %d", i)
 		}

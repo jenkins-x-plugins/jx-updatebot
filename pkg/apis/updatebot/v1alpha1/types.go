@@ -35,6 +35,9 @@ type Rule struct {
 
 	// Changes the changes to perform on the repositories
 	Changes []Change `json:"changes"`
+
+	// Fork if we should create the pull request from a fork of the repository
+	Fork bool `json:"fork,omitempty"`
 }
 
 // Change the kind of change to make on a repository
