@@ -1,6 +1,6 @@
 filepath: ""
 helmfiles:
-- path: jx-production/helmfile.yaml
+- path: helmfiles/jx-production/helmfile.yaml
 namespace: jx
 templates: {}
 renderedvalues: {}

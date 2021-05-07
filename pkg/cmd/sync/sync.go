@@ -29,8 +29,19 @@ var (
 `)
 
 	cmdExample = templates.Examples(`
-		# promotes your current cluster of Jenkins X to helm 3 / helmfile
+		# choose the environments to synchronize
 		jx updatebot sync
+
+		# synchronizes the apps in 2 of your environments (local or remote)
+		jx updatebot sync --source-env staging --target-env production
+
+		# synchronizes the apps in 2 namespaces in the dev cluster
+		jx updatebot sync --source-ns jx-staging --target-ns jx-production
+
+
+		# synchronizes the edam and beer charts in 2 of your environments (local or remote)
+		jx updatebot sync --source-env staging --target-env production --charts edam --charts beer
+
 	`)
 )
 
@@ -121,6 +132,9 @@ func (o *Options) Validate() error {
 	}
 	// lets remove the dev env name as we don't promote to/from it
 	o.EnvNames = stringhelpers.RemoveStringFromSlice(o.EnvNames, "dev")
+
+	// lazy create git
+	o.EnvironmentPullRequestOptions.Git()
 	return nil
 }
 
@@ -192,9 +206,6 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 		o.ChartFilter.Namespaces = append(o.ChartFilter.Namespaces, o.Source.Namespace)
 	}
 
-	if o.Target.Helmfile == "" {
-		o.Target.Helmfile = "helmfile.yaml"
-	}
 	targetHelmfiles, err := helmfiles.GatherHelmfiles(o.Target.Helmfile, targetDir)
 	if err != nil {
 		return errors.Wrapf(err, "failed to gather target helmfiles from %s", targetDir)
@@ -202,9 +213,6 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 
 	sourceHelmfiles := targetHelmfiles
 	if sourceDir != "" {
-		if o.Source.Helmfile == "" {
-			o.Source.Helmfile = "helmfile.yaml"
-		}
 		sourceHelmfiles, err = helmfiles.GatherHelmfiles(o.Source.Helmfile, sourceDir)
 		if err != nil {
 			return errors.Wrapf(err, "failed to gather source helmfiles from %s", sourceDir)
