@@ -3,9 +3,9 @@ module github.com/jenkins-x-plugins/jx-updatebot
 require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/cpuguy83/go-md2man v1.0.10
-	github.com/jenkins-x-plugins/jx-gitops v0.2.60
+	github.com/jenkins-x-plugins/jx-gitops v0.2.80
 	github.com/jenkins-x-plugins/jx-pipeline v0.0.132
-	github.com/jenkins-x-plugins/jx-promote v0.0.257
+	github.com/jenkins-x-plugins/jx-promote v0.0.263
 	github.com/jenkins-x/go-scm v1.8.2
 	github.com/jenkins-x/jx-api/v4 v4.0.29
 	github.com/jenkins-x/jx-helpers/v3 v3.0.111
@@ -26,7 +26,6 @@ replace (
 	// helm dependencies
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
-	github.com/jenkins-x-plugins/jx-gitops => /Users/jstrachan/workspace/workspace/go/src/github.com/jenkins-x/jx-gitops
 	// override the go-scm from tekton
 	github.com/jenkins-x/go-scm => github.com/jenkins-x/go-scm v1.8.2
 	// fix yaml comment parsing issue
