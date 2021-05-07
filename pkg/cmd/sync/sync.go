@@ -188,6 +188,10 @@ func (o *Options) Run() error {
 
 // SyncVersions syncs the source and target versions
 func (o *Options) SyncVersions(sourceDir, targetDir string) error {
+	if o.Source.Namespace != "" && stringhelpers.StringArrayIndex(o.ChartFilter.Namespaces, o.Source.Namespace) < 0 {
+		o.ChartFilter.Namespaces = append(o.ChartFilter.Namespaces, o.Source.Namespace)
+	}
+
 	if o.Target.Helmfile == "" {
 		o.Target.Helmfile = "helmfile.yaml"
 	}
@@ -251,6 +255,9 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 			details := helmfiles.NewChartDetails(helmState, rel, o.Prefixes)
 			if !o.ChartFilter.Matches(details) {
 				continue
+			}
+			if o.Target.Namespace != "" {
+				details.Namespace = o.Target.Namespace
 			}
 			err = editor.AddChart(details)
 			if err != nil {

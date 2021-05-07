@@ -1,4 +1,5 @@
 filepath: ""
+namespace: nginx
 repositories:
 - name: ingress-nginx
   url: https://kubernetes.github.io/ingress-nginx
@@ -6,6 +7,5 @@ releases:
 - chart: ingress-nginx/ingress-nginx
   version: 3.12.0
   name: nginx-ingress
-  namespace: nginx
 templates: {}
 renderedvalues: {}

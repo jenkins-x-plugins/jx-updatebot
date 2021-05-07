@@ -24,12 +24,19 @@ func TestSync(t *testing.T) {
 	testDir := "test_data"
 	fileSlice, err := ioutil.ReadDir(testDir)
 	require.NoError(t, err, "failed to read dir %s", testDir)
+
+	testCaseName := os.Getenv("TEST_NAME")
 	for _, f := range fileSlice {
 		if !f.IsDir() {
 			continue
 		}
 		name := f.Name()
 		dir := filepath.Join(testDir, name)
+
+		if testCaseName != "" && name != testCaseName {
+			t.Logf("ignoring test case %s\n", name)
+			continue
+		}
 
 		_, o := sync.NewCmdEnvironmentSync()
 
@@ -40,6 +47,9 @@ func TestSync(t *testing.T) {
 			o.ChartFilter.Namespaces = []string{"nginx"}
 		case "ns-staging":
 			o.ChartFilter.Namespaces = []string{"jx-staging"}
+		case "ns-prod":
+			o.Source.Namespace = "jx-staging"
+			o.Target.Namespace = "jx-production"
 		}
 
 		srcDir := filepath.Join(dir, "source")
