@@ -1,0 +1,7 @@
+filepath: ""
+helmfiles:
+- path: jx-staging/helmfile.yaml
+- path: nginx/helmfile.yaml
+namespace: jx
+templates: {}
+renderedvalues: {}

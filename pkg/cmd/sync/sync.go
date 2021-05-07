@@ -41,6 +41,7 @@ type Options struct {
 
 	Source             EnvironmentOptions
 	Target             EnvironmentOptions
+	ChartFilter        ChartFilter
 	PullRequestTitle   string
 	PullRequestBody    string
 	GitCommitUsername  string
@@ -55,6 +56,11 @@ type Options struct {
 	SourceDir          string
 	VersionStreamDir   string
 	Prefixes           *versionstream.RepositoryPrefixes
+}
+
+type ChartFilter struct {
+	Namespaces []string
+	Charts     []string
 }
 
 // NewCmdEnvironmentSync creates a command object for the command
@@ -77,6 +83,8 @@ func NewCmdEnvironmentSync() (*cobra.Command, *Options) {
 	cmd.Flags().StringVarP(&o.GitCommitUsername, "git-user-name", "", "", "the user name to git commit")
 	cmd.Flags().StringVarP(&o.GitCommitUserEmail, "git-user-email", "", "", "the user email to git commit")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
+	cmd.Flags().StringSliceVar(&o.ChartFilter.Namespaces, "namespaces", []string{}, "a list of namespaces to filter resources to sync")
+	cmd.Flags().StringSliceVar(&o.ChartFilter.Charts, "charts", []string{}, "names of charts to filter resources to sync. Can be local chart name (without prefix) or the full name with prefix")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
 	cmd.Flags().BoolVarP(&o.NoVersion, "no-version", "", false, "disables validation on requiring a '--version' option or environment variable to be required")
 	cmd.Flags().BoolVarP(&o.GitCredentials, "git-credentials", "", false, "ensures the git credentials are setup so we can push to git")
@@ -216,7 +224,7 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to create helmfile editor")
 	}
-	err = o.syncHelmfileVersions(sourceDir, sourceHelmfiles, editor)
+	err = o.syncHelmfileVersions(sourceHelmfiles, editor)
 	if err != nil {
 		return errors.Wrapf(err, "failed to sync versions")
 	}
@@ -228,7 +236,7 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 	return nil
 }
 
-func (o *Options) syncHelmfileVersions(sourceDir string, sourceHelmfiles []helmfiles.Helmfile, editor *helmfiles.Editor) error {
+func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, editor *helmfiles.Editor) error {
 	for i := range sourceHelmfiles {
 		src := &sourceHelmfiles[i]
 		helmState := &state.HelmState{}
@@ -241,7 +249,7 @@ func (o *Options) syncHelmfileVersions(sourceDir string, sourceHelmfiles []helmf
 		for i := range helmState.Releases {
 			rel := &helmState.Releases[i]
 			details := helmfiles.NewChartDetails(helmState, rel, o.Prefixes)
-			if !o.Matches(details) {
+			if !o.ChartFilter.Matches(details) {
 				continue
 			}
 			err = editor.AddChart(details)
@@ -253,7 +261,24 @@ func (o *Options) syncHelmfileVersions(sourceDir string, sourceHelmfiles []helmf
 	return nil
 }
 
-func (o *Options) Matches(details *helmfiles.ChartDetails) bool {
-	// TODO add filters for the chart name / namespace
+// Matches return true if the chart details matches the filters
+func (o *ChartFilter) Matches(details *helmfiles.ChartDetails) bool {
+	if len(o.Namespaces) > 0 {
+		if stringhelpers.StringArrayIndex(o.Namespaces, details.Namespace) < 0 {
+			return false
+		}
+	}
+	prefix, localName := helmfiles.SpitChartName(details.Chart)
+	if len(o.Charts) > 0 {
+		answer := false
+		for _, c := range o.Charts {
+			p, l := helmfiles.SpitChartName(c)
+			if (prefix == p || p == "") && l == localName {
+				answer = true
+				break
+			}
+		}
+		return answer
+	}
 	return true
 }

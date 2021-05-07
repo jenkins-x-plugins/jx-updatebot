@@ -14,7 +14,7 @@ import (
 
 var (
 	// generateTestOutput enable to regenerate the expected output
-	generateTestOutput = false
+	generateTestOutput = true
 )
 
 func TestSync(t *testing.T) {
@@ -32,6 +32,15 @@ func TestSync(t *testing.T) {
 		dir := filepath.Join(testDir, name)
 
 		_, o := sync.NewCmdEnvironmentSync()
+
+		switch name {
+		case "name-filter":
+			o.ChartFilter.Charts = []string{"ingress-nginx", "myapp"}
+		case "ns-nginx":
+			o.ChartFilter.Namespaces = []string{"nginx"}
+		case "ns-staging":
+			o.ChartFilter.Namespaces = []string{"jx-staging"}
+		}
 
 		srcDir := filepath.Join(dir, "source")
 		targetDir := filepath.Join(dir, "target")
