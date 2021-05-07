@@ -2,6 +2,8 @@ package sync
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/jenkins-x-plugins/jx-gitops/pkg/helmfiles"
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x/go-scm/scm"
@@ -20,7 +22,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/roboll/helmfile/pkg/state"
 	"github.com/spf13/cobra"
-	"path/filepath"
 )
 
 var (
