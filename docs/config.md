@@ -377,6 +377,17 @@ string
 <p>Changes the changes to perform on the repositories</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>fork</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>Fork if we should create the pull request from a fork of the repository</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="updatebot.jenkins-x.io/v1alpha1.UpdateConfigSpec">UpdateConfigSpec
@@ -456,5 +467,5 @@ string
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>a33528d</code>.
+on git commit <code>fc6efea</code>.
 </em></p>

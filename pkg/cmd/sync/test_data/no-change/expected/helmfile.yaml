@@ -1,0 +1,19 @@
+filepath: ""
+helmfiles:
+- path: helmfiles/jx-staging/helmfile.yaml
+- path: helmfiles/jx/helmfile.yaml
+- path: helmfiles/nginx/helmfile.yaml
+- path: jx-staging/helmfile.yaml
+- path: jx/helmfile.yaml
+- path: nginx/helmfile.yaml
+namespace: jx
+repositories:
+- name: jx3
+  url: https://storage.googleapis.com/jenkinsxio/charts
+releases:
+- chart: jx3/jx-pipelines-visualizer
+  version: 1.4.0
+  name: jx-pipelines-visualizer
+  namespace: jx
+templates: {}
+renderedvalues: {}
