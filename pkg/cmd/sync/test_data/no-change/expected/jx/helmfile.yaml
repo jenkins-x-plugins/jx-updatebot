@@ -1,0 +1,18 @@
+filepath: ""
+environments:
+  default:
+    values:
+    - jx-values.yaml
+namespace: jx
+repositories:
+- name: jx3
+  url: https://storage.googleapis.com/jenkinsxio/charts
+releases:
+- chart: jx3/jx-pipelines-visualizer
+  version: 1.4.0
+  name: jx-pipelines-visualizer
+  values:
+  - ../../versionStream/charts/jx3/jx-pipelines-visualizer/values.yaml.gotmpl
+  - jx-values.yaml
+templates: {}
+renderedvalues: {}

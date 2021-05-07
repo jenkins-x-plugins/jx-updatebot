@@ -20,6 +20,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/roboll/helmfile/pkg/state"
 	"github.com/spf13/cobra"
+	"path/filepath"
 )
 
 var (
@@ -52,6 +53,7 @@ type Options struct {
 	EnvMap             map[string]*v1.Environment
 	EnvNames           []string
 	SourceDir          string
+	VersionStreamDir   string
 	Prefixes           *versionstream.RepositoryPrefixes
 }
 
@@ -178,6 +180,9 @@ func (o *Options) Run() error {
 
 // SyncVersions syncs the source and target versions
 func (o *Options) SyncVersions(sourceDir, targetDir string) error {
+	if o.Target.Helmfile == "" {
+		o.Target.Helmfile = "helmfile.yaml"
+	}
 	targetHelmfiles, err := helmfiles.GatherHelmfiles(o.Target.Helmfile, targetDir)
 	if err != nil {
 		return errors.Wrapf(err, "failed to gather target helmfiles from %s", targetDir)
@@ -185,12 +190,26 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 
 	sourceHelmfiles := targetHelmfiles
 	if sourceDir != "" {
+		if o.Source.Helmfile == "" {
+			o.Source.Helmfile = "helmfile.yaml"
+		}
 		sourceHelmfiles, err = helmfiles.GatherHelmfiles(o.Source.Helmfile, sourceDir)
 		if err != nil {
 			return errors.Wrapf(err, "failed to gather source helmfiles from %s", sourceDir)
 		}
 	} else {
 		sourceDir = targetDir
+	}
+
+	if o.VersionStreamDir == "" {
+		o.VersionStreamDir = filepath.Join(sourceDir, "versionStream")
+	}
+	if o.Prefixes == nil {
+		var err error
+		o.Prefixes, err = versionstream.GetRepositoryPrefixes(o.VersionStreamDir)
+		if err != nil {
+			return errors.Wrapf(err, "failed to load repository prefixes from version stream dir %s", o.VersionStreamDir)
+		}
 	}
 
 	editor, err := helmfiles.NewEditor(targetDir, targetHelmfiles)
