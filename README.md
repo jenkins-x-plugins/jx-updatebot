@@ -34,6 +34,8 @@ Here are some example updatebot configurations:
 
 You can see an [example of invoking the Updatebot step](https://github.com/jenkins-x/go-scm/blob/main/.lighthouse/jenkins-x/release.yaml#L22-L23) inside a Tekton pipeline. This reuses the [Jenkins X Pipeline as Code GitOps approach](https://jenkins-x.io/blog/2021/02/25/gitops-pipelines/)
 
+e.g. check out the final step in this Task:
+
 ``` 
         steps:
         - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/git-clone/git-clone.yaml@versionStream
