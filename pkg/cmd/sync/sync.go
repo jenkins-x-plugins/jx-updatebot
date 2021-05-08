@@ -26,7 +26,12 @@ import (
 
 var (
 	cmdLong = templates.LongDesc(`
-		Synchonizes all or some applications in an environment from another environment to reduce version drift
+		Synchronizes some or all applications in an environment/namespace to another environment/namespace to reduce version drift
+
+		Supports synchronizing environments or namespaces within the same cluster or namespaces between remote clusters (possibly using different namespaces).
+
+		Create a Pull Request on the target GitOps repository to apply the changes so that you can review the changes before they happen. 
+		You can use different labels to enable/disable auto-merging.
 `)
 
 	cmdExample = templates.Examples(`
@@ -81,7 +86,7 @@ func NewCmdEnvironmentSync() (*cobra.Command, *Options) {
 
 	cmd := &cobra.Command{
 		Use:     "sync",
-		Short:   "Synchonizes all or some applications in an environment from another environment",
+		Short:   "Synchronizes some or all applications in an environment/namespace to another environment/namespace to reduce version drift",
 		Long:    cmdLong,
 		Example: cmdExample,
 		Run: func(cmd *cobra.Command, args []string) {
