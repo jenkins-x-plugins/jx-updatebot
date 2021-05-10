@@ -142,6 +142,10 @@ Create a Pull Request on the target GitOps repository to apply the changes so th
     the namespace for the target
 
 .PP
+\fB\-\-update\-only\fP[=false]
+    only update versions in the target environment/namespace \- do not add any new charts that are missing
+
+.PP
 \fB\-\-verbose\fP[=false]
     Enables verbose output. The environment variable JX\_LOG\_LEVEL has precedence over this flag and allows setting the logging level to any value of: panic, fatal, error, warn, info, debug, trace
 
