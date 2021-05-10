@@ -65,6 +65,7 @@ type Options struct {
 	GitCommitUserEmail string
 	AutoMerge          bool
 	NoVersion          bool
+	UpdateOnly         bool
 	GitCredentials     bool
 	Labels             []string
 	Input              input.Interface
@@ -104,6 +105,7 @@ func NewCmdEnvironmentSync() (*cobra.Command, *Options) {
 	cmd.Flags().StringSliceVar(&o.ChartFilter.Charts, "charts", []string{}, "names of charts to filter resources to sync. Can be local chart name (without prefix) or the full name with prefix")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
 	cmd.Flags().BoolVarP(&o.NoVersion, "no-version", "", false, "disables validation on requiring a '--version' option or environment variable to be required")
+	cmd.Flags().BoolVarP(&o.UpdateOnly, "update-only", "", false, "only update versions in the target environment/namespace - do not add any new charts that are missing")
 	cmd.Flags().BoolVarP(&o.GitCredentials, "git-credentials", "", false, "ensures the git credentials are setup so we can push to git")
 
 	o.BaseOptions.AddBaseFlags(cmd)
@@ -267,6 +269,9 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 		for i := range helmState.Releases {
 			rel := &helmState.Releases[i]
 			details := helmfiles.NewChartDetails(helmState, rel, o.Prefixes)
+			if o.UpdateOnly {
+				details.UpdateOnly = true
+			}
 			if !o.ChartFilter.Matches(details) {
 				continue
 			}

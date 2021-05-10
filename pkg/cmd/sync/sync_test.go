@@ -50,6 +50,10 @@ func TestSync(t *testing.T) {
 		case "ns-prod":
 			o.Source.Namespace = "jx-staging"
 			o.Target.Namespace = "jx-production"
+		case "update-only":
+			o.UpdateOnly = true
+			o.Source.Namespace = "jx-staging"
+			o.Target.Namespace = "jx-production"
 		}
 
 		srcDir := filepath.Join(dir, "source")
