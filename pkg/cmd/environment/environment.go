@@ -2,6 +2,7 @@ package environment
 
 import (
 	"fmt"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/requirements"
 	"os"
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
@@ -168,16 +169,55 @@ func (o *Options) gitopsUpgrade(dir string) error {
 }
 
 func (o *Options) gitSetup() error {
+	// lets clone the dev cluster to get the jx-requirements...
+	dir, err := o.cloneClusterGitURL()
+	if err != nil {
+		return errors.Wrapf(err, "failed to clone the cluster git URL")
+	}
+
 	args := []string{"gitops", "git", "setup"}
 	c := &cmdrunner.Command{
+		Dir:  dir,
 		Name: "jx",
 		Args: args,
 		Out:  os.Stdout,
 		Err:  os.Stdin,
 	}
-	_, err := o.CommandRunner(c)
+	_, err = o.CommandRunner(c)
 	if err != nil {
 		return errors.Wrapf(err, "failed to run command %s", c.CLI())
 	}
 	return nil
+}
+
+func (o *Options) cloneClusterGitURL() (string, error) {
+	settings, err := requirements.LoadSettings(".", true)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to load settings")
+	}
+	gitURL := ""
+	if settings != nil {
+		gitURL = settings.Spec.GitURL
+	}
+	if gitURL == "" {
+		jxClient := o.EnvironmentPullRequestOptions.JXClient
+		ns := o.EnvironmentPullRequestOptions.Namespace
+		env, err := jxenv.GetDevEnvironment(jxClient, ns)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to get dev environment")
+		}
+		if env == nil {
+			return "", errors.Errorf("failed to find a dev environment source url as there is no 'dev' Environment resource in namespace %s", ns)
+		}
+		gitURL = env.Spec.Source.URL
+		if gitURL == "" {
+			return "", errors.New("failed to find a dev environment source url on development environment resource")
+		}
+	}
+	_, clusterDir, err := requirements.GetRequirementsAndGit(o.EnvironmentPullRequestOptions.Git(), gitURL)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to clone cluster git repository %s", gitURL)
+	}
+	return clusterDir, nil
+
 }
