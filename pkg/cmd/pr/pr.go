@@ -322,6 +322,9 @@ func (o *Options) Validate() error {
 
 // ApplyChanges applies the changes to the given dir
 func (o *Options) ApplyChanges(dir, gitURL string, change v1alpha1.Change) error {
+	if change.Command != nil {
+		return o.ApplyCommand(dir, gitURL, change, change.Command)
+	}
 	if change.Go != nil {
 		return o.ApplyGo(dir, gitURL, change, change.Go)
 	}

@@ -42,6 +42,9 @@ type Rule struct {
 
 // Change the kind of change to make on a repository
 type Change struct {
+	// Command runs a shell command
+	Command *Command `json:"command,omitempty"`
+
 	// Go for go lang based dependency upgrades
 	Go *GoChange `json:"go,omitempty"`
 
@@ -53,6 +56,24 @@ type Change struct {
 
 	// VersionTemplate an optional template if the version is coming from a previous Pull Request SHA
 	VersionTemplate string `json:"versionTemplate,omitempty"`
+}
+
+// Command runs a command line program
+type Command struct {
+	// Name the name of the command
+	Name string `json:"name,omitempty"`
+	// Args the command line arguments
+	Args []string `json:"args,omitempty"`
+	// Env the environment variables to pass into the command
+	Env []EnvVar `json:"env,omitempty"`
+}
+
+// EnvVar the environment variable
+type EnvVar struct {
+	// Name the name of the environment variable
+	Name string `json:"name,omitempty"`
+	// Value the value of the environment variable
+	Value string `json:"value,omitempty"`
 }
 
 // Regex a regex based modification
