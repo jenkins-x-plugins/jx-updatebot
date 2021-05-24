@@ -114,6 +114,19 @@ UpdateConfigSpec
 <tbody>
 <tr>
 <td>
+<code>command</code></br>
+<em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.Command">
+Command
+</a>
+</em>
+</td>
+<td>
+<p>Command runs a shell command</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>go</code></br>
 <em>
 <a href="#updatebot.jenkins-x.io/v1alpha1.GoChange">
@@ -160,6 +173,101 @@ string
 </td>
 <td>
 <p>VersionTemplate an optional template if the version is coming from a previous Pull Request SHA</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="updatebot.jenkins-x.io/v1alpha1.Command">Command
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.Change">Change</a>)
+</p>
+<p>
+<p>Command runs a command line program</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Name the name of the command</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>args</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>Args the command line arguments</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>env</code></br>
+<em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.EnvVar">
+[]EnvVar
+</a>
+</em>
+</td>
+<td>
+<p>Env the environment variables to pass into the command</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="updatebot.jenkins-x.io/v1alpha1.EnvVar">EnvVar
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#updatebot.jenkins-x.io/v1alpha1.Command">Command</a>)
+</p>
+<p>
+<p>EnvVar the environment variable</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Name the name of the environment variable</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>value</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Value the value of the environment variable</p>
 </td>
 </tr>
 </tbody>
@@ -467,5 +575,5 @@ string
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>234e4dd</code>.
+on git commit <code>6eb4d86</code>.
 </em></p>
