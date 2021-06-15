@@ -6,6 +6,7 @@ require (
 	github.com/jenkins-x-plugins/jx-gitops v0.2.97
 	github.com/jenkins-x-plugins/jx-pipeline v0.0.147
 	github.com/jenkins-x-plugins/jx-promote v0.0.269
+	github.com/jenkins-x/gen-crd-api-reference-docs v0.1.6 // indirect
 	github.com/jenkins-x/go-scm v1.9.2
 	github.com/jenkins-x/jx-api/v4 v4.0.33
 	github.com/jenkins-x/jx-helpers/v3 v3.0.116
