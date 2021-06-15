@@ -1,41 +1,44 @@
-## jx-updatebot pr
+## jx-updatebot argo
 
-Create a Pull Request on each downstream repository
+Promotes a new Application version in an ArgoCD git repository
+
+***Aliases**: argocd*
 
 ### Usage
 
 ```
-jx-updatebot pr
+jx-updatebot argo
 ```
 
 ### Synopsis
 
-Create a Pull Request on each downstream repository
+Promotes a new Application version in an ArgoCD git repository
 
 ### Examples
 
-  jx-updatebot pr --test-url https://github.com/myorg/mytest.git
+  # lets promote a specific version in the current git clone to a remote repo
+  jx updatebot argo --version v1.2.3 --target-git-url https://github.com/myorg/my-argo-repo.git
+  
+  # lets promote a specific version of the given spec.source.repoURL (--source-git-url)
+  jx updatebot argo --version v1.2.3 --source-git-url https://github.com/myorg/my-chart-repo.git --target-git-url https://github.com/myorg/my-argo-repo.git
 
 ### Options
 
 ```
-      --auto-merge                  should we automatically merge if the PR pipeline is green (default true)
+      --auto-merge                  should we automatically merge if the PR pipeline is green
       --commit-message string       the commit message
       --commit-title string         the commit title
-  -c, --config-file string          the updatebot config file. If none specified defaults to .jx/updatebot.yaml
   -d, --dir string                  the directory look for the VERSION file (default ".")
-      --git-credentials             ensures the git credentials are setup so we can push to git
       --git-kind string             the kind of git server to connect to
       --git-server string           the git server URL to create the scm client
       --git-token string            the git token used to operate on the git repository. If not specified it's loaded from the git credentials file
-      --git-user-email string       the user email to git commit
-      --git-user-name string        the user name to git commit
       --git-username string         the git username used to operate on the git repository. If not specified it's loaded from the git credentials file
-  -h, --help                        help for pr
-      --labels strings              a list of labels to apply to the PR
-      --no-version                  disables validation on requiring a '--version' option or environment variable to be required
+  -h, --help                        help for argo
+      --labels strings              a list of labels to apply to the PR (default [promote])
       --pull-request-body string    the PR body
-      --pull-request-title string   the PR title
+      --pull-request-title string   the PR title (default "chore: upgrade the cluster git repository from the version stream")
+      --source-git-url string       the source repo git URL to upgrade the version
+      --target-git-url string       the target git URL to create a Pull Request on
       --version string              the version number to promote. If not specified uses $VERSION or the version file
       --version-file string         the file to load the version from if not specified directly or via a $VERSION environment variable. Defaults to VERSION in the current dir
 ```
