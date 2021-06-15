@@ -20,6 +20,7 @@ require (
 	github.com/yargevad/filepathx v0.0.0-20161019152617-907099cb5a62
 	golang.org/x/oauth2 v0.0.0-20210201163806-010130855d6c
 	k8s.io/apimachinery v0.20.7
+	sigs.k8s.io/kustomize/kyaml v0.10.5
 )
 
 replace (

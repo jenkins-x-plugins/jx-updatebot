@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/argo"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/environment"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/pipeline"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/pr"
@@ -24,6 +25,7 @@ func Main() *cobra.Command {
 			}
 		},
 	}
+	cmd.AddCommand(cobras.SplitCommand(argo.NewCmdArgoPromote()))
 	cmd.AddCommand(cobras.SplitCommand(environment.NewCmdUpgradeEnvironment()))
 	cmd.AddCommand(cobras.SplitCommand(pipeline.NewCmdUpgradePipeline()))
 	cmd.AddCommand(cobras.SplitCommand(pr.NewCmdPullRequest()))
