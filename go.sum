@@ -861,8 +861,6 @@ github.com/jenkins-x-plugins/jx-pipeline v0.0.147 h1:jtn0iWhYyfbFrvKpNcA9qyQC9XH
 github.com/jenkins-x-plugins/jx-pipeline v0.0.147/go.mod h1:7nmyNVIyiGmOlhesi+uGm//YT1edfuFuKvL+4n3He+w=
 github.com/jenkins-x-plugins/jx-promote v0.0.269 h1:JfIm/RGjZhmnalegbQKWVBM74T49L613AjWwhBiGS1w=
 github.com/jenkins-x-plugins/jx-promote v0.0.269/go.mod h1:AbHhQMUubrveawu9AEDiijaqNQ1WqAdAQJj3KvtZW/k=
-github.com/jenkins-x/gen-crd-api-reference-docs v0.1.6 h1:jV0THW6KeMYC0rcawdPeix7+ZmDZMR0UMU+QJr5gU6Y=
-github.com/jenkins-x/gen-crd-api-reference-docs v0.1.6/go.mod h1:a4dzSf/nNLMMMqultm6IlV/04xq26uICEYPkSTOahWQ=
 github.com/jenkins-x/go-scm v1.9.2 h1:2ahJTAowVNdRQMohjUi/Px30JKnzInEc9GUcKn1GAxU=
 github.com/jenkins-x/go-scm v1.9.2/go.mod h1:z7xTO9/VzqW3xEbEMH2z5cpOGrZ8+nOHOWfU1ngFGxs=
 github.com/jenkins-x/jx-api/v4 v4.0.33 h1:a5yikWzisk79+tNZJ68lvZmEWo1ai9GvCBVAUtqNMeQ=
@@ -878,8 +876,8 @@ github.com/jenkins-x/jx-logging/v3 v3.0.6/go.mod h1:Vp2ER2SYgGhAgEEHlLwfi2ZB54tz
 github.com/jenkins-x/lighthouse-client v0.0.146/go.mod h1:GBH6WI6eNFYZrX3Zk+Hxj0dsU698gh/GdQphRpq5YMk=
 github.com/jenkins-x/lighthouse-client v0.0.160/go.mod h1:4VTExT7f/rcg088xiNU+ZzW9t6VtEUidZ12eNswPTuE=
 github.com/jenkins-x/lighthouse-client v0.0.164/go.mod h1:4VTExT7f/rcg088xiNU+ZzW9t6VtEUidZ12eNswPTuE=
-github.com/jenkins-x/lighthouse-client v0.0.165 h1:j2FNdHj+VqLX2tQFcdIL4UKTqjyNLD+0A2yRiECdz9A=
-github.com/jenkins-x/lighthouse-client v0.0.165/go.mod h1:4VTExT7f/rcg088xiNU+ZzW9t6VtEUidZ12eNswPTuE=
+github.com/jenkins-x/lighthouse-client v0.0.166 h1:4dVBBB2+5n+9HycXBXlc3RcFyK0eZZMuSW12rzWPwD0=
+github.com/jenkins-x/lighthouse-client v0.0.166/go.mod h1:4VTExT7f/rcg088xiNU+ZzW9t6VtEUidZ12eNswPTuE=
 github.com/jenkins-x/logrus-stackdriver-formatter v0.2.3 h1:NuRWKUPCEX1wKlXA8ZYSG28qGKd41R7BK11YDQkPwqo=
 github.com/jenkins-x/logrus-stackdriver-formatter v0.2.3/go.mod h1:litPp7VZWDRCl8LvXuqGngy+65kkg/+T23TgFnDmfTk=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
@@ -1732,7 +1730,6 @@ golang.org/x/tools v0.0.0-20190110163146-51295c7ec13a/go.mod h1:n7NCudcB/nEzxVGm
 golang.org/x/tools v0.0.0-20190114222345-bf090417da8b/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190125232054-d66bd3c5d5a6/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190206041539-40960b6deb8e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
-golang.org/x/tools v0.0.0-20190213192042-740235f6c0d8/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190226205152-f727befe758c/go.mod h1:9Yl7xja0Znq3iFh3HoIrodX9oNMXvdceNzlUR8zjMvY=
 golang.org/x/tools v0.0.0-20190311212946-11955173bddd/go.mod h1:LCzVGOaR6xXOjkQ3onu1FJEFr0SW1gC7cKk1uF8kGRs=
 golang.org/x/tools v0.0.0-20190311215038-5c2858a9cfe5/go.mod h1:LCzVGOaR6xXOjkQ3onu1FJEFr0SW1gC7cKk1uF8kGRs=
@@ -2085,7 +2082,6 @@ k8s.io/gengo v0.0.0-20200413195148-3a45101e95ac/go.mod h1:ezvh/TsK7cY6rbqRK0oQQ8
 k8s.io/gengo v0.0.0-20201113003025-83324d819ded h1:JApXBKYyB7l9xx+DK7/+mFjC7A9Bt5A93FPvFD0HIFE=
 k8s.io/gengo v0.0.0-20201113003025-83324d819ded/go.mod h1:FiNAH4ZV3gBg2Kwh89tzAEV2be7d5xI0vBa/VySYy3E=
 k8s.io/klog v0.0.0-20181102134211-b9b56d5dfc92/go.mod h1:Gq+BEi5rUBO/HRz0bTSXDUcqjScdoY3a9IHpCEIOOfk=
-k8s.io/klog v0.2.0/go.mod h1:Gq+BEi5rUBO/HRz0bTSXDUcqjScdoY3a9IHpCEIOOfk=
 k8s.io/klog v0.3.0/go.mod h1:Gq+BEi5rUBO/HRz0bTSXDUcqjScdoY3a9IHpCEIOOfk=
 k8s.io/klog v1.0.0 h1:Pt+yjF5aB1xDSVbau4VsWe+dQNzA0qv1LlXdC2dF6Q8=
 k8s.io/klog v1.0.0/go.mod h1:4Bi6QPql/J/LkTDqv7R/cd3hPo4k2DG6Ptcz060Ez5I=

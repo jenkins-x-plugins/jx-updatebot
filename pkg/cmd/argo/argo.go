@@ -26,6 +26,7 @@ import (
 type Options struct {
 	Version          string
 	VersionFile      string
+	VersionPrefix    string
 	Dir              string
 	SourceGitURL     string
 	TargetGitURL     string
@@ -39,9 +40,14 @@ var (
 	info    = termcolor.ColorInfo
 	cmdLong = templates.LongDesc(`
 		Promotes a new Application version in an ArgoCD git repository
+
+		This command will use the source git repository URL and version to find the ArgoCD Application resource in the target git URL and create a Pull Request if the version is chThis lets you push promotion pull requests into ArgoCD repositories as part of your CI release pipeline. 
 `)
 
 	cmdExample = templates.Examples(`
+		# lets use the $VERSION env var or a VERSION file in the current dir
+		jx updatebot argo --target-git-url https://github.com/myorg/my-argo-repo.git
+	
 		# lets promote a specific version in the current git clone to a remote repo
 		jx updatebot argo --version v1.2.3 --target-git-url https://github.com/myorg/my-argo-repo.git
 
@@ -71,6 +77,7 @@ func NewCmdArgoPromote() (*cobra.Command, *Options) {
 	cmd.Flags().StringVarP(&o.TargetGitURL, "target-git-url", "", "", "the target git URL to create a Pull Request on")
 	cmd.Flags().StringVarP(&o.Version, "version", "", "", "the version number to promote. If not specified uses $VERSION or the version file")
 	cmd.Flags().StringVarP(&o.VersionFile, "version-file", "", "", "the file to load the version from if not specified directly or via a $VERSION environment variable. Defaults to VERSION in the current dir")
+	cmd.Flags().StringVarP(&o.VersionPrefix, "version-prefix", "", "v", "the prefix added to the version number that will be used in the Argo CD Application YAML if --version option is not specified and the version is defaulted from $VERSION or the VERSION file")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{"promote"}, "a list of labels to apply to the PR")
 
 	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")
@@ -116,7 +123,9 @@ func (o *Options) Validate() error {
 	if o.SourceGitURL == "" {
 		return options.MissingOption("source-git-url")
 	}
+	addPrefix := false
 	if o.Version == "" {
+		addPrefix = true
 		if o.VersionFile == "" {
 			o.VersionFile = filepath.Join(o.Dir, "VERSION")
 		}
@@ -139,6 +148,9 @@ func (o *Options) Validate() error {
 		if o.Version == "" {
 			return options.MissingOption("version")
 		}
+	}
+	if addPrefix && o.VersionPrefix != "" && !strings.HasPrefix(o.Version, o.VersionPrefix) {
+		o.Version = o.VersionPrefix + o.Version
 	}
 
 	o.EnvironmentPullRequestOptions.JXClient, o.EnvironmentPullRequestOptions.Namespace, err = jxclient.LazyCreateJXClientAndNamespace(o.EnvironmentPullRequestOptions.JXClient, o.EnvironmentPullRequestOptions.Namespace)
