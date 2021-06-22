@@ -2,8 +2,8 @@
 
 [![Documentation](https://godoc.org/github.com/jenkins-x-plugins/jx-updatebot?status.svg)](https://pkg.go.dev/mod/github.com/jenkins-x-plugins/jx-updatebot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jenkins-x-plugins/jx-updatebot)](https://goreportcard.com/report/github.com/jenkins-x-plugins/jx-updatebot)
-[![Releases](https://img.shields.io/github/release-pre/jenkins-x/jx-updatebot.svg)](https://github.com/jenkins-x-plugins/jx-updatebot/releases)
-[![LICENSE](https://img.shields.io/github/license/jenkins-x/jx-updatebot.svg)](https://github.com/jenkins-x-plugins/jx-updatebot/blob/master/LICENSE)
+[![Releases](https://img.shields.io/github/release-pre/jenkins-x-plugins/jx-updatebot.svg)](https://github.com/jenkins-x-plugins/jx-updatebot/releases)
+[![LICENSE](https://img.shields.io/github/license/jenkins-x-plugins/jx-updatebot.svg)](https://github.com/jenkins-x-plugins/jx-updatebot/blob/master/LICENSE)
 [![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://slack.k8s.io/)
 
 `jx-updatebot` is a small command line tool for generating downstream Pull Requests
