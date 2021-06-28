@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app1
+spec:
+  destination:
+    namespace: staging
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: jxRequirements.ingress.domain
+          value: 34.134.146.124.nip.io
+    path: charts/app1
+    repoURL: https://github.com/myorg/app1.git
+    targetRevision: v0.0.52
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

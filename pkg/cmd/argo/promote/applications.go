@@ -1,18 +1,13 @@
 package promote
 
 import (
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/argocd"
 	"strings"
 
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kyamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/kustomize/kyaml/yaml"
-)
-
-var (
-	filter = kyamls.Filter{
-		Kinds: []string{"argoproj.io/v1alpha1/Application"},
-	}
 )
 
 func (o *Options) ModifyApplicationFiles(dir, repoURL string, version string) error {
@@ -27,7 +22,7 @@ func (o *Options) ModifyApplicationFiles(dir, repoURL string, version string) er
 			return false, errors.Wrapf(err, "failed to get text value")
 		}
 		text = strings.TrimSpace(text)
-		if trimGitURLSuffix(repoURL) != trimGitURLSuffix(text) {
+		if argocd.TrimGitURLSuffix(repoURL) != argocd.TrimGitURLSuffix(text) {
 			return false, nil
 		}
 
@@ -39,10 +34,5 @@ func (o *Options) ModifyApplicationFiles(dir, repoURL string, version string) er
 		return true, nil
 	}
 
-	return kyamls.ModifyFiles(dir, modifyFn, filter)
-}
-
-// remove any trailing git tokens to make comparison less likely to fail
-func trimGitURLSuffix(url string) string {
-	return strings.TrimSuffix(strings.TrimSuffix(url, "/"), ".git")
+	return kyamls.ModifyFiles(dir, modifyFn, argocd.ArgoApplicationFilter)
 }
