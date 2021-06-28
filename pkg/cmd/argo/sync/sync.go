@@ -28,6 +28,9 @@ var (
 `)
 
 	cmdExample = templates.Examples(`
+		# create a Pull Request if any of the versions in the current directory are newer than the target repo
+		jx updatebot argo sync --target-git-url https://github.com/myorg/my-production-repo
+
 		# create a Pull Request if any of the versions are out of sync
 		jx updatebot argo sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo
 
@@ -58,7 +61,6 @@ type Options struct {
 	Input              input.Interface
 	EnvMap             map[string]*v1.Environment
 	EnvNames           []string
-	SourceDir          string
 	VersionStreamDir   string
 	Prefixes           *versionstream.RepositoryPrefixes
 	SourceApplications map[string]*argocd.AppVersion
@@ -127,12 +129,16 @@ func (o *Options) Validate() error {
 	if o.Source.Dir == "" {
 		sourceGitURL := o.Source.GitCloneURL
 		if sourceGitURL == "" {
-			return options.MissingOption(o.Source.OptionPrefix + "-git-url")
-		}
-
-		o.SourceDir, err = gitclient.CloneToDir(o.Git(), sourceGitURL, "")
-		if err != nil {
-			return errors.Wrapf(err, "failed to clone source cluster %s", sourceGitURL)
+			// lets assume current directory is the source
+			o.Source.Dir = "."
+		} else {
+			o.Source.Dir, err = gitclient.CloneToDir(o.Git(), sourceGitURL, "")
+			if err != nil {
+				return errors.Wrapf(err, "failed to clone source cluster %s", sourceGitURL)
+			}
+			if o.Source.Dir == "" {
+				return errors.Errorf("failed to clone the source repository to a directory %s", sourceGitURL)
+			}
 		}
 	}
 	return nil
@@ -176,7 +182,7 @@ func (o *Options) Run() error {
 
 	o.Function = func() error {
 		dir := o.OutDir
-		return o.SyncVersions(o.SourceDir, dir)
+		return o.SyncVersions(o.Source.Dir, dir)
 	}
 
 	_, err = o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
