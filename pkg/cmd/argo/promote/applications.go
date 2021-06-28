@@ -1,4 +1,4 @@
-package argo
+package promote
 
 import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kyamls"
