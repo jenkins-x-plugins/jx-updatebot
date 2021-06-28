@@ -2,8 +2,9 @@ package environment
 
 import (
 	"fmt"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/requirements"
 	"os"
+
+	"github.com/jenkins-x/jx-helpers/v3/pkg/requirements"
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x/go-scm/scm"

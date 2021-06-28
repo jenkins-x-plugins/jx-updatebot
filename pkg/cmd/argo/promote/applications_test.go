@@ -1,15 +1,16 @@
-package argo_test
+package promote_test
 
 import (
-	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/argo"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/testhelpers"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/argo/promote"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/testhelpers"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestModifyApplicationFiles(t *testing.T) {
@@ -34,7 +35,7 @@ func TestModifyApplicationFiles(t *testing.T) {
 		dir := d.Name()
 		srcDir := filepath.Join(tmpDir, dir, "source")
 
-		_, o := argo.NewCmdArgoPromote()
+		_, o := promote.NewCmdArgoPromote()
 
 		err = o.ModifyApplicationFiles(srcDir, repoURL, version)
 		require.NoError(t, err, "failed to modify files")

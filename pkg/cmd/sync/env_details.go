@@ -25,7 +25,7 @@ func (o *EnvironmentOptions) AddFlags(cmd *cobra.Command, optionsPrefix string) 
 	cmd.Flags().StringVarP(&o.GitCloneURL, optionsPrefix+"-git-url", "", "", fmt.Sprintf("git URL to clone for the %s", optionsPrefix))
 	cmd.Flags().StringVarP(&o.Helmfile, optionsPrefix+"-helmfile", "", "", "the helmfile to resolve. If not specified defaults to 'helmfile.yaml' in the git clone dir")
 	cmd.Flags().StringVarP(&o.EnvironmentName, optionsPrefix+"-env", "", "", fmt.Sprintf("the environment name for the %s", optionsPrefix))
-	cmd.Flags().StringVarP(&o.EnvironmentName, optionsPrefix+"-dir", "", "", fmt.Sprintf("the directory to use for the git clone for the %s", optionsPrefix))
+	cmd.Flags().StringVarP(&o.Dir, optionsPrefix+"-dir", "", "", fmt.Sprintf("the directory to use for the git clone for the %s", optionsPrefix))
 	cmd.Flags().StringVarP(&o.Namespace, optionsPrefix+"-ns", "", "", fmt.Sprintf("the namespace for the %s", optionsPrefix))
 }
 

@@ -25,7 +25,7 @@ func Main() *cobra.Command {
 			}
 		},
 	}
-	cmd.AddCommand(cobras.SplitCommand(argo.NewCmdArgoPromote()))
+	cmd.AddCommand(argo.NewCmdArgo())
 	cmd.AddCommand(cobras.SplitCommand(environment.NewCmdUpgradeEnvironment()))
 	cmd.AddCommand(cobras.SplitCommand(pipeline.NewCmdUpgradePipeline()))
 	cmd.AddCommand(cobras.SplitCommand(pr.NewCmdPullRequest()))
