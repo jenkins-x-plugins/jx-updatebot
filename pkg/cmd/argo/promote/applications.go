@@ -1,11 +1,12 @@
 package promote
 
 import (
+	"strings"
+
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kyamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/kustomize/kyaml/yaml"
-	"strings"
 )
 
 var (

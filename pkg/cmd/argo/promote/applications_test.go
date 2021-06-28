@@ -1,15 +1,16 @@
 package promote_test
 
 import (
+	"io/ioutil"
+	"path/filepath"
+	"strings"
+	"testing"
+
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/argo/promote"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
-	"path/filepath"
-	"strings"
-	"testing"
 )
 
 func TestModifyApplicationFiles(t *testing.T) {

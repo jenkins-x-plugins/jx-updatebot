@@ -1,10 +1,11 @@
 package pr
 
 import (
+	"os"
+
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cmdrunner"
 	"github.com/pkg/errors"
-	"os"
 )
 
 func (o *Options) ApplyCommand(dir string, url string, change v1alpha1.Change, command *v1alpha1.Command) error {
