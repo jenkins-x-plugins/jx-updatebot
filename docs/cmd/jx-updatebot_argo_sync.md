@@ -12,24 +12,18 @@ jx-updatebot argo sync
 
 Synchronizes some or all applications in an ArgoCD git repository to reduce version drift 
 
-Supports synchronizing environments or namespaces within the same cluster or namespaces between remote clusters (possibly using different namespaces). 
-
-Create a Pull Request on the target GitOps repository to apply the changes so that you can review the changes before they happen. You can use different labels to enable/disable auto-merging.
+Creates a Pull Request on the target GitOps repository.
 
 ### Examples
 
-  # choose the environments to synchronize
-  jx updatebot argo sync
+  # create a Pull Request if any of the versions are out of sync
+  jx updatebot argo sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo
   
-  # synchronizes the apps in 2 of your environments (local or remote)
-  jx updatebot argo sync --source-env staging --target-env production
+  # create a Pull Request if any of the versions are out of sync including only the given repo URL strings
+  jx updatebot argo sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo --repourl-includes wine  --repourl-includes beer
   
-  # synchronizes the apps in 2 namespaces in the dev cluster
-  jx updatebot argo sync --source-ns jx-staging --target-ns jx-production
-  
-  
-  # synchronizes the edam and beer charts in 2 of your environments (local or remote)
-  jx updatebot argo sync --source-env staging --target-env production --charts edam --charts beer
+  # create a Pull Request if any of the versions are out of sync excluding the given repo URL strings
+  jx updatebot argo sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo --repourl-excludes water
 
 ### Options
 
