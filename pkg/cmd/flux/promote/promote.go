@@ -9,8 +9,6 @@ import (
 
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/templates"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient/gitdiscovery"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
@@ -29,7 +27,8 @@ type Options struct {
 	VersionFile      string
 	VersionPrefix    string
 	Dir              string
-	SourceGitURL     string
+	Chart            string
+	SourceRefName    string
 	TargetGitURL     string
 	PullRequestTitle string
 	PullRequestBody  string
@@ -40,31 +39,30 @@ type Options struct {
 var (
 	info    = termcolor.ColorInfo
 	cmdLong = templates.LongDesc(`
-		Promotes a new Application version in an ArgoCD git repository
+		Promotes a new HelmRelease version in a FluxCD git repository
 
-		This command will use the source git repository URL and version to find the ArgoCD Application resource in the target git URL and create a Pull Request if the version is different.
-		This lets you push promotion pull requests into ArgoCD repositories as part of your CI release pipeline. 
+		This command will use the given chart name and version along with an optional sourceRefName of the helm or git repository or bucket to find the HelmRelease resource in the target git repository and create a Pull Request if the version is different.
+        This lets you push promotion pull requests into FluxCD repositories as part of your CI release pipeline.
+
+		If you don't supply a version the $VERSION or VERSION file will be used. If you don't supply a chart the current folder name is used.
 `)
 
 	cmdExample = templates.Examples(`
-		# lets use the $VERSION env var or a VERSION file in the current dir
-		jx updatebot argo promote --target-git-url https://github.com/myorg/my-argo-repo.git
-	
-		# lets promote a specific version in the current git clone to a remote repo
-		jx updatebot argo promote --version v1.2.3 --target-git-url https://github.com/myorg/my-argo-repo.git
+		# lets promote a specific version of a chart with a source ref (repository) name to a git repo
+		jx updatebot flux promote --version v1.2.3 --chart mychart --source-ref-name myrepo --target-git-url https://github.com/myorg/my-flux-repo.git
 
-		# lets promote a specific version of the given spec.source.repoURL (--source-git-url)
-		jx updatebot argo promote --version v1.2.3 --source-git-url https://github.com/myorg/my-chart-repo.git --target-git-url https://github.com/myorg/my-argo-repo.git
+		# lets use the $VERSION env var or a VERSION file in the current dir and detect the chart name from the current folder
+		jx updatebot flux promote --target-git-url https://github.com/myorg/my-flux-repo.git
 	`)
 )
 
-// NewCmdArgoPromote creates a command object
-func NewCmdArgoPromote() (*cobra.Command, *Options) {
+// NewCmdFluxPromote creates a command object
+func NewCmdFluxPromote() (*cobra.Command, *Options) {
 	o := &Options{}
 
 	cmd := &cobra.Command{
 		Use:     "promote",
-		Short:   "Promotes a new Application version in an ArgoCD git repository",
+		Short:   "Promotes a new Application version in an FluxCD git repository",
 		Long:    cmdLong,
 		Example: cmdExample,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -74,11 +72,12 @@ func NewCmdArgoPromote() (*cobra.Command, *Options) {
 	}
 
 	cmd.Flags().StringVarP(&o.Dir, "dir", "d", ".", "the directory look for the VERSION file")
-	cmd.Flags().StringVarP(&o.SourceGitURL, "source-git-url", "", "", "the source repo git URL to upgrade the version")
+	cmd.Flags().StringVarP(&o.Chart, "chart", "c", "", "the name of the chart to promote. If not specified defaults to the current directory name")
+	cmd.Flags().StringVarP(&o.SourceRefName, "source-ref-name", "", "", "the source ref name of the HelmRepository, GitRepository or Bucket containing the helm chart")
 	cmd.Flags().StringVarP(&o.TargetGitURL, "target-git-url", "", "", "the target git URL to create a Pull Request on")
 	cmd.Flags().StringVarP(&o.Version, "version", "", "", "the version number to promote. If not specified uses $VERSION or the version file")
 	cmd.Flags().StringVarP(&o.VersionFile, "version-file", "", "", "the file to load the version from if not specified directly or via a $VERSION environment variable. Defaults to VERSION in the current dir")
-	cmd.Flags().StringVarP(&o.VersionPrefix, "version-prefix", "", "v", "the prefix added to the version number that will be used in the Argo CD Application YAML if --version option is not specified and the version is defaulted from $VERSION or the VERSION file")
+	cmd.Flags().StringVarP(&o.VersionPrefix, "version-prefix", "", "v", "the prefix added to the version number that will be used in the Flux CD Application YAML if --version option is not specified and the version is defaulted from $VERSION or the VERSION file")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{"promote"}, "a list of labels to apply to the PR")
 
 	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")
@@ -113,16 +112,18 @@ func (o *Options) Validate() error {
 	if o.TargetGitURL == "" {
 		return options.MissingOption("target-git-url")
 	}
-	if o.SourceGitURL == "" {
-		o.SourceGitURL, err = gitdiscovery.FindGitURLFromDir(o.Dir, true)
-		if err != nil {
-			return errors.Wrapf(err, "failed to detect the source repo git URL")
+	if o.Chart == "" {
+		if o.Dir == "" {
+			o.Dir = "."
 		}
-		o.SourceGitURL = stringhelpers.SanitizeURL(o.SourceGitURL)
-
+		abs, err := filepath.Abs(o.Dir)
+		if err != nil {
+			return errors.Wrapf(err, "failed to resolve absolute dir for %s", o.Dir)
+		}
+		_, o.Chart = filepath.Split(abs)
 	}
-	if o.SourceGitURL == "" {
-		return options.MissingOption("source-git-url")
+	if o.Chart == "" {
+		return options.MissingOption("chart")
 	}
 	addPrefix := false
 	if o.Version == "" {
@@ -191,7 +192,7 @@ func (o *Options) upgradeRepository(gitURL string) error {
 
 	o.Function = func() error {
 		dir := o.OutDir
-		return o.ModifyApplicationFiles(dir, o.SourceGitURL, o.Version)
+		return o.ModifyApplicationFiles(dir, o.Chart, o.SourceRefName, o.Version)
 	}
 
 	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)

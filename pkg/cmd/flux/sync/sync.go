@@ -3,7 +3,7 @@ package sync
 import (
 	"fmt"
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
-	"github.com/jenkins-x-plugins/jx-updatebot/pkg/argocd"
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/fluxcd"
 	"github.com/jenkins-x/go-scm/scm"
 	v1 "github.com/jenkins-x/jx-api/v4/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
@@ -22,23 +22,23 @@ import (
 
 var (
 	cmdLong = templates.LongDesc(`
-		Synchronizes some or all applications in an ArgoCD git repository to reduce version drift
+		Synchronizes some or all applications in an FluxCD git repository to reduce version drift
 
 		Creates a Pull Request on the target GitOps repository.
 `)
 
 	cmdExample = templates.Examples(`
 		# create a Pull Request if any of the versions in the current directory are newer than the target repo
-		jx updatebot argo sync --target-git-url https://github.com/myorg/my-production-repo
+		jx updatebot flux sync --target-git-url https://github.com/myorg/my-production-repo
 
 		# create a Pull Request if any of the versions are out of sync
-		jx updatebot argo sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo
+		jx updatebot flux sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo
 
 		# create a Pull Request if any of the versions are out of sync including only the given repo URL strings
-		jx updatebot argo sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo --repourl-includes wine  --repourl-includes beer 
+		jx updatebot flux sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo --repourl-includes wine  --repourl-includes beer 
 
 		# create a Pull Request if any of the versions are out of sync excluding the given repo URL strings
-		jx updatebot argo sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo --repourl-excludes water
+		jx updatebot flux sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo --repourl-excludes water
 	`)
 )
 
@@ -49,7 +49,7 @@ type Options struct {
 
 	Source             RepositoryOptions
 	Target             RepositoryOptions
-	AppFilter          argocd.AppFilter
+	AppFilter          fluxcd.AppFilter
 	PullRequestTitle   string
 	PullRequestBody    string
 	GitCommitUsername  string
@@ -63,16 +63,16 @@ type Options struct {
 	EnvNames           []string
 	VersionStreamDir   string
 	Prefixes           *versionstream.RepositoryPrefixes
-	SourceApplications map[string]*argocd.AppVersion
+	SourceApplications map[string]*fluxcd.AppVersion
 }
 
-// NewCmdArgoSync creates a command object for the command
-func NewCmdArgoSync() (*cobra.Command, *Options) {
+// NewCmdFluxSync creates a command object for the command
+func NewCmdFluxSync() (*cobra.Command, *Options) {
 	o := &Options{}
 
 	cmd := &cobra.Command{
 		Use:     "sync",
-		Short:   "Synchronizes some or all applications in an ArgoCD git repository to reduce version drift",
+		Short:   "Synchronizes some or all applications in an FluxCD git repository to reduce version drift",
 		Long:    cmdLong,
 		Example: cmdExample,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -109,7 +109,7 @@ func NewCmdArgoSync() (*cobra.Command, *Options) {
 // Validate validates the options
 func (o *Options) Validate() error {
 	if o.SourceApplications == nil {
-		o.SourceApplications = map[string]*argocd.AppVersion{}
+		o.SourceApplications = map[string]*fluxcd.AppVersion{}
 	}
 	err := o.BaseOptions.Validate()
 	if err != nil {
@@ -208,11 +208,11 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 
 func (o *Options) findSourceApplications(dir string) error {
 	if o.SourceApplications == nil {
-		o.SourceApplications = map[string]*argocd.AppVersion{}
+		o.SourceApplications = map[string]*fluxcd.AppVersion{}
 	}
 	modifyFn := func(node *yaml.RNode, path string) (bool, error) {
-		v := argocd.GetAppVersion(node, path)
-		if v.RepoURL == "" || v.Version == "" {
+		v := fluxcd.GetAppVersion(node, path)
+		if v.Chart == "" || v.Version == "" {
 			return false, nil
 		}
 
@@ -222,13 +222,13 @@ func (o *Options) findSourceApplications(dir string) error {
 		o.SourceApplications[k] = v
 		return false, nil
 	}
-	return kyamls.ModifyFiles(dir, modifyFn, argocd.ApplicationFilter)
+	return kyamls.ModifyFiles(dir, modifyFn, fluxcd.HelmReleaseFilter)
 }
 
 func (o *Options) syncAppVersions(dir string) error {
 	modifyFn := func(node *yaml.RNode, path string) (bool, error) {
-		v := argocd.GetAppVersion(node, path)
-		if v.RepoURL == "" || !o.AppFilter.Matches(v) {
+		v := fluxcd.GetAppVersion(node, path)
+		if v.Chart == "" || !o.AppFilter.Matches(v) {
 			return false, nil
 		}
 		k := v.Key()
@@ -237,11 +237,11 @@ func (o *Options) syncAppVersions(dir string) error {
 			return false, nil
 		}
 
-		err := argocd.SetAppVersion(node, path, source.Version)
+		err := fluxcd.SetAppVersion(node, path, source.Version)
 		if err != nil {
 			return false, err
 		}
 		return true, nil
 	}
-	return kyamls.ModifyFiles(dir, modifyFn, argocd.ApplicationFilter)
+	return kyamls.ModifyFiles(dir, modifyFn, fluxcd.HelmReleaseFilter)
 }

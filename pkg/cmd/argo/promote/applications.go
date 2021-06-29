@@ -12,21 +12,12 @@ import (
 
 func (o *Options) ModifyApplicationFiles(dir, repoURL string, version string) error {
 	modifyFn := func(node *yaml.RNode, path string) (bool, error) {
-
-		value, err := node.Pipe(yaml.PathGetter{Path: []string{"spec", "source", "repoURL"}})
-		if err != nil {
-			return false, errors.Wrapf(err, "failed to get spec.source.repoURL")
-		}
-		text, err := value.String()
-		if err != nil {
-			return false, errors.Wrapf(err, "failed to get text value")
-		}
-		text = strings.TrimSpace(text)
+		text := strings.TrimSpace(argocd.GetRepoURL(node, path))
 		if argocd.TrimGitURLSuffix(repoURL) != argocd.TrimGitURLSuffix(text) {
 			return false, nil
 		}
 
-		err = node.PipeE(yaml.LookupCreate(yaml.ScalarNode, "spec", "source", "targetRevision"), yaml.FieldSetter{StringValue: version})
+		err := node.PipeE(yaml.LookupCreate(yaml.ScalarNode, "spec", "source", "targetRevision"), yaml.FieldSetter{StringValue: version})
 		if err != nil {
 			return false, errors.Wrapf(err, "failed to set spec.source.targetRevision to %s", version)
 		}
@@ -34,5 +25,5 @@ func (o *Options) ModifyApplicationFiles(dir, repoURL string, version string) er
 		return true, nil
 	}
 
-	return kyamls.ModifyFiles(dir, modifyFn, argocd.ArgoApplicationFilter)
+	return kyamls.ModifyFiles(dir, modifyFn, argocd.ApplicationFilter)
 }

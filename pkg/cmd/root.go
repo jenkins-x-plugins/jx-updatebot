@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/argo"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/environment"
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/flux"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/pipeline"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/pr"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/sync"
@@ -26,6 +27,7 @@ func Main() *cobra.Command {
 		},
 	}
 	cmd.AddCommand(argo.NewCmdArgo())
+	cmd.AddCommand(flux.NewCmdFlux())
 	cmd.AddCommand(cobras.SplitCommand(environment.NewCmdUpgradeEnvironment()))
 	cmd.AddCommand(cobras.SplitCommand(pipeline.NewCmdUpgradePipeline()))
 	cmd.AddCommand(cobras.SplitCommand(pr.NewCmdPullRequest()))
