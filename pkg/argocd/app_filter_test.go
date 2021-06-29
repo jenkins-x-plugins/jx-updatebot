@@ -2,6 +2,7 @@ package argocd_test
 
 import (
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/argocd"
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -20,7 +21,7 @@ func TestAppFilter(t *testing.T) {
 		},
 		{
 			filter: argocd.AppFilter{
-				RepoURL: argocd.TextFilter{
+				RepoURL: gitops.TextFilter{
 					Includes: []string{"app1"},
 				},
 			},
@@ -33,7 +34,7 @@ func TestAppFilter(t *testing.T) {
 		},
 		{
 			filter: argocd.AppFilter{
-				RepoURL: argocd.TextFilter{
+				RepoURL: gitops.TextFilter{
 					Excludes: []string{"app1"},
 				},
 			},

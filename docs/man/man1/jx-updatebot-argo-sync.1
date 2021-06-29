@@ -125,6 +125,11 @@ Creates a Pull Request on the target GitOps repository.
 
 .SH EXAMPLE
 .PP
+# create a Pull Request if any of the versions in the current directory are newer than the target repo
+  jx updatebot argo sync \-\-target\-git\-url 
+\[la]https://github.com/myorg/my-production-repo\[ra]
+
+.PP
 # create a Pull Request if any of the versions are out of sync
   jx updatebot argo sync \-\-source\-git\-url 
 \[la]https://github.com/myorg/my-staging-repo\[ra] \-\-target\-git\-url 

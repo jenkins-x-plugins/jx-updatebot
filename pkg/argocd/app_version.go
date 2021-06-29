@@ -1,7 +1,10 @@
 package argocd
 
 import (
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kyamls"
+	"github.com/jenkins-x/jx-logging/v3/pkg/log"
+	"github.com/pkg/errors"
 	"sigs.k8s.io/kustomize/kyaml/yaml"
 )
 
@@ -14,7 +17,7 @@ type AppVersion struct {
 
 // Key returns a unique key for the app version
 func (v *AppVersion) Key() string {
-	return TrimGitURLSuffix(v.RepoURL) + "\n" + v.Path
+	return gitops.TrimGitURLSuffix(v.RepoURL) + "\n" + v.Path
 }
 
 // String returns the string summary of the app version
@@ -26,6 +29,11 @@ func (v *AppVersion) String() string {
 	return "repo: " + v.RepoURL + sep + " version: " + v.Version
 }
 
+// GetRepoURL gets repository URL
+func GetRepoURL(node *yaml.RNode, path string) string {
+	return kyamls.GetStringField(node, path, "spec", "source", "repoURL")
+}
+
 // GetAppVersion gets the AppVersion from the given YAML file
 func GetAppVersion(node *yaml.RNode, path string) *AppVersion {
 	v := &AppVersion{}
@@ -33,4 +41,14 @@ func GetAppVersion(node *yaml.RNode, path string) *AppVersion {
 	v.Path = kyamls.GetStringField(node, path, "spec", "source", "path")
 	v.Version = kyamls.GetStringField(node, path, "spec", "source", "targetRevision")
 	return v
+}
+
+// SetAppVersion sets the application version
+func SetAppVersion(node *yaml.RNode, path, version string) error {
+	err := node.PipeE(yaml.LookupCreate(yaml.ScalarNode, "spec", "source", "targetRevision"), yaml.FieldSetter{StringValue: version})
+	if err != nil {
+		return errors.Wrapf(err, "failed to set spec.source.targetRevision to %s", version)
+	}
+	log.Logger().Debugf("modified the version in file %s to %s", path, version)
+	return nil
 }

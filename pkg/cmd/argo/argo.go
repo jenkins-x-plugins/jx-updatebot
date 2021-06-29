@@ -13,7 +13,7 @@ func NewCmdArgo() *cobra.Command {
 	command := &cobra.Command{
 		Use:     "argo",
 		Aliases: []string{"argocd"},
-		Short:   "Commands for working with ArgoCD",
+		Short:   "Commands for working with ArgoCD git repositories",
 		Run: func(command *cobra.Command, args []string) {
 			err := command.Help()
 			if err != nil {

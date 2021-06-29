@@ -42,7 +42,8 @@ var (
 	cmdLong = templates.LongDesc(`
 		Promotes a new Application version in an ArgoCD git repository
 
-		This command will use the source git repository URL and version to find the ArgoCD Application resource in the target git URL and create a Pull Request if the version is chThis lets you push promotion pull requests into ArgoCD repositories as part of your CI release pipeline. 
+		This command will use the source git repository URL and version to find the ArgoCD Application resource in the target git URL and create a Pull Request if the version is different.
+		This lets you push promotion pull requests into ArgoCD repositories as part of your CI release pipeline. 
 `)
 
 	cmdExample = templates.Examples(`

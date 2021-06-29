@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/argocd"
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
 	"github.com/jenkins-x/go-scm/scm"
 	v1 "github.com/jenkins-x/jx-api/v4/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
@@ -28,6 +29,9 @@ var (
 `)
 
 	cmdExample = templates.Examples(`
+		# create a Pull Request if any of the versions in the current directory are newer than the target repo
+		jx updatebot argo sync --target-git-url https://github.com/myorg/my-production-repo
+
 		# create a Pull Request if any of the versions are out of sync
 		jx updatebot argo sync --source-git-url https://github.com/myorg/my-staging-repo --target-git-url https://github.com/myorg/my-production-repo
 
@@ -44,8 +48,8 @@ type Options struct {
 	options.BaseOptions
 	environments.EnvironmentPullRequestOptions
 
-	Source             RepositoryOptions
-	Target             RepositoryOptions
+	Source             gitops.RepositoryOptions
+	Target             gitops.RepositoryOptions
 	AppFilter          argocd.AppFilter
 	PullRequestTitle   string
 	PullRequestBody    string
@@ -58,7 +62,6 @@ type Options struct {
 	Input              input.Interface
 	EnvMap             map[string]*v1.Environment
 	EnvNames           []string
-	SourceDir          string
 	VersionStreamDir   string
 	Prefixes           *versionstream.RepositoryPrefixes
 	SourceApplications map[string]*argocd.AppVersion
@@ -127,12 +130,16 @@ func (o *Options) Validate() error {
 	if o.Source.Dir == "" {
 		sourceGitURL := o.Source.GitCloneURL
 		if sourceGitURL == "" {
-			return options.MissingOption(o.Source.OptionPrefix + "-git-url")
-		}
-
-		o.SourceDir, err = gitclient.CloneToDir(o.Git(), sourceGitURL, "")
-		if err != nil {
-			return errors.Wrapf(err, "failed to clone source cluster %s", sourceGitURL)
+			// lets assume current directory is the source
+			o.Source.Dir = "."
+		} else {
+			o.Source.Dir, err = gitclient.CloneToDir(o.Git(), sourceGitURL, "")
+			if err != nil {
+				return errors.Wrapf(err, "failed to clone source cluster %s", sourceGitURL)
+			}
+			if o.Source.Dir == "" {
+				return errors.Errorf("failed to clone the source repository to a directory %s", sourceGitURL)
+			}
 		}
 	}
 	return nil
@@ -176,7 +183,7 @@ func (o *Options) Run() error {
 
 	o.Function = func() error {
 		dir := o.OutDir
-		return o.SyncVersions(o.SourceDir, dir)
+		return o.SyncVersions(o.Source.Dir, dir)
 	}
 
 	_, err = o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
@@ -216,7 +223,7 @@ func (o *Options) findSourceApplications(dir string) error {
 		o.SourceApplications[k] = v
 		return false, nil
 	}
-	return kyamls.ModifyFiles(dir, modifyFn, argocd.ArgoApplicationFilter)
+	return kyamls.ModifyFiles(dir, modifyFn, argocd.ApplicationFilter)
 }
 
 func (o *Options) syncAppVersions(dir string) error {
@@ -231,14 +238,11 @@ func (o *Options) syncAppVersions(dir string) error {
 			return false, nil
 		}
 
-		version := source.Version
-		err := node.PipeE(yaml.LookupCreate(yaml.ScalarNode, "spec", "source", "targetRevision"), yaml.FieldSetter{StringValue: version})
+		err := argocd.SetAppVersion(node, path, source.Version)
 		if err != nil {
-			return false, errors.Wrapf(err, "failed to set spec.source.targetRevision to %s", version)
+			return false, err
 		}
-
-		log.Logger().Debugf("modified the version in file %s to %s", path, version)
 		return true, nil
 	}
-	return kyamls.ModifyFiles(dir, modifyFn, argocd.ArgoApplicationFilter)
+	return kyamls.ModifyFiles(dir, modifyFn, argocd.ApplicationFilter)
 }
