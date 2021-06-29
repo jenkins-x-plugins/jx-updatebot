@@ -50,7 +50,7 @@ type Options struct {
 
 	Source             gitops.RepositoryOptions
 	Target             gitops.RepositoryOptions
-	AppFilter          fluxcd.AppFilter
+	AppFilter          fluxcd.HelmReleaseFilter
 	PullRequestTitle   string
 	PullRequestBody    string
 	GitCommitUsername  string
@@ -64,7 +64,7 @@ type Options struct {
 	EnvNames           []string
 	VersionStreamDir   string
 	Prefixes           *versionstream.RepositoryPrefixes
-	SourceApplications map[string]*fluxcd.AppVersion
+	SourceApplications map[string]*fluxcd.ChartVersion
 }
 
 // NewCmdFluxSync creates a command object for the command
@@ -110,7 +110,7 @@ func NewCmdFluxSync() (*cobra.Command, *Options) {
 // Validate validates the options
 func (o *Options) Validate() error {
 	if o.SourceApplications == nil {
-		o.SourceApplications = map[string]*fluxcd.AppVersion{}
+		o.SourceApplications = map[string]*fluxcd.ChartVersion{}
 	}
 	err := o.BaseOptions.Validate()
 	if err != nil {
@@ -209,10 +209,10 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 
 func (o *Options) findSourceApplications(dir string) error {
 	if o.SourceApplications == nil {
-		o.SourceApplications = map[string]*fluxcd.AppVersion{}
+		o.SourceApplications = map[string]*fluxcd.ChartVersion{}
 	}
 	modifyFn := func(node *yaml.RNode, path string) (bool, error) {
-		v := fluxcd.GetAppVersion(node, path)
+		v := fluxcd.GetChartVersion(node, path)
 		if v.Chart == "" || v.Version == "" {
 			return false, nil
 		}
@@ -223,12 +223,12 @@ func (o *Options) findSourceApplications(dir string) error {
 		o.SourceApplications[k] = v
 		return false, nil
 	}
-	return kyamls.ModifyFiles(dir, modifyFn, fluxcd.HelmReleaseFilter)
+	return kyamls.ModifyFiles(dir, modifyFn, fluxcd.HelmReleaseKindFilter)
 }
 
 func (o *Options) syncAppVersions(dir string) error {
 	modifyFn := func(node *yaml.RNode, path string) (bool, error) {
-		v := fluxcd.GetAppVersion(node, path)
+		v := fluxcd.GetChartVersion(node, path)
 		if v.Chart == "" || !o.AppFilter.Matches(v) {
 			return false, nil
 		}
@@ -238,11 +238,11 @@ func (o *Options) syncAppVersions(dir string) error {
 			return false, nil
 		}
 
-		err := fluxcd.SetAppVersion(node, path, source.Version)
+		err := fluxcd.SetChartVersion(node, path, source.Version)
 		if err != nil {
 			return false, err
 		}
 		return true, nil
 	}
-	return kyamls.ModifyFiles(dir, modifyFn, fluxcd.HelmReleaseFilter)
+	return kyamls.ModifyFiles(dir, modifyFn, fluxcd.HelmReleaseKindFilter)
 }

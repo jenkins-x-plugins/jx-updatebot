@@ -6,14 +6,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// AppFilter filter for apps
-type AppFilter struct {
+// HelmReleaseFilter filter for helm releases
+type HelmReleaseFilter struct {
 	Chart         gitops.TextFilter
 	SourceRefName gitops.TextFilter
 }
 
 // Matches return true if the app version matches the filter
-func (o *AppFilter) Matches(v *AppVersion) bool {
+func (o *HelmReleaseFilter) Matches(v *ChartVersion) bool {
 	if !stringhelpers.StringContainsAny(v.Chart, o.Chart.Includes, o.Chart.Excludes) {
 		return false
 	}
@@ -23,7 +23,7 @@ func (o *AppFilter) Matches(v *AppVersion) bool {
 	return true
 }
 
-func (o *AppFilter) AddFlags(cmd *cobra.Command) {
+func (o *HelmReleaseFilter) AddFlags(cmd *cobra.Command) {
 	o.Chart.AddFlags(cmd, "chart", "chart name")
 	o.Chart.AddFlags(cmd, "source-ref-name", "the sourceRef name of the chart repository or bucket")
 }

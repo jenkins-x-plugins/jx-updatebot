@@ -192,7 +192,7 @@ func (o *Options) upgradeRepository(gitURL string) error {
 
 	o.Function = func() error {
 		dir := o.OutDir
-		return o.ModifyApplicationFiles(dir, o.Chart, o.SourceRefName, o.Version)
+		return o.ModifyHelmReleaseFiles(dir, o.Chart, o.SourceRefName, o.Version)
 	}
 
 	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)

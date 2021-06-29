@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	HelmReleaseFilter = kyamls.Filter{
+	HelmReleaseKindFilter = kyamls.Filter{
 		Kinds: []string{"helm.toolkit.fluxcd.io/v2beta1/HelmRelease"},
 	}
 )

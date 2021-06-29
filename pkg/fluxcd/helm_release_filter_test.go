@@ -9,39 +9,39 @@ import (
 
 func TestAppFilter(t *testing.T) {
 	testCases := []struct {
-		filter     fluxcd.AppFilter
-		matches    []fluxcd.AppVersion
-		notMatches []fluxcd.AppVersion
+		filter     fluxcd.HelmReleaseFilter
+		matches    []fluxcd.ChartVersion
+		notMatches []fluxcd.ChartVersion
 	}{
 		{
-			filter: fluxcd.AppFilter{},
-			matches: []fluxcd.AppVersion{
+			filter: fluxcd.HelmReleaseFilter{},
+			matches: []fluxcd.ChartVersion{
 				{Chart: "https://github.com/myorg/myrepo", SourceRefName: "cheese"},
 			},
 		},
 		{
-			filter: fluxcd.AppFilter{
+			filter: fluxcd.HelmReleaseFilter{
 				Chart: gitops.TextFilter{
 					Includes: []string{"app1"},
 				},
 			},
-			matches: []fluxcd.AppVersion{
+			matches: []fluxcd.ChartVersion{
 				{Chart: "https://github.com/myorg/app1", SourceRefName: "cheese"},
 			},
-			notMatches: []fluxcd.AppVersion{
+			notMatches: []fluxcd.ChartVersion{
 				{Chart: "https://github.com/myorg/app2", SourceRefName: "cheese"},
 			},
 		},
 		{
-			filter: fluxcd.AppFilter{
+			filter: fluxcd.HelmReleaseFilter{
 				Chart: gitops.TextFilter{
 					Excludes: []string{"app1"},
 				},
 			},
-			matches: []fluxcd.AppVersion{
+			matches: []fluxcd.ChartVersion{
 				{Chart: "https://github.com/myorg/app2", SourceRefName: "cheese"},
 			},
-			notMatches: []fluxcd.AppVersion{
+			notMatches: []fluxcd.ChartVersion{
 				{Chart: "https://github.com/myorg/app1", SourceRefName: "cheese"},
 			},
 		},

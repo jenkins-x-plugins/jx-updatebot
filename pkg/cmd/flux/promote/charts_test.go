@@ -18,7 +18,7 @@ var (
 	generateTestOutput = false
 )
 
-func TestModifyApplicationFiles(t *testing.T) {
+func TestModifyHelmReleaseFiles(t *testing.T) {
 	tmpDir, err := ioutil.TempDir("", "")
 	require.NoError(t, err, "could not create temp dir")
 
@@ -43,7 +43,7 @@ func TestModifyApplicationFiles(t *testing.T) {
 
 		_, o := promote.NewCmdFluxPromote()
 
-		err = o.ModifyApplicationFiles(srcDir, chart, sourceRefName, version)
+		err = o.ModifyHelmReleaseFiles(srcDir, chart, sourceRefName, version)
 		require.NoError(t, err, "failed to modify files")
 
 		fileNames, err := ioutil.ReadDir(srcDir)
