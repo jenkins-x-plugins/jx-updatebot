@@ -62,7 +62,7 @@ func NewCmdFluxPromote() (*cobra.Command, *Options) {
 
 	cmd := &cobra.Command{
 		Use:     "promote",
-		Short:   "Promotes a new Application version in an FluxCD git repository",
+		Short:   "Promotes a new HelmRelease version in a FluxCD git repository",
 		Long:    cmdLong,
 		Example: cmdExample,
 		Run: func(cmd *cobra.Command, args []string) {

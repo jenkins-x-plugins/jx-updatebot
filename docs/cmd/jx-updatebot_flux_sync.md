@@ -1,6 +1,6 @@
 ## jx-updatebot flux sync
 
-Synchronizes some or all applications in an FluxCD git repository to reduce version drift
+Synchronizes some or all HelmRelease versions in an FluxCD git repository to reduce version drift
 
 ### Usage
 
@@ -10,7 +10,7 @@ jx-updatebot flux sync
 
 ### Synopsis
 
-Synchronizes some or all applications in an FluxCD git repository to reduce version drift 
+Synchronizes some or all HelmRelease versions in an FluxCD git repository to reduce version drift 
 
 Creates a Pull Request on the target GitOps repository.
 

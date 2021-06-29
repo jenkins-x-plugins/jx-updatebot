@@ -23,7 +23,7 @@ import (
 
 var (
 	cmdLong = templates.LongDesc(`
-		Synchronizes some or all applications in an FluxCD git repository to reduce version drift
+		Synchronizes some or all HelmRelease versions in an FluxCD git repository to reduce version drift
 
 		Creates a Pull Request on the target GitOps repository.
 `)
@@ -73,7 +73,7 @@ func NewCmdFluxSync() (*cobra.Command, *Options) {
 
 	cmd := &cobra.Command{
 		Use:     "sync",
-		Short:   "Synchronizes some or all applications in an FluxCD git repository to reduce version drift",
+		Short:   "Synchronizes some or all HelmRelease versions in an FluxCD git repository to reduce version drift",
 		Long:    cmdLong,
 		Example: cmdExample,
 		Run: func(cmd *cobra.Command, args []string) {

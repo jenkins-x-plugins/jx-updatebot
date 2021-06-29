@@ -1,6 +1,6 @@
 ## jx-updatebot flux promote
 
-Promotes a new Application version in an FluxCD git repository
+Promotes a new HelmRelease version in a FluxCD git repository
 
 ### Usage
 
