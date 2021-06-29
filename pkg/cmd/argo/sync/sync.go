@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/argocd"
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
 	"github.com/jenkins-x/go-scm/scm"
 	v1 "github.com/jenkins-x/jx-api/v4/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
@@ -47,8 +48,8 @@ type Options struct {
 	options.BaseOptions
 	environments.EnvironmentPullRequestOptions
 
-	Source             RepositoryOptions
-	Target             RepositoryOptions
+	Source             gitops.RepositoryOptions
+	Target             gitops.RepositoryOptions
 	AppFilter          argocd.AppFilter
 	PullRequestTitle   string
 	PullRequestBody    string

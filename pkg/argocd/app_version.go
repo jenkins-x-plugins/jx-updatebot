@@ -1,6 +1,7 @@
 package argocd
 
 import (
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kyamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 	"github.com/pkg/errors"
@@ -16,7 +17,7 @@ type AppVersion struct {
 
 // Key returns a unique key for the app version
 func (v *AppVersion) Key() string {
-	return TrimGitURLSuffix(v.RepoURL) + "\n" + v.Path
+	return gitops.TrimGitURLSuffix(v.RepoURL) + "\n" + v.Path
 }
 
 // String returns the string summary of the app version

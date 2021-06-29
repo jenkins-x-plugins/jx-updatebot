@@ -2,6 +2,7 @@ package fluxcd_test
 
 import (
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/fluxcd"
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -20,7 +21,7 @@ func TestAppFilter(t *testing.T) {
 		},
 		{
 			filter: fluxcd.AppFilter{
-				Chart: fluxcd.TextFilter{
+				Chart: gitops.TextFilter{
 					Includes: []string{"app1"},
 				},
 			},
@@ -33,7 +34,7 @@ func TestAppFilter(t *testing.T) {
 		},
 		{
 			filter: fluxcd.AppFilter{
-				Chart: fluxcd.TextFilter{
+				Chart: gitops.TextFilter{
 					Excludes: []string{"app1"},
 				},
 			},

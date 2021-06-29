@@ -16,7 +16,7 @@ type AppVersion struct {
 
 // Key returns a unique key for the app version
 func (v *AppVersion) Key() string {
-	return TrimGitURLSuffix(v.Chart) + "\n" + v.SourceRefName
+	return v.Chart + "\n" + v.SourceRefName
 }
 
 // String returns the string summary of the app version
