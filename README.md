@@ -1,4 +1,4 @@
-# jx-updatebot
+# jx updatebot
 
 [![Documentation](https://godoc.org/github.com/jenkins-x-plugins/jx-updatebot?status.svg)](https://pkg.go.dev/mod/github.com/jenkins-x-plugins/jx-updatebot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jenkins-x-plugins/jx-updatebot)](https://goreportcard.com/report/github.com/jenkins-x-plugins/jx-updatebot)
