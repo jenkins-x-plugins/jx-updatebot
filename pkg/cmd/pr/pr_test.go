@@ -40,7 +40,7 @@ func TestCreate(t *testing.T) {
 	assert.NoError(t, err)
 
 	fakeHelmer := helmer.NewFakeHelmer()
-	fakeHelmer.ChartsAllVersions["jx3/jx-build-controller"] = []helmer.ChartSummary{
+	fakeHelmer.ChartsAllVersions["jxgh/jx-build-controller"] = []helmer.ChartSummary{
 		{
 			ChartVersion: "9.1.2",
 		},
