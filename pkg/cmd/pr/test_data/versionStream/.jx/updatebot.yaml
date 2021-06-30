@@ -8,4 +8,4 @@ spec:
         - versionStream:
             kind: charts
             include:
-              - jx3/*
+              - jxgh/*
