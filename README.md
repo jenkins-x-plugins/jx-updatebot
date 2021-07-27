@@ -30,6 +30,7 @@ Here are some example updatebot configurations:
 * [jenkins-xlighthouse](https://github.com/jenkins-x/lighthouse) releases a chart which then uses this [.jx/updatebot.yaml](https://github.com/jenkins-x/lighthouse/blob/main/.jx/updatebot.yaml) to create a downstream pull request on the Jenkins X [Version Stream](https://jenkins-x.io/blog/2021/01/26/jx3-walkthroughs/#version-streams)
 * [jenkins-x/jx](https://github.com/jenkins-x/jx) is the Jenkins X command line which releases binaries and charts and uses this [.jx/updatebot.yaml](https://github.com/jenkins-x/jx/blob/main/.jx/updatebot.yaml) to create a downstream pull request on the Jenkins X [Version Stream](https://jenkins-x.io/blog/2021/01/26/jx3-walkthroughs/#version-streams)
           
+          
 ## Using updatebot in Tekton
 
 You can see an [example of invoking the Updatebot step](https://github.com/jenkins-x/go-scm/blob/main/.lighthouse/jenkins-x/release.yaml#L22-L23) inside a Tekton pipeline. This reuses the [Jenkins X Pipeline as Code GitOps approach](https://jenkins-x.io/blog/2021/02/25/gitops-pipelines/)
