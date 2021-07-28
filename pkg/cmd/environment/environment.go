@@ -2,6 +2,7 @@ package environment
 
 import (
 	"fmt"
+	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 	"os"
 
 	"github.com/jenkins-x/jx-helpers/v3/pkg/errorutil"
@@ -136,6 +137,8 @@ func (o *Options) Validate() error {
 }
 
 func (o *Options) upgradeRepository(env *v1.Environment, gitURL string) error {
+	log.Logger().Infof("about to upgrade environment %s at git URL %s", info(env.Name), info(gitURL))
+
 	// lets clear the branch name so we create a new one each time in a loop
 	o.BranchName = ""
 
