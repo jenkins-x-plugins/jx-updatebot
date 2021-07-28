@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jenkins-x/jx-helpers/v3/pkg/errorutil"
+
 	"github.com/jenkins-x/jx-helpers/v3/pkg/requirements"
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
@@ -48,7 +50,7 @@ func NewCmdUpgradeEnvironment() (*cobra.Command, *Options) {
 		},
 	}
 
-	cmd.Flags().StringVarP(&o.Env, "env", "e", "dev", "the name of the environment to upgrade")
+	cmd.Flags().StringVarP(&o.Env, "env", "e", "", "the name of the environment to upgrade. If no environment is named then all git repositories for all environments are upgraded")
 	cmd.Flags().StringVarP(&o.Strategy, "strategy", "s", "", "the 'kpt' strategy to use. To see available strategies type 'kpt pkg update --help'. Typical values are: resource-merge, fast-forward, alpha-git-patch, force-delete-replace")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{"jx-boot-upgrade"}, "a list of labels to apply to the PR")
 
@@ -83,21 +85,41 @@ func (o *Options) Run() error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to load Environments from namespace %s", ns)
 	}
-	env := envMap[o.Env]
-	if env == nil {
-		return options.InvalidOption("env", o.Env, envNames)
+
+	if o.Env != "" {
+		env := envMap[o.Env]
+		if env == nil {
+			return options.InvalidOption("env", o.Env, envNames)
+		}
+
+		gitURL := env.Spec.Source.URL
+		if gitURL == "" {
+			return errors.Errorf("the Environment %s has no spec.source.url value so we cannot create a Pull Request", o.Env)
+		}
+
+		err = o.upgradeRepository(env, gitURL)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
+		}
+		return nil
 	}
 
-	gitURL := env.Spec.Source.URL
-	if gitURL == "" {
-		return errors.Errorf("the Environment %s has no spec.source.url value so we cannot create a Pull Request", o.Env)
-	}
+	// lets upgrade all remote repositories
+	gitURLs := map[string]bool{}
+	var errs []error
+	for name, env := range envMap {
+		gitURL := env.Spec.Source.URL
+		if gitURL == "" || gitURLs[gitURL] {
+			continue
+		}
+		gitURLs[gitURL] = true
 
-	err = o.upgradeRepository(env, gitURL)
-	if err != nil {
-		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
+		err = o.upgradeRepository(env, gitURL)
+		if err != nil {
+			errs = append(errs, errors.Wrapf(err, "failed to create Pull Request on repository %s for environment %s", gitURL, name))
+		}
 	}
-	return nil
+	return errorutil.CombineErrors(errs...)
 }
 
 func (o *Options) Validate() error {
