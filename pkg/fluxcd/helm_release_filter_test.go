@@ -1,10 +1,11 @@
 package fluxcd_test
 
 import (
+	"testing"
+
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/fluxcd"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestAppFilter(t *testing.T) {

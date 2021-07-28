@@ -1,9 +1,10 @@
 package promote
 
 import (
+	"strings"
+
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/argocd"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
-	"strings"
 
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kyamls"
 	"sigs.k8s.io/kustomize/kyaml/yaml"

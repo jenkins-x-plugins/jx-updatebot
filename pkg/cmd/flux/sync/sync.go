@@ -2,6 +2,7 @@ package sync
 
 import (
 	"fmt"
+
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/fluxcd"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"

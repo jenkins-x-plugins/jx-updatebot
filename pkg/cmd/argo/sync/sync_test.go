@@ -1,13 +1,14 @@
 package sync_test
 
 import (
-	"github.com/google/go-cmp/cmp"
-	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/argo/sync"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/jenkins-x-plugins/jx-updatebot/pkg/cmd/argo/sync"
 
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
 	"github.com/stretchr/testify/require"

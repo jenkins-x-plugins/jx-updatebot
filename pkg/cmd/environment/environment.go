@@ -2,8 +2,9 @@ package environment
 
 import (
 	"fmt"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/errorutil"
 	"os"
+
+	"github.com/jenkins-x/jx-helpers/v3/pkg/errorutil"
 
 	"github.com/jenkins-x/jx-helpers/v3/pkg/requirements"
 
