@@ -9,3 +9,10 @@ spec:
             pattern: "jenkins-x/jx-updatebot:(.*)"
             files:
               - "**/*.yaml"
+    - urls:
+        - https://github.com/jenkins-x-charts/jxboot-helmfile-resources
+      changes:
+        - regex:
+            pattern: "updatebot: (.*)"
+            files:
+              - "charts/jxboot-helmfile-resources/values.yaml"
