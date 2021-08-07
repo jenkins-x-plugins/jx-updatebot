@@ -31,7 +31,16 @@ func (v *AppVersion) String() string {
 
 // GetRepoURL gets repository URL
 func GetRepoURL(node *yaml.RNode, path string) string {
-	return kyamls.GetStringField(node, path, "spec", "source", "repoURL")
+
+	annotation := kyamls.GetStringField(node, path, "metadata", "annotaions", "gitops.jenkins-x.io/sourceRepoUrl")
+	repoUrl := kyamls.GetStringField(node, path, "spec", "source", "repoURL")
+	if len(annotation) > 0 {
+		return annotation
+	}
+	if len(repoUrl) > 0 {
+		return repoUrl
+	}
+	return ""
 }
 
 // GetAppVersion gets the AppVersion from the given YAML file
