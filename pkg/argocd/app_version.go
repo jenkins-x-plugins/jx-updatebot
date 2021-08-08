@@ -32,7 +32,7 @@ func (v *AppVersion) String() string {
 // GetRepoURL gets repository URL
 func GetRepoURL(node *yaml.RNode, path string) string {
 
-	annotation := kyamls.GetStringField(node, path, "metadata", "annotaions", "gitops.jenkins-x.io/sourceRepoUrl")
+	annotation := kyamls.GetStringField(node, path, "metadata", "annotations", "gitops.jenkins-x.io/sourceRepoUrl")
 	repoUrl := kyamls.GetStringField(node, path, "spec", "source", "repoURL")
 	if len(annotation) > 0 {
 		return annotation
