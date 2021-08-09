@@ -3,7 +3,7 @@ kind: Application
 metadata:
   name: my-v3-lts-node
   namespace: argocd
-  annotaions:
+  annotations:
     gitops.jenkins-x.io/sourceRepoUrl: https://github.com/myorg/myrepo.git
 spec:
   destination:
