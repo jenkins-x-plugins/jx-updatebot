@@ -67,6 +67,7 @@ type Options struct {
 	NoVersion          bool
 	UpdateOnly         bool
 	GitCredentials     bool
+	Interactive        bool
 	Labels             []string
 	Input              input.Interface
 	EnvMap             map[string]*v1.Environment
@@ -107,7 +108,7 @@ func NewCmdEnvironmentSync() (*cobra.Command, *Options) {
 	cmd.Flags().BoolVarP(&o.NoVersion, "no-version", "", false, "disables validation on requiring a '--version' option or environment variable to be required")
 	cmd.Flags().BoolVarP(&o.UpdateOnly, "update-only", "", false, "only update versions in the target environment/namespace - do not add any new charts that are missing")
 	cmd.Flags().BoolVarP(&o.GitCredentials, "git-credentials", "", false, "ensures the git credentials are setup so we can push to git")
-
+	cmd.Flags().BoolVarP(&o.Interactive, "interactive", "", false, "enables interactive mode")
 	o.BaseOptions.AddBaseFlags(cmd)
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
 
@@ -257,6 +258,7 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 }
 
 func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, editor *helmfiles.Editor) error {
+	charts := []*helmfiles.ChartDetails{}
 	for i := range sourceHelmfiles {
 		src := &sourceHelmfiles[i]
 		helmState := &state.HelmState{}
@@ -265,7 +267,6 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 		if err != nil {
 			return errors.Wrapf(err, "failed to load helmfile %s", path)
 		}
-
 		for i := range helmState.Releases {
 			rel := &helmState.Releases[i]
 			details := helmfiles.NewChartDetails(helmState, rel, o.Prefixes)
@@ -278,11 +279,39 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 			if o.Target.Namespace != "" {
 				details.Namespace = o.Target.Namespace
 			}
-			err = editor.AddChart(details)
-			if err != nil {
-				return errors.Wrapf(err, "failed to add chart %s", details.String())
+			if !o.Interactive {
+				err = editor.AddChart(details)
+				if err != nil {
+					return errors.Wrapf(err, "failed to add chart %s", details.String())
+				}
+			} else {
+				charts = append(charts, details)
 			}
 		}
+	}
+	if o.Interactive {
+		names := []string{}
+		m := map[string]*helmfiles.ChartDetails{}
+		for i, chart := range charts {
+			text := chart.Repository
+			if chart.String() != "" {
+				text = fmt.Sprintf("%-36s: %s", chart.Chart, chart.Version)
+			}
+			names = append(names, text)
+			m[text] = charts[i]
+		}
+		results, err := o.Input.SelectNames(names, "Pick chart to promote: ", false, "which chart name do you wish to promote")
+		if err != nil {
+			return err
+		}
+		for _, el := range results {
+			err = editor.AddChart(m[el])
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+
 	}
 	return nil
 }
