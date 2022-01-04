@@ -258,7 +258,7 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 }
 
 func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, editor *helmfiles.Editor) error {
-	charts := []*helmfiles.ChartDetails{}
+	charts := make(map[string]*helmfiles.ChartDetails)
 	for i := range sourceHelmfiles {
 		src := &sourceHelmfiles[i]
 		helmState := &state.HelmState{}
@@ -285,20 +285,20 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 					return errors.Wrapf(err, "failed to add chart %s", details.String())
 				}
 			} else {
-				charts = append(charts, details)
+				charts[details.Chart] = details
 			}
 		}
 	}
 	if o.Interactive {
 		names := []string{}
 		m := map[string]*helmfiles.ChartDetails{}
-		for i, chart := range charts {
-			text := chart.Repository
+		for name, chart := range charts {
+			text := name
 			if chart.String() != "" {
-				text = fmt.Sprintf("%-36s: %s", chart.Chart, chart.Version)
+				text = fmt.Sprintf("%-36s: %s", name, chart.Version)
 			}
 			names = append(names, text)
-			m[text] = charts[i]
+			m[text] = chart
 		}
 		results, err := o.Input.SelectNames(names, "Pick chart to promote: ", false, "which chart name do you wish to promote")
 		if err != nil {
