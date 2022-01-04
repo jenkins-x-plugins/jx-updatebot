@@ -300,7 +300,7 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 			names = append(names, text)
 			m[text] = chart
 		}
-		results, err := o.Input.SelectNames(names, "Pick chart to promote: ", false, "which chart name do you wish to promote")
+		results, err := o.Input.SelectNames(names, "Pick chart(s) to promote: ", false, "which chart name do you wish to promote")
 		if err != nil {
 			return err
 		}
