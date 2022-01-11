@@ -285,7 +285,7 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 					return errors.Wrapf(err, "failed to add chart %s", details.String())
 				}
 			} else {
-				charts[details.Chart] = details
+				charts[details.ReleaseName] = details
 			}
 		}
 	}
@@ -293,7 +293,7 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 		names := []string{}
 		m := map[string]*helmfiles.ChartDetails{}
 		for name, chart := range charts {
-			text := name
+			text := chart.ReleaseName
 			if chart.String() != "" {
 				text = fmt.Sprintf("%-36s: %s", name, chart.Version)
 			}
