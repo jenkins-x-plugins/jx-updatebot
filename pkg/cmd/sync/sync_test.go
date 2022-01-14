@@ -1,6 +1,7 @@
 package sync_test
 
 import (
+	"github.com/jenkins-x/jx-helpers/v3/pkg/input/fake"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,6 +17,8 @@ var (
 	// generateTestOutput enable to regenerate the expected output
 	generateTestOutput = false
 )
+
+var fakeInput = &fake.FakeInput{Values: map[string]string{"Pick chart(s) to promote: ": "mychart                             : 2.2.2"}}
 
 func TestSync(t *testing.T) {
 	tmpDir, err := ioutil.TempDir("", "")
@@ -52,6 +55,11 @@ func TestSync(t *testing.T) {
 			o.Target.Namespace = "jx-production"
 		case "update-only":
 			o.UpdateOnly = true
+			o.Source.Namespace = "jx-staging"
+			o.Target.Namespace = "jx-production"
+		case "interactive":
+			o.Interactive = true
+			o.Input = fakeInput
 			o.Source.Namespace = "jx-staging"
 			o.Target.Namespace = "jx-production"
 		}

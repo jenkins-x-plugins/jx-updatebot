@@ -1,0 +1,5 @@
+filepath: ""
+helmfiles:
+- path: helmfiles/jx-staging/helmfile.yaml
+templates: {}
+renderedvalues: {}
