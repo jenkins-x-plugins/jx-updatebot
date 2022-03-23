@@ -60,14 +60,15 @@ func TestModifyHelmReleaseFiles(t *testing.T) {
 				data, err := ioutil.ReadFile(srcFile)
 				require.NoError(t, err, "failed to load %s", srcFile)
 
-				err = ioutil.WriteFile(expectedFile, data, 0666)
+				err = ioutil.WriteFile(expectedFile, data, 0600)
 				require.NoError(t, err, "failed to save file %s", expectedFile)
 
 				t.Logf("saved file %s\n", expectedFile)
 				continue
 			}
 
-			testhelpers.AssertEqualFileText(t, expectedFile, srcFile)
+			err = testhelpers.AssertEqualFileText(t, expectedFile, srcFile)
+			require.NoError(t, err, "cannot assert expected file %s and actual file %s have the same text", expectedFile, srcFile)
 		}
 	}
 }

@@ -1,9 +1,9 @@
 package environment
 
 import (
-	"fmt"
-	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 	"os"
+
+	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 
 	"github.com/jenkins-x/jx-helpers/v3/pkg/errorutil"
 
@@ -33,9 +33,7 @@ type Options struct {
 	environments.EnvironmentPullRequestOptions
 }
 
-var (
-	info = termcolor.ColorInfo
-)
+var info = termcolor.ColorInfo
 
 // NewCmdUpgradeEnvironment creates a command object
 func NewCmdUpgradeEnvironment() (*cobra.Command, *Options) {
@@ -143,7 +141,7 @@ func (o *Options) upgradeRepository(env *v1.Environment, gitURL string) error {
 	o.BranchName = ""
 
 	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = fmt.Sprintf("chore: upgrade pipelines")
+		o.PullRequestTitle = "chore: upgrade pipelines"
 	}
 	if o.CommitTitle == "" {
 		o.CommitTitle = o.PullRequestTitle
@@ -245,5 +243,4 @@ func (o *Options) cloneClusterGitURL() (string, error) {
 		return "", errors.Wrapf(err, "failed to clone cluster git repository %s", gitURL)
 	}
 	return clusterDir, nil
-
 }

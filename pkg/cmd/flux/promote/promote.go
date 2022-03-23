@@ -1,7 +1,6 @@
 package promote
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,7 +15,6 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kube/jxclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +35,6 @@ type Options struct {
 }
 
 var (
-	info    = termcolor.ColorInfo
 	cmdLong = templates.LongDesc(`
 		Promotes a new HelmRelease version in a FluxCD git repository
 
@@ -170,7 +167,7 @@ func (o *Options) upgradeRepository(gitURL string) error {
 	o.BranchName = ""
 
 	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = fmt.Sprintf("chore: upgrade pipelines")
+		o.PullRequestTitle = "chore: upgrade pipelines"
 	}
 	if o.CommitTitle == "" {
 		o.CommitTitle = o.PullRequestTitle

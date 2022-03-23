@@ -10,7 +10,7 @@ import (
 	"sigs.k8s.io/kustomize/kyaml/yaml"
 )
 
-func (o *Options) ModifyApplicationFiles(dir, repoURL string, version string) error {
+func (o *Options) ModifyApplicationFiles(dir, repoURL, version string) error {
 	modifyFn := func(node *yaml.RNode, path string) (bool, error) {
 		text := strings.TrimSpace(argocd.GetRepoURL(node, path))
 		if gitops.TrimGitURLSuffix(repoURL) != gitops.TrimGitURLSuffix(text) {

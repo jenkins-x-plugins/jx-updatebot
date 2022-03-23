@@ -17,7 +17,7 @@ import (
 )
 
 // ApplyVersionStream applies the version stream change
-func (o *Options) ApplyVersionStream(dir string, gitURL string, change v1alpha1.Change, vs *v1alpha1.VersionStreamChange) error {
+func (o *Options) ApplyVersionStream(dir, gitURL string, change v1alpha1.Change, vs *v1alpha1.VersionStreamChange) error {
 	kind := vs.Kind
 	if kind == "" {
 		return options.MissingOption("kind")
@@ -27,7 +27,7 @@ func (o *Options) ApplyVersionStream(dir string, gitURL string, change v1alpha1.
 	}
 
 	if kind == string(versionstream.KindChart) {
-		err := o.applyVersionStreamCharts(dir, gitURL, change, vs, kind)
+		err := o.applyVersionStreamCharts(dir, vs, kind)
 		if err != nil {
 			return errors.Wrapf(err, "failed to apply kind %s", kind)
 		}
@@ -36,7 +36,7 @@ func (o *Options) ApplyVersionStream(dir string, gitURL string, change v1alpha1.
 	return nil
 }
 
-func (o *Options) applyVersionStreamCharts(dir string, url string, change v1alpha1.Change, vs *v1alpha1.VersionStreamChange, kindStr string) error {
+func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStreamChange, kindStr string) error {
 	prefixes, err := versionstream.GetRepositoryPrefixes(dir)
 	if err != nil {
 		return errors.Wrapf(err, "failed to load chart repository prefixes")

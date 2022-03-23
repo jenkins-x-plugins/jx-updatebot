@@ -1,7 +1,6 @@
 package promote
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -18,7 +17,6 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kube/jxclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -38,7 +36,6 @@ type Options struct {
 }
 
 var (
-	info    = termcolor.ColorInfo
 	cmdLong = templates.LongDesc(`
 		Promotes a new Application version in an ArgoCD git repository
 
@@ -49,7 +46,7 @@ var (
 	cmdExample = templates.Examples(`
 		# lets use the $VERSION env var or a VERSION file in the current dir
 		jx updatebot argo promote --target-git-url https://github.com/myorg/my-argo-repo.git
-	
+
 		# lets promote a specific version in the current git clone to a remote repo
 		jx updatebot argo promote --version v1.2.3 --target-git-url https://github.com/myorg/my-argo-repo.git
 
@@ -169,7 +166,7 @@ func (o *Options) upgradeRepository(gitURL string) error {
 	o.BranchName = ""
 
 	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = fmt.Sprintf("chore: upgrade pipelines")
+		o.PullRequestTitle = "chore: upgrade pipelines"
 	}
 	if o.CommitTitle == "" {
 		o.CommitTitle = o.PullRequestTitle

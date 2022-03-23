@@ -49,7 +49,8 @@ func TestModifyApplicationFiles(t *testing.T) {
 			}
 			expectedFile := filepath.Join(tmpDir, dir, "expected", name)
 			srcFile := filepath.Join(srcDir, name)
-			testhelpers.AssertEqualFileText(t, expectedFile, srcFile)
+			err = testhelpers.AssertEqualFileText(t, expectedFile, srcFile)
+			require.NoError(t, err, "cannot assert expected file %s and actual file %s have the same text", expectedFile, srcFile)
 		}
 	}
 }

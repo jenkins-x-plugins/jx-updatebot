@@ -47,40 +47,42 @@ func TestCreate(t *testing.T) {
 	}
 
 	for _, f := range fileNames {
-		if f.IsDir() {
-			name := f.Name()
-			if stringhelpers.StringArrayIndex(excludeTests, name) >= 0 {
-				t.Logf("excluding test %s\n", name)
-				continue
-			}
-			dir := filepath.Join("test_data", name)
-			scmClient, fakeData := fake.NewDefault()
-
-			_, o := pr.NewCmdPullRequest()
-			o.Dir = dir
-			o.CommandRunner = runner.Run
-			o.ScmClient = scmClient
-			o.ScmClientFactory.ScmClient = scmClient
-			o.ScmClientFactory.NoWriteGitCredentialsFile = true
-			o.Helmer = fakeHelmer
-			o.Version = "1.2.3"
-			o.EnvironmentPullRequestOptions.ScmClientFactory.GitServerURL = "https://github.com"
-			o.EnvironmentPullRequestOptions.ScmClientFactory.GitToken = "dummytoken"
-			o.EnvironmentPullRequestOptions.ScmClientFactory.GitUsername = "dummyuser"
-
-			err := o.Run()
-			require.NoError(t, err, "failed to run command for test %s", name)
-
-			t.Logf("ran test %s\n", name)
-
-			if name == "versionStream" {
-				require.Len(t, fakeData.PullRequests, 1, "should have 1 Pull Request created for %s", name)
-			}
-
-			for n, pr := range fakeData.PullRequests {
-				t.Logf("test %s created PR #%d with title: %s\n", name, n, pr.Title)
-				t.Logf("body: %s\n\n", pr.Body)
-			}
+		if !f.IsDir() {
+			continue
 		}
+		name := f.Name()
+		if stringhelpers.StringArrayIndex(excludeTests, name) >= 0 {
+			t.Logf("excluding test %s\n", name)
+			continue
+		}
+		dir := filepath.Join("test_data", name)
+		scmClient, fakeData := fake.NewDefault()
+
+		_, o := pr.NewCmdPullRequest()
+		o.Dir = dir
+		o.CommandRunner = runner.Run
+		o.ScmClient = scmClient
+		o.ScmClientFactory.ScmClient = scmClient
+		o.ScmClientFactory.NoWriteGitCredentialsFile = true
+		o.Helmer = fakeHelmer
+		o.Version = "1.2.3"
+		o.EnvironmentPullRequestOptions.ScmClientFactory.GitServerURL = "https://github.com"
+		o.EnvironmentPullRequestOptions.ScmClientFactory.GitToken = "dummytoken"
+		o.EnvironmentPullRequestOptions.ScmClientFactory.GitUsername = "dummyuser"
+
+		err := o.Run()
+		require.NoError(t, err, "failed to run command for test %s", name)
+
+		t.Logf("ran test %s\n", name)
+
+		if name == "versionStream" {
+			require.Len(t, fakeData.PullRequests, 1, "should have 1 Pull Request created for %s", name)
+		}
+
+		for n, pr := range fakeData.PullRequests {
+			t.Logf("test %s created PR #%d with title: %s\n", name, n, pr.Title)
+			t.Logf("body: %s\n\n", pr.Body)
+		}
+
 	}
 }
