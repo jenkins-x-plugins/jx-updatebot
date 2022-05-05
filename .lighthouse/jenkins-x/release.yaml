@@ -32,7 +32,7 @@ spec:
           resources: {}
         - name: chart-docs
           resources: {}
-        - image: gcr.io/jenkinsxio/jx-boot:3.0.773
+        - image: gcr.io/jenkinsxio/jx-boot:latest
           name: release-chart
           resources: {}
           script: |
@@ -48,5 +48,5 @@ spec:
           resources: {}
   podTemplate: {}
   serviceAccountName: tekton-bot
-  timeout: 240h0m0s
+  timeout: 1h30m
 status: {}
