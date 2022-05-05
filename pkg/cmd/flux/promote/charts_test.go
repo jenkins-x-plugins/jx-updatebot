@@ -19,11 +19,10 @@ var (
 )
 
 func TestModifyHelmReleaseFiles(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "")
-	require.NoError(t, err, "could not create temp dir")
+	tmpDir := t.TempDir()
 
 	t.Logf("using dir %s\n", tmpDir)
-	err = files.CopyDirOverwrite("test_data", tmpDir)
+	err := files.CopyDirOverwrite("test_data", tmpDir)
 	require.NoError(t, err, "failed to copy test data to %s", tmpDir)
 
 	dirNames, err := ioutil.ReadDir(tmpDir)

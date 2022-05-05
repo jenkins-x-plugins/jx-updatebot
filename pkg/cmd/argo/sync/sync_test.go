@@ -22,10 +22,9 @@ var (
 )
 
 func TestArgoSync(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "")
-	require.NoError(t, err, "failed to create temp dir")
+	tmpDir := t.TempDir()
 
-	err = files.CopyDirOverwrite("test_data", tmpDir)
+	err := files.CopyDirOverwrite("test_data", tmpDir)
 	require.NoError(t, err, "failed to copy test_data to %s", tmpDir)
 
 	fileSlice, err := ioutil.ReadDir(tmpDir)

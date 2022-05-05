@@ -18,8 +18,7 @@ var (
 )
 
 func TestSync(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "")
-	require.NoError(t, err, "failed to create temp dir")
+	tmpDir := t.TempDir()
 
 	testDir := "test_data"
 	fileSlice, err := ioutil.ReadDir(testDir)
