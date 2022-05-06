@@ -22,7 +22,6 @@ spec:
         - name: next-version
           resources: {}
         - name: jx-variables
-          resources: {}
         - name: release-binary
           resources: {}
         - name: build-and-push-image
@@ -32,14 +31,7 @@ spec:
           resources: {}
         - name: chart-docs
           resources: {}
-        - image: gcr.io/jenkinsxio/jx-boot:3.0.773
-          name: release-chart
-          resources: {}
-          script: |
-            #!/usr/bin/env sh
-            if [ -d "/workspace/source/charts/$REPO_NAME" ]; then source .jx/variables.sh
-            cd /workspace/source/charts/$REPO_NAME
-            make release; else echo no charts; fi
+        - name: release-chart
         - name: changelog
           resources: {}
         - name: upload-binaries
@@ -48,5 +40,5 @@ spec:
           resources: {}
   podTemplate: {}
   serviceAccountName: tekton-bot
-  timeout: 240h0m0s
+  timeout: 1h30m
 status: {}
