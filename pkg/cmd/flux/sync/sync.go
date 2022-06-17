@@ -1,8 +1,6 @@
 package sync
 
 import (
-	"fmt"
-
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/fluxcd"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
@@ -90,7 +88,7 @@ func NewCmdFluxSync() (*cobra.Command, *Options) {
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
 	// TODO support adding missing releases?
-	//cmd.Flags().BoolVarP(&o.UpdateOnly, "update-only", "", false, "only update versions in the target environment/namespace - do not add any new charts that are missing")
+	// cmd.Flags().BoolVarP(&o.UpdateOnly, "update-only", "", false, "only update versions in the target environment/namespace - do not add any new charts that are missing")
 	cmd.Flags().BoolVarP(&o.GitCredentials, "git-credentials", "", false, "ensures the git credentials are setup so we can push to git")
 
 	o.AppFilter.AddFlags(cmd)
@@ -162,7 +160,7 @@ func (o *Options) Run() error {
 	o.BranchName = ""
 
 	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = fmt.Sprintf("chore: sync versions")
+		o.PullRequestTitle = "chore: sync versions"
 	}
 	if o.CommitTitle == "" {
 		o.CommitTitle = o.PullRequestTitle

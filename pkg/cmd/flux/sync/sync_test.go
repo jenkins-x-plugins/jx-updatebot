@@ -68,7 +68,7 @@ func TestFluxSync(t *testing.T) {
 
 // AssertDirContentsEqual asserts that the directory matches the expected dir
 func AssertDirContentsEqual(t *testing.T, generateTestOutput, verbose bool, dir, expectedDir string) {
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error { //nolint:staticcheck
 		if info == nil || info.IsDir() {
 			return nil
 		}
@@ -76,7 +76,8 @@ func AssertDirContentsEqual(t *testing.T, generateTestOutput, verbose bool, dir,
 			return nil
 		}
 
-		rel, err := filepath.Rel(dir, path)
+		rel, err := filepath.Rel(dir, path) //nolint:staticcheck
+		require.NoError(t, err, "failed to return relative path")
 
 		expectedFile := filepath.Join(expectedDir, rel)
 		require.FileExists(t, path)
@@ -90,7 +91,7 @@ func AssertDirContentsEqual(t *testing.T, generateTestOutput, verbose bool, dir,
 			err = os.MkdirAll(expectedDir, files.DefaultDirWritePermissions)
 			require.NoError(t, err, "failed to create expected dir %s", expectedDir)
 
-			err = ioutil.WriteFile(expectedFile, []byte(result), 0666)
+			err = ioutil.WriteFile(expectedFile, []byte(result), 0600)
 			require.NoError(t, err, "failed to save file %s", expectedFile)
 			return nil
 		}

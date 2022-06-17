@@ -1,7 +1,6 @@
 package pipeline
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -40,9 +39,7 @@ type Options struct {
 	environments.EnvironmentPullRequestOptions
 }
 
-var (
-	info = termcolor.ColorInfo
-)
+var info = termcolor.ColorInfo
 
 // NewCmdUpgradePipeline creates a command object
 func NewCmdUpgradePipeline() (*cobra.Command, *Options) {
@@ -154,7 +151,10 @@ func (o *Options) LoadSourceConfig() (*v1alpha1.SourceConfig, error) {
 }
 
 func (o *Options) UpgradeRepository(config *v1alpha1.SourceConfig, group *v1alpha1.RepositoryGroup, repo *v1alpha1.Repository) error {
-	sourceconfigs.DefaultValues(config, group, repo)
+	err := sourceconfigs.DefaultValues(config, group, repo)
+	if err != nil {
+		return err
+	}
 	gitURL := repo.HTTPCloneURL
 	if gitURL == "" {
 		return nil
@@ -165,7 +165,7 @@ func (o *Options) UpgradeRepository(config *v1alpha1.SourceConfig, group *v1alph
 	o.BranchName = ""
 
 	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = fmt.Sprintf("chore: upgrade pipelines")
+		o.PullRequestTitle = "chore: upgrade pipelines"
 	}
 	if o.CommitTitle == "" {
 		o.CommitTitle = o.PullRequestTitle
@@ -193,7 +193,7 @@ func (o *Options) UpgradeRepository(config *v1alpha1.SourceConfig, group *v1alph
 		return o.convertPipelines(gitURL, dir)
 	}
 
-	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
+	_, err = o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
 	}

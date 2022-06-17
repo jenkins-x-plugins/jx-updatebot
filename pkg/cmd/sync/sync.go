@@ -1,7 +1,6 @@
 package sync
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/jenkins-x-plugins/jx-gitops/pkg/helmfiles"
@@ -176,7 +175,7 @@ func (o *Options) Run() error {
 	o.BranchName = ""
 
 	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = fmt.Sprintf("chore: sync versions")
+		o.PullRequestTitle = "chore: sync versions"
 	}
 	if o.CommitTitle == "" {
 		o.CommitTitle = o.PullRequestTitle

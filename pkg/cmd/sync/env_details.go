@@ -101,16 +101,9 @@ func (o *Options) ValidateEnvironment(env *EnvironmentOptions, source bool) erro
 		return errors.Errorf("no %s environment name or namespace for", name)
 	}
 	if env.GitCloneURL == "" {
-		if source {
-			env.GitCloneURL, err = o.GetDevCloneGitURL()
-			if err != nil {
-				return err
-			}
-		} else {
-			env.GitCloneURL, err = o.GetDevCloneGitURL()
-			if err != nil {
-				return err
-			}
+		env.GitCloneURL, err = o.GetDevCloneGitURL()
+		if err != nil {
+			return err
 		}
 	}
 	return nil

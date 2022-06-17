@@ -14,7 +14,7 @@ import (
 )
 
 // ApplyRegex applies the regex change
-func (o *Options) ApplyRegex(dir string, gitURL string, change v1alpha1.Change, regex *v1alpha1.Regex) error {
+func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *v1alpha1.Regex) error {
 	pattern := regex.Pattern
 	if pattern == "" {
 		return errors.Errorf("no pattern for regex change %#v", change)
