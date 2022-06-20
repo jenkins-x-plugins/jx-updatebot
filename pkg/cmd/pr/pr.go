@@ -180,13 +180,16 @@ func (o *Options) Run() error {
 				return nil
 			}
 
-			// reuse existing PullRequest
-			if o.AutoMerge {
-				if o.PullRequestFilter == nil {
-					o.PullRequestFilter = &environments.PullRequestFilter{}
+			if rule.ReusePullRequest {
+				if len(o.Labels) == 0 {
+					return fmt.Errorf("To be able to reuse pull request you need to supply pullRequestLabels in config file or --labels")
 				}
-				if stringhelpers.StringArrayIndex(o.PullRequestFilter.Labels, environments.LabelUpdatebot) < 0 {
-					o.PullRequestFilter.Labels = append(o.PullRequestFilter.Labels, environments.LabelUpdatebot)
+				o.PullRequestFilter = &environments.PullRequestFilter{Labels: []string{}}
+				for _, label := range o.Labels {
+					o.PullRequestFilter.Labels = stringhelpers.EnsureStringArrayContains(o.PullRequestFilter.Labels, label)
+				}
+				if o.AutoMerge {
+					o.PullRequestFilter.Labels = stringhelpers.EnsureStringArrayContains(o.PullRequestFilter.Labels, environments.LabelUpdatebot)
 				}
 			}
 
@@ -251,6 +254,10 @@ func (o *Options) Validate() error {
 		}
 	} else {
 		log.Logger().Warnf("file %s does not exist so cannot create any updatebot Pull Requests", o.ConfigFile)
+	}
+
+	if len(o.Labels) == 0 {
+		o.Labels = o.UpdateConfig.Spec.PullRequestLabels
 	}
 
 	if o.Helmer == nil {
