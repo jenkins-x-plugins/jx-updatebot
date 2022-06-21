@@ -1,7 +1,6 @@
 package sync_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -21,7 +20,7 @@ func TestSync(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	testDir := "test_data"
-	fileSlice, err := ioutil.ReadDir(testDir)
+	fileSlice, err := os.ReadDir(testDir)
 	require.NoError(t, err, "failed to read dir %s", testDir)
 
 	testCaseName := os.Getenv("TEST_NAME")

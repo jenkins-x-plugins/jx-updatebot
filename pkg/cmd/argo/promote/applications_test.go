@@ -1,7 +1,7 @@
 package promote_test
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -20,7 +20,7 @@ func TestModifyApplicationFiles(t *testing.T) {
 	err := files.CopyDirOverwrite("test_data", tmpDir)
 	require.NoError(t, err, "failed to copy test data to %s", tmpDir)
 
-	dirNames, err := ioutil.ReadDir(tmpDir)
+	dirNames, err := os.ReadDir(tmpDir)
 	assert.NoError(t, err)
 
 	repoURL := "https://github.com/myorg/myrepo.git"
@@ -39,7 +39,7 @@ func TestModifyApplicationFiles(t *testing.T) {
 		err = o.ModifyApplicationFiles(srcDir, repoURL, version)
 		require.NoError(t, err, "failed to modify files")
 
-		fileNames, err := ioutil.ReadDir(srcDir)
+		fileNames, err := os.ReadDir(srcDir)
 		require.NoError(t, err, "failed to read fileNames")
 
 		for _, f := range fileNames {

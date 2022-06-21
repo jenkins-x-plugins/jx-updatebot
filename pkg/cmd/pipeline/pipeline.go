@@ -1,7 +1,6 @@
 package pipeline
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -210,7 +209,7 @@ func (o *Options) upgradePipelinesViaKpt(dir string) error {
 		return nil
 	}
 
-	fs, err := ioutil.ReadDir(lhDir)
+	fs, err := os.ReadDir(lhDir)
 	if err != nil {
 		return errors.Wrapf(err, "failed to read dir %s", lhDir)
 	}

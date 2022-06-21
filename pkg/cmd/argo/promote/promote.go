@@ -1,7 +1,6 @@
 package promote
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -132,7 +131,7 @@ func (o *Options) Validate() error {
 			return errors.Wrapf(err, "failed to check for file %s", o.VersionFile)
 		}
 		if exists {
-			data, err := ioutil.ReadFile(o.VersionFile)
+			data, err := os.ReadFile(o.VersionFile)
 			if err != nil {
 				return errors.Wrapf(err, "failed to read version file %s", o.VersionFile)
 			}

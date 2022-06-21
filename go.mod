@@ -7,10 +7,10 @@ require (
 	github.com/jenkins-x-plugins/jx-gitops v0.3.13
 	github.com/jenkins-x-plugins/jx-pipeline v0.0.152
 	github.com/jenkins-x-plugins/jx-promote v0.0.277
-	github.com/jenkins-x/go-scm v1.10.11
-	github.com/jenkins-x/jx-api/v4 v4.3.0
-	github.com/jenkins-x/jx-helpers/v3 v3.1.1
-	github.com/jenkins-x/jx-logging/v3 v3.0.6
+	github.com/jenkins-x/go-scm v1.11.5
+	github.com/jenkins-x/jx-api/v4 v4.3.6
+	github.com/jenkins-x/jx-helpers/v3 v3.2.16
+	github.com/jenkins-x/jx-logging/v3 v3.0.7
 	github.com/jenkins-x/lighthouse-client v0.0.295
 	github.com/pkg/errors v0.9.1
 	github.com/roboll/helmfile v0.139.0

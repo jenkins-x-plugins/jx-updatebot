@@ -1,7 +1,6 @@
 package pr_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,7 +35,7 @@ func TestCreate(t *testing.T) {
 		},
 	}
 
-	fileNames, err := ioutil.ReadDir("test_data")
+	fileNames, err := os.ReadDir("test_data")
 	assert.NoError(t, err)
 
 	fakeHelmer := helmer.NewFakeHelmer()

@@ -1,7 +1,7 @@
 package pr
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 
@@ -46,7 +46,7 @@ func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *
 		for _, f := range matches {
 			log.Logger().Infof("found file %s", f)
 
-			data, err := ioutil.ReadFile(f)
+			data, err := os.ReadFile(f)
 			if err != nil {
 				return errors.Wrapf(err, "failed to load file %s", f)
 			}
@@ -82,7 +82,7 @@ func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *
 			})
 
 			if text2 != text {
-				err = ioutil.WriteFile(f, []byte(text2), files.DefaultFileWritePermissions)
+				err = os.WriteFile(f, []byte(text2), files.DefaultFileWritePermissions)
 				if err != nil {
 					return errors.Wrapf(err, "failed to save file %s", f)
 				}
