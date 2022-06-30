@@ -14,7 +14,7 @@ import (
 )
 
 // SparseCheckoutPatternsRegex return the patterns to check out sparsely
-func (change *Options) SparseCheckoutPatternsRegex(regex *v1alpha1.Regex) []string {
+func (o *Options) SparseCheckoutPatternsRegex(regex *v1alpha1.Regex) []string {
 	res := make([]string, len(regex.Globs))
 	for _, p := range regex.Globs {
 		// Normal glob patterns are always defined compared to the root. For these patterns a prefix of / is needed for that
