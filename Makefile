@@ -18,7 +18,7 @@ GO_DEPENDENCIES := $(call rwildcard,pkg/,*.go) $(call rwildcard,cmd/j,*.go)
 
 BRANCH     := $(shell git rev-parse --abbrev-ref HEAD 2> /dev/null  || echo 'unknown')
 BUILD_DATE := $(shell date +%Y%m%d-%H:%M:%S)
-CGO_ENABLED = 1
+CGO_ENABLED = 0
 
 GOPRIVATE := github.com/jenkins-x/jx-helpers
 
