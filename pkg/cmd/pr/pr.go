@@ -134,6 +134,14 @@ func (o *Options) Run() error {
 		if len(rule.URLs) == 0 {
 			log.Logger().Warnf("no URLs to process for rule %d", i)
 		}
+		o.EnvironmentPullRequestOptions.SparseCheckoutPatterns = []string{}
+		if rule.SparseCheckout {
+			o.EnvironmentPullRequestOptions.SparseCheckoutPatterns, err = o.GetSparseCheckoutPatterns(*rule)
+			if err != nil {
+				return err
+			}
+		}
+
 		for _, gitURL := range rule.URLs {
 			if gitURL == "" {
 				log.Logger().Warnf("missing out repository %d as it has no git URL", i)
@@ -324,6 +332,25 @@ func (o *Options) Validate() error {
 		log.Logger().Infof("setup git credentials file for user %s and email %s", gc.UserName, gc.UserEmail)
 	}
 	return nil
+}
+
+func (o *Options) GetSparseCheckoutPatterns(rule v1alpha1.Rule) ([]string, error) {
+	patterns := make([]string, len(rule.Changes))
+	for _, change := range rule.Changes {
+		if change.Command != nil {
+			return nil, fmt.Errorf("Sparse checkout not supported for Command change")
+		}
+		if change.VersionStream != nil {
+			return nil, fmt.Errorf("Sparse checkout not supported for VersionStream change")
+		}
+		if change.Go != nil {
+			patterns = append(patterns, o.SparseCheckoutPatternsGo()...)
+		}
+		if change.Regex != nil {
+			patterns = append(patterns, o.SparseCheckoutPatternsRegex(change.Regex)...)
+		}
+	}
+	return patterns, nil
 }
 
 // ApplyChanges applies the changes to the given dir

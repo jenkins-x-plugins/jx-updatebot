@@ -13,6 +13,16 @@ import (
 	"github.com/yargevad/filepathx"
 )
 
+// SparseCheckoutPatternsRegex return the patterns to check out sparsely
+func (change *Options) SparseCheckoutPatternsRegex(regex *v1alpha1.Regex) []string {
+	res := make([]string, len(regex.Globs))
+	for _, p := range regex.Globs {
+		// Normal glob patterns are always defined compared to the root. For these patterns a prefix of / is needed for that
+		res = append(res, "/"+p)
+	}
+	return res
+}
+
 // ApplyRegex applies the regex change
 func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *v1alpha1.Regex) error {
 	pattern := regex.Pattern

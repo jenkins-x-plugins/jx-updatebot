@@ -15,6 +15,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// SparseCheckoutPatternsGo return the patterns to check out sparsely
+func (o *Options) SparseCheckoutPatternsGo() []string {
+	return []string{"/go.mod", "/go.sum"}
+}
+
 // GoFindURLs find the git URLs for the given go dependency change
 func (o *Options) GoFindURLs(rule *v1alpha1.Rule, change v1alpha1.Change, gc *v1alpha1.GoChange) error {
 	ctx := context.Background()
