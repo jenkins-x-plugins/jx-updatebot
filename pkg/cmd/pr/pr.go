@@ -106,12 +106,17 @@ func (o *Options) Run() error {
 		return errors.Wrapf(err, "failed to validate")
 	}
 
-	if o.PullRequestBody == "" || o.CommitMessage == "" {
+	if o.PullRequestBody == "" || o.CommitMessage == "" || o.CommitTitle == "" || o.PullRequestTitle == "" {
 		// lets try discover the current git URL
 		gitURL, err := gitdiscovery.FindGitURLFromDir(o.Dir, true)
 		if err != nil {
 			log.Logger().Warnf("failed to find git URL %s", err.Error())
-
+			if o.PullRequestTitle == "" {
+				o.PullRequestTitle = fmt.Sprintf("chore(deps): upgrade to version %s", o.Version)
+			}
+			if o.CommitTitle == "" {
+				o.CommitTitle = o.PullRequestTitle
+			}
 		} else if gitURL != "" {
 			message := fmt.Sprintf("from: %s\n", gitURL)
 			if o.PullRequestBody == "" {
@@ -119,6 +124,15 @@ func (o *Options) Run() error {
 			}
 			if o.CommitMessage == "" {
 				o.CommitMessage = message
+			}
+			if o.PullRequestTitle == "" {
+				gitURLpart := strings.Split(gitURL, "/")
+				repository := gitURLpart[len(gitURLpart)-2] + "/" +
+					strings.TrimSuffix(gitURLpart[len(gitURLpart)-1], ".git")
+				o.PullRequestTitle = fmt.Sprintf("chore(deps): upgrade %s to version %s", repository, o.Version)
+			}
+			if o.CommitTitle == "" {
+				o.CommitTitle = o.PullRequestTitle
 			}
 		}
 	}
@@ -176,20 +190,12 @@ func (o *Options) Run() error {
 					}
 
 				}
-				if o.PullRequestTitle == "" {
-					gitURLpart := strings.Split(gitURL, "/")
-					repository := gitURLpart[len(gitURLpart)-2] + "/" + gitURLpart[len(gitURLpart)-1]
-					o.PullRequestTitle = fmt.Sprintf("chore(deps): upgrade %s to version %s", repository, o.Version)
-				}
-				if o.CommitTitle == "" {
-					o.CommitTitle = o.PullRequestTitle
-				}
 				return nil
 			}
 
 			if rule.ReusePullRequest {
 				if len(o.Labels) == 0 {
-					return fmt.Errorf("To be able to reuse pull request you need to supply pullRequestLabels in config file or --labels")
+					return fmt.Errorf("to be able to reuse pull request you need to supply pullRequestLabels in config file or --labels")
 				}
 				o.PullRequestFilter = &environments.PullRequestFilter{Labels: []string{}}
 				for _, label := range o.Labels {
