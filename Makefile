@@ -28,6 +28,7 @@ GOTEST := $(GO) test
 
 CLIENTSET_GENERATOR_VERSION := kubernetes-1.15.12
 
+GOHOME ?= ${GOPATH}
 # set dev version unless VERSION is explicitly set via environment
 VERSION ?= $(shell echo "$$(git for-each-ref refs/tags/ --count=1 --sort=-version:refname --format='%(refname:short)' 2>/dev/null)-dev+$(REV)" | sed 's/^v//')
 
@@ -172,10 +173,10 @@ lint: ## Lint the code
 .PHONY: all
 all: fmt build lint test
 
-install-refdocs:
-	$(GO) get github.com/jenkins-x/gen-crd-api-reference-docs
+${GOHOME}/bin/gen-crd-api-reference-docs:
+	$(GO) install github.com/jenkins-x/gen-crd-api-reference-docs@latest
 
-generate-refdocs: install-refdocs
+generate-refdocs: ${GOHOME}/bin/gen-crd-api-reference-docs
 	${GOHOME}/bin/gen-crd-api-reference-docs -config "hack/configdocs/config.json" \
 	-template-dir hack/configdocs/templates \
     -api-dir "./pkg/apis/updatebot/v1alpha1" \
