@@ -1174,8 +1174,8 @@ github.com/jenkins-x-plugins/jx-gitops v0.3.20 h1:BoQx60c603KTJ/DTI5IYtvWKCwbUGR
 github.com/jenkins-x-plugins/jx-gitops v0.3.20/go.mod h1:oYyt8n6hp9iUyWkaUKMuv3b22v6TYThCB78w+V4H8jM=
 github.com/jenkins-x-plugins/jx-pipeline v0.1.54 h1:0E/R8LjGFqmpmoOeSq/809Qpqzz/MY9ZL03hxpTdClw=
 github.com/jenkins-x-plugins/jx-pipeline v0.1.54/go.mod h1:d8170kQ5e65QrMugZYuG+kZd1KY6YzzTZsI60Z/SQzY=
-github.com/jenkins-x-plugins/jx-promote v0.4.0 h1:kbRJb3dIqU3Gy6k+fLWJfurH8O4FX13iDoZ3TevIE9I=
-github.com/jenkins-x-plugins/jx-promote v0.4.0/go.mod h1:/3yMsvEza+wxdK7/sHEnM5L/EoQiVQFsO/M8zfcQgvc=
+github.com/jenkins-x-plugins/jx-promote v0.4.3 h1:kabOpWCyWaXYQvPLbcANzG4stHiMi1Z4EbLTc4KZnCg=
+github.com/jenkins-x-plugins/jx-promote v0.4.3/go.mod h1:/3yMsvEza+wxdK7/sHEnM5L/EoQiVQFsO/M8zfcQgvc=
 github.com/jenkins-x/gen-crd-api-reference-docs v0.1.6/go.mod h1:a4dzSf/nNLMMMqultm6IlV/04xq26uICEYPkSTOahWQ=
 github.com/jenkins-x/go-scm v1.11.5 h1:bWfyBlcDB/HHSRmJOSmBs2l4VRL2YF1Ka6Y1dn4Inx0=
 github.com/jenkins-x/go-scm v1.11.5/go.mod h1:GB6XjszezsDOxKTsPoyk4MT/cKw30qkPdJ4tml+MImg=

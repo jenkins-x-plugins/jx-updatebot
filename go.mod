@@ -6,7 +6,7 @@ require (
 	github.com/google/go-cmp v0.5.7
 	github.com/jenkins-x-plugins/jx-gitops v0.7.22
 	github.com/jenkins-x-plugins/jx-pipeline v0.1.54
-	github.com/jenkins-x-plugins/jx-promote v0.4.0
+	github.com/jenkins-x-plugins/jx-promote v0.4.3
 	github.com/jenkins-x/go-scm v1.11.16
 	github.com/jenkins-x/jx-api/v4 v4.4.0
 	github.com/jenkins-x/jx-helpers/v3 v3.3.0
