@@ -3,6 +3,7 @@ package sync
 import (
 	"path/filepath"
 
+	"github.com/helmfile/helmfile/pkg/state"
 	"github.com/jenkins-x-plugins/jx-gitops/pkg/helmfiles"
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x/go-scm/scm"
@@ -19,7 +20,6 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/versionstream"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/yaml2s"
 	"github.com/pkg/errors"
-	"github.com/roboll/helmfile/pkg/state"
 	"github.com/spf13/cobra"
 )
 
