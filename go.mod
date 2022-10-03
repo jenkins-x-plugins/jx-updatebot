@@ -7,7 +7,7 @@ require (
 	github.com/helmfile/helmfile v0.146.0
 	github.com/jenkins-x-plugins/jx-gitops v0.10.5
 	github.com/jenkins-x-plugins/jx-pipeline v0.5.9
-	github.com/jenkins-x-plugins/jx-promote v0.4.4
+	github.com/jenkins-x-plugins/jx-promote v0.4.5
 	github.com/jenkins-x/go-scm v1.11.29
 	github.com/jenkins-x/jx-api/v4 v4.6.2
 	github.com/jenkins-x/jx-helpers/v3 v3.4.2

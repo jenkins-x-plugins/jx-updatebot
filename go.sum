@@ -1087,8 +1087,8 @@ github.com/jenkins-x-plugins/jx-gitops v0.10.5 h1:nK4RMFXGKCtLUvjt5fsHLKvrS4fC4R
 github.com/jenkins-x-plugins/jx-gitops v0.10.5/go.mod h1:qTu+3fSn0Li65buMLGYez4I6OOwPZkElLXF5eeXL8ts=
 github.com/jenkins-x-plugins/jx-pipeline v0.5.9 h1:H01nNliAHmo+GutJqNFdppkqfZ0UOhPTWZJ5/d4S460=
 github.com/jenkins-x-plugins/jx-pipeline v0.5.9/go.mod h1:iJwAbFdC7JJm94+daCjjmcGO50nmxtgnqdOq4SGHdFc=
-github.com/jenkins-x-plugins/jx-promote v0.4.4 h1:02olyvgiSJoU+chPgEL2w9NDuRK13OOEtCfgoPs4y9U=
-github.com/jenkins-x-plugins/jx-promote v0.4.4/go.mod h1:8EP7QkluIHhnQg35Vadm3g6NebGQjFSmcuYZYMGU+RY=
+github.com/jenkins-x-plugins/jx-promote v0.4.5 h1:47ekU3x3VHR9F+jtTFEC5L2axj/Gq/oWAEsH+p8oR+4=
+github.com/jenkins-x-plugins/jx-promote v0.4.5/go.mod h1:8EP7QkluIHhnQg35Vadm3g6NebGQjFSmcuYZYMGU+RY=
 github.com/jenkins-x/go-scm v1.11.29 h1:SXpqD+ZTs9yMH9FHfX3ysXOq6RaKO9vVdwaqDoqMJNA=
 github.com/jenkins-x/go-scm v1.11.29/go.mod h1:s5AZIMeNzvDHRnOG1nhD/OLZZ/LOwHTGLXehCsjwGuo=
 github.com/jenkins-x/jx-api/v4 v4.6.2 h1:RuS5pyPUhVe19CpUStA+1Bqmv1B3kLFyng8Wd6KYOxs=
