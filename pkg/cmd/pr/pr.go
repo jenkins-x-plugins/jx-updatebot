@@ -95,6 +95,7 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 	eo := &o.EnvironmentPullRequestOptions
 	cmd.Flags().StringVarP(&eo.CommitTitle, "commit-title", "", "", "the commit title")
 	cmd.Flags().StringVarP(&eo.CommitMessage, "commit-message", "", "", "the commit message")
+	cmd.Flags().StringVarP(&eo.BaseBranchName, "base-branch-name", "b", "", "the base branch name to use for new pull requests")
 
 	return cmd, o
 }
