@@ -138,6 +138,8 @@ func (o *Options) Run() error {
 		}
 	}
 
+	BaseBranchName := o.BaseBranchName
+
 	for i := range o.UpdateConfig.Spec.Rules {
 		rule := &o.UpdateConfig.Spec.Rules[i]
 		err = o.FindURLs(rule)
@@ -165,6 +167,8 @@ func (o *Options) Run() error {
 
 			// lets clear the branch name so we create a new one each time in a loop
 			o.BranchName = ""
+			// lets reset the base branch name each time in a loop to avoid side effects when reusing pull requests
+			o.BaseBranchName = BaseBranchName
 
 			source := ""
 			details := &scm.PullRequest{
