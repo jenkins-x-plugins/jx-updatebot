@@ -10,7 +10,6 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/requirements"
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
-	"github.com/jenkins-x/go-scm/scm"
 	v1 "github.com/jenkins-x/jx-api/v4/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cmdrunner"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
@@ -24,12 +23,10 @@ import (
 
 // Options the command line options
 type Options struct {
-	Env              string
-	Strategy         string
-	PullRequestTitle string
-	PullRequestBody  string
-	AutoMerge        bool
-	GitSetup         bool
+	Env       string
+	Strategy  string
+	AutoMerge bool
+	GitSetup  bool
 	environments.EnvironmentPullRequestOptions
 }
 
@@ -53,8 +50,8 @@ func NewCmdUpgradeEnvironment() (*cobra.Command, *Options) {
 	cmd.Flags().StringVarP(&o.Strategy, "strategy", "s", "", "the 'kpt' strategy to use. To see available strategies type 'kpt pkg update --help'. Typical values are: resource-merge, fast-forward, alpha-git-patch, force-delete-replace")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{"jx-boot-upgrade"}, "a list of labels to apply to the PR")
 
-	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")
-	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
+	cmd.Flags().StringVar(&o.CommitTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")
+	cmd.Flags().StringVar(&o.CommitMessage, "pull-request-body", "", "the PR body")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", false, "should we automatically merge if the PR pipeline is green")
 	cmd.Flags().BoolVarP(&o.GitSetup, "git-setup", "", false, "should we setup git first so that we can create Pull Requests")
 
@@ -140,25 +137,8 @@ func (o *Options) upgradeRepository(env *v1.Environment, gitURL string) error {
 	// lets clear the branch name so we create a new one each time in a loop
 	o.BranchName = ""
 
-	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = "chore: upgrade pipelines"
-	}
 	if o.CommitTitle == "" {
-		o.CommitTitle = o.PullRequestTitle
-	}
-	source := ""
-	details := &scm.PullRequest{
-		Source: source,
-		Title:  o.PullRequestTitle,
-		Body:   o.PullRequestBody,
-		Draft:  false,
-	}
-
-	for _, label := range o.Labels {
-		details.Labels = append(details.Labels, &scm.Label{
-			Name:        label,
-			Description: label,
-		})
+		o.CommitTitle = "chore: upgrade pipelines"
 	}
 
 	o.Function = func() error {
@@ -166,7 +146,7 @@ func (o *Options) upgradeRepository(env *v1.Environment, gitURL string) error {
 		return o.gitopsUpgrade(dir)
 	}
 
-	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
+	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
 	}
