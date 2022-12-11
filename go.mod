@@ -7,8 +7,8 @@ require (
 	github.com/helmfile/helmfile v0.146.0
 	github.com/jenkins-x-plugins/jx-gitops v0.10.5
 	github.com/jenkins-x-plugins/jx-pipeline v0.5.9
-	github.com/jenkins-x-plugins/jx-promote v0.4.5
-	github.com/jenkins-x/go-scm v1.11.29
+	github.com/jenkins-x-plugins/jx-promote v0.5.0
+	github.com/jenkins-x/go-scm v1.12.0
 	github.com/jenkins-x/jx-api/v4 v4.6.2
 	github.com/jenkins-x/jx-helpers/v3 v3.4.4
 	github.com/jenkins-x/jx-logging/v3 v3.0.10
@@ -66,7 +66,7 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
-	github.com/bluekeyes/go-gitdiff v0.6.1 // indirect
+	github.com/bluekeyes/go-gitdiff v0.7.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect

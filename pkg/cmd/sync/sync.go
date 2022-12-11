@@ -6,7 +6,6 @@ import (
 	"github.com/helmfile/helmfile/pkg/state"
 	"github.com/jenkins-x-plugins/jx-gitops/pkg/helmfiles"
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
-	"github.com/jenkins-x/go-scm/scm"
 	v1 "github.com/jenkins-x/jx-api/v4/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/templates"
@@ -58,8 +57,6 @@ type Options struct {
 	Source             EnvironmentOptions
 	Target             EnvironmentOptions
 	ChartFilter        ChartFilter
-	PullRequestTitle   string
-	PullRequestBody    string
 	GitCommitUsername  string
 	GitCommitUserEmail string
 	AutoMerge          bool
@@ -95,8 +92,8 @@ func NewCmdEnvironmentSync() (*cobra.Command, *Options) {
 		},
 	}
 
-	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "", "the PR title")
-	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
+	cmd.Flags().StringVar(&o.CommitTitle, "pull-request-title", "", "the PR title")
+	cmd.Flags().StringVar(&o.CommitMessage, "pull-request-body", "", "the PR body")
 	cmd.Flags().StringVarP(&o.GitCommitUsername, "git-user-name", "", "", "the user name to git commit")
 	cmd.Flags().StringVarP(&o.GitCommitUserEmail, "git-user-email", "", "", "the user email to git commit")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
@@ -110,9 +107,8 @@ func NewCmdEnvironmentSync() (*cobra.Command, *Options) {
 	o.BaseOptions.AddBaseFlags(cmd)
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
 
-	eo := &o.EnvironmentPullRequestOptions
-	cmd.Flags().StringVarP(&eo.CommitTitle, "commit-title", "", "", "the commit title")
-	cmd.Flags().StringVarP(&eo.CommitMessage, "commit-message", "", "", "the commit message")
+	cmd.Flags().StringVarP(&o.CommitTitle, "commit-title", "", "", "the commit title")
+	cmd.Flags().StringVarP(&o.CommitMessage, "commit-message", "", "", "the commit message")
 
 	o.Source.AddFlags(cmd, "source")
 	o.Target.AddFlags(cmd, "target")
@@ -174,25 +170,8 @@ func (o *Options) Run() error {
 	// lets clear the branch name so we create a new one each time in a loop
 	o.BranchName = ""
 
-	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = "chore: sync versions"
-	}
 	if o.CommitTitle == "" {
-		o.CommitTitle = o.PullRequestTitle
-	}
-	source := ""
-	details := &scm.PullRequest{
-		Source: source,
-		Title:  o.PullRequestTitle,
-		Body:   o.PullRequestBody,
-		Draft:  false,
-	}
-
-	for _, label := range o.Labels {
-		details.Labels = append(details.Labels, &scm.Label{
-			Name:        label,
-			Description: label,
-		})
+		o.CommitTitle = "chore: sync versions"
 	}
 
 	o.Function = func() error {
@@ -200,7 +179,7 @@ func (o *Options) Run() error {
 		return o.SyncVersions(o.SourceDir, dir)
 	}
 
-	_, err = o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
+	_, err = o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
 	}
