@@ -7,10 +7,10 @@ require (
 	github.com/helmfile/helmfile v0.146.0
 	github.com/jenkins-x-plugins/jx-gitops v0.10.5
 	github.com/jenkins-x-plugins/jx-pipeline v0.5.9
-	github.com/jenkins-x-plugins/jx-promote v0.6.0
+	github.com/jenkins-x-plugins/jx-promote v0.6.4
 	github.com/jenkins-x/go-scm v1.12.0
 	github.com/jenkins-x/jx-api/v4 v4.6.2
-	github.com/jenkins-x/jx-helpers/v3 v3.4.4
+	github.com/jenkins-x/jx-helpers/v3 v3.4.9
 	github.com/jenkins-x/jx-logging/v3 v3.0.10
 	github.com/jenkins-x/lighthouse-client v0.0.597
 	github.com/pkg/errors v0.9.1
@@ -211,13 +211,13 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
+	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/term v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
-	golang.org/x/tools v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/api v0.74.0 // indirect
