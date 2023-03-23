@@ -79,6 +79,17 @@ UpdateConfigSpec
 <table>
 <tr>
 <td>
+<code>pullRequestLabels</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>PullRequestLabels defines the labels to apply to created pull requests</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>rules</code></br>
 <em>
 <a href="#updatebot.jenkins-x.io/v1alpha1.Rule">
@@ -496,6 +507,30 @@ bool
 <p>Fork if we should create the pull request from a fork of the repository</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>reusePullRequest</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>ReusePullRequest governs if existing pull requests for application are found and updated. Requires that &ndash;labels
+or UpdateConfigSpec.PullRequestLabels are supplied.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sparseCheckout</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>SparseCheckout governs if sparse checkout is made of repository. Only possible with regex and go changes.
+Note: Not all git servers support this.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="updatebot.jenkins-x.io/v1alpha1.UpdateConfigSpec">UpdateConfigSpec
@@ -515,6 +550,17 @@ bool
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<code>pullRequestLabels</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>PullRequestLabels defines the labels to apply to created pull requests</p>
+</td>
+</tr>
 <tr>
 <td>
 <code>rules</code></br>
@@ -575,5 +621,5 @@ string
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>78bc04d</code>.
+on git commit <code>d317e67</code>.
 </em></p>

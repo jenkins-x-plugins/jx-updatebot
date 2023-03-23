@@ -1,7 +1,7 @@
 package promote_test
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -19,14 +19,13 @@ var (
 )
 
 func TestModifyHelmReleaseFiles(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "")
-	require.NoError(t, err, "could not create temp dir")
+	tmpDir := t.TempDir()
 
 	t.Logf("using dir %s\n", tmpDir)
-	err = files.CopyDirOverwrite("test_data", tmpDir)
+	err := files.CopyDirOverwrite("test_data", tmpDir)
 	require.NoError(t, err, "failed to copy test data to %s", tmpDir)
 
-	dirNames, err := ioutil.ReadDir(tmpDir)
+	dirNames, err := os.ReadDir(tmpDir)
 	assert.NoError(t, err)
 
 	chart := "chartmuseum"
@@ -46,7 +45,7 @@ func TestModifyHelmReleaseFiles(t *testing.T) {
 		err = o.ModifyHelmReleaseFiles(srcDir, chart, sourceRefName, version)
 		require.NoError(t, err, "failed to modify files")
 
-		fileNames, err := ioutil.ReadDir(srcDir)
+		fileNames, err := os.ReadDir(srcDir)
 		require.NoError(t, err, "failed to read fileNames")
 
 		for _, f := range fileNames {
@@ -58,17 +57,18 @@ func TestModifyHelmReleaseFiles(t *testing.T) {
 			srcFile := filepath.Join(srcDir, name)
 
 			if generateTestOutput {
-				data, err := ioutil.ReadFile(srcFile)
+				data, err := os.ReadFile(srcFile)
 				require.NoError(t, err, "failed to load %s", srcFile)
 
-				err = ioutil.WriteFile(expectedFile, data, 0666)
+				err = os.WriteFile(expectedFile, data, 0600)
 				require.NoError(t, err, "failed to save file %s", expectedFile)
 
 				t.Logf("saved file %s\n", expectedFile)
 				continue
 			}
 
-			testhelpers.AssertEqualFileText(t, expectedFile, srcFile)
+			err = testhelpers.AssertEqualFileText(t, expectedFile, srcFile)
+			require.NoError(t, err, "cannot assert expected file %s and actual file %s have the same text", expectedFile, srcFile)
 		}
 	}
 }

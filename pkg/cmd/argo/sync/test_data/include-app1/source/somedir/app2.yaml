@@ -10,8 +10,8 @@ spec:
   source:
     helm:
       parameters:
-        - name: jxRequirements.ingress.domain
-          value: 34.134.146.124.nip.io
+      - name: jxRequirements.ingress.domain
+        value: 34.134.146.124.nip.io
     path: charts/app2
     repoURL: https://github.com/myorg/app2.git
     targetRevision: v1.2.3
@@ -20,4 +20,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true

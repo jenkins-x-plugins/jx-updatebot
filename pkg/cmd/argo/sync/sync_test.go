@@ -1,7 +1,6 @@
 package sync_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,13 +21,12 @@ var (
 )
 
 func TestArgoSync(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "")
-	require.NoError(t, err, "failed to create temp dir")
+	tmpDir := t.TempDir()
 
-	err = files.CopyDirOverwrite("test_data", tmpDir)
+	err := files.CopyDirOverwrite("test_data", tmpDir)
 	require.NoError(t, err, "failed to copy test_data to %s", tmpDir)
 
-	fileSlice, err := ioutil.ReadDir(tmpDir)
+	fileSlice, err := os.ReadDir(tmpDir)
 	require.NoError(t, err, "failed to read dir %s", tmpDir)
 
 	testCaseName := os.Getenv("TEST_NAME")
@@ -69,7 +67,7 @@ func TestArgoSync(t *testing.T) {
 
 // AssertDirContentsEqual asserts that the directory matches the expected dir
 func AssertDirContentsEqual(t *testing.T, generateTestOutput, verbose bool, dir, expectedDir string) {
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error { //nolint:staticcheck
 		if info == nil || info.IsDir() {
 			return nil
 		}
@@ -77,12 +75,13 @@ func AssertDirContentsEqual(t *testing.T, generateTestOutput, verbose bool, dir,
 			return nil
 		}
 
-		rel, err := filepath.Rel(dir, path)
+		rel, err := filepath.Rel(dir, path) //nolint:staticcheck
+		require.NoError(t, err, "failed to return relative path")
 
 		expectedFile := filepath.Join(expectedDir, rel)
 		require.FileExists(t, path)
 
-		resultData, err := ioutil.ReadFile(path)
+		resultData, err := os.ReadFile(path)
 		result := strings.TrimSpace(string(resultData))
 		require.NoError(t, err, "failed to load results %s", path)
 
@@ -91,13 +90,13 @@ func AssertDirContentsEqual(t *testing.T, generateTestOutput, verbose bool, dir,
 			err = os.MkdirAll(expectedDir, files.DefaultDirWritePermissions)
 			require.NoError(t, err, "failed to create expected dir %s", expectedDir)
 
-			err = ioutil.WriteFile(expectedFile, []byte(result), 0666)
+			err = os.WriteFile(expectedFile, []byte(result), 0600)
 			require.NoError(t, err, "failed to save file %s", expectedFile)
 			return nil
 		}
 
 		require.FileExists(t, expectedFile)
-		expectData, err := ioutil.ReadFile(expectedFile)
+		expectData, err := os.ReadFile(expectedFile)
 		require.NoError(t, err, "failed to load results %s", expectedFile)
 		expectedText := strings.TrimSpace(string(expectData))
 

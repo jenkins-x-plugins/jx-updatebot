@@ -21,11 +21,10 @@ var (
 var fakeInput = &fake.FakeInput{Values: map[string]string{"Pick chart(s) to promote: ": "mychart                             : 2.2.2"}}
 
 func TestSync(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "")
-	require.NoError(t, err, "failed to create temp dir")
+	tmpDir := t.TempDir()
 
 	testDir := "test_data"
-	fileSlice, err := ioutil.ReadDir(testDir)
+	fileSlice, err := os.ReadDir(testDir)
 	require.NoError(t, err, "failed to read dir %s", testDir)
 
 	testCaseName := os.Getenv("TEST_NAME")

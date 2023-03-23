@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (o *Options) ApplyCommand(dir string, url string, change v1alpha1.Change, command *v1alpha1.Command) error {
+func (o *Options) ApplyCommand(dir, url string, change v1alpha1.Change, command *v1alpha1.Command) error {
 	c := &cmdrunner.Command{
 		Dir:  dir,
 		Name: command.Name,

@@ -15,6 +15,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// SparseCheckoutPatternsGo return the patterns to check out sparsely
+func (o *Options) SparseCheckoutPatternsGo() []string {
+	return []string{"/go.mod", "/go.sum"}
+}
+
 // GoFindURLs find the git URLs for the given go dependency change
 func (o *Options) GoFindURLs(rule *v1alpha1.Rule, change v1alpha1.Change, gc *v1alpha1.GoChange) error {
 	ctx := context.Background()
@@ -41,7 +46,7 @@ func (o *Options) GoFindURLs(rule *v1alpha1.Rule, change v1alpha1.Change, gc *v1
 }
 
 // ApplyGo applies the go change
-func (o *Options) ApplyGo(dir string, gitURL string, change v1alpha1.Change, gc *v1alpha1.GoChange) error {
+func (o *Options) ApplyGo(dir, gitURL string, change v1alpha1.Change, gc *v1alpha1.GoChange) error {
 	o.CommitTitle = "chore(deps): upgrade go dependencies"
 
 	log.Logger().Infof("finding all the go dependences for repository: %s", gitURL)
@@ -71,7 +76,7 @@ func (o *Options) ApplyGo(dir string, gitURL string, change v1alpha1.Change, gc 
 				Name: "go",
 				Args: []string{"get", patch, line},
 			}
-			text, err = runner(c)
+			_, err = runner(c)
 			if err != nil {
 				log.Logger().Warnf("failed to update %s: %s", line, err.Error())
 			}
@@ -80,7 +85,7 @@ func (o *Options) ApplyGo(dir string, gitURL string, change v1alpha1.Change, gc 
 				Name: "go",
 				Args: []string{"mod", "tidy"},
 			}
-			text, err = runner(c)
+			_, err = runner(c)
 			if err != nil {
 				log.Logger().Warnf("failed to update %s: %s", line, err.Error())
 			}

@@ -1,8 +1,6 @@
 package promote
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,31 +12,26 @@ import (
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
-	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kube/jxclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 // Options the command line options
 type Options struct {
-	Version          string
-	VersionFile      string
-	VersionPrefix    string
-	Dir              string
-	SourceGitURL     string
-	TargetGitURL     string
-	PullRequestTitle string
-	PullRequestBody  string
-	AutoMerge        bool
+	Version       string
+	VersionFile   string
+	VersionPrefix string
+	Dir           string
+	SourceGitURL  string
+	TargetGitURL  string
+	AutoMerge     bool
 	environments.EnvironmentPullRequestOptions
 }
 
 var (
-	info    = termcolor.ColorInfo
 	cmdLong = templates.LongDesc(`
 		Promotes a new Application version in an ArgoCD git repository
 
@@ -49,7 +42,7 @@ var (
 	cmdExample = templates.Examples(`
 		# lets use the $VERSION env var or a VERSION file in the current dir
 		jx updatebot argo promote --target-git-url https://github.com/myorg/my-argo-repo.git
-	
+
 		# lets promote a specific version in the current git clone to a remote repo
 		jx updatebot argo promote --version v1.2.3 --target-git-url https://github.com/myorg/my-argo-repo.git
 
@@ -81,15 +74,14 @@ func NewCmdArgoPromote() (*cobra.Command, *Options) {
 	cmd.Flags().StringVarP(&o.VersionPrefix, "version-prefix", "", "v", "the prefix added to the version number that will be used in the Argo CD Application YAML if --version option is not specified and the version is defaulted from $VERSION or the VERSION file")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{"promote"}, "a list of labels to apply to the PR")
 
-	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")
-	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
+	cmd.Flags().StringVar(&o.CommitTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")
+	cmd.Flags().StringVar(&o.CommitMessage, "pull-request-body", "", "the PR body")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", false, "should we automatically merge if the PR pipeline is green")
 
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
 
-	eo := &o.EnvironmentPullRequestOptions
-	cmd.Flags().StringVarP(&eo.CommitTitle, "commit-title", "", "", "the commit title")
-	cmd.Flags().StringVarP(&eo.CommitMessage, "commit-message", "", "", "the commit message")
+	cmd.Flags().StringVarP(&o.CommitTitle, "commit-title", "", "", "the commit title")
+	cmd.Flags().StringVarP(&o.CommitMessage, "commit-message", "", "", "the commit message")
 	return cmd, o
 }
 
@@ -135,7 +127,7 @@ func (o *Options) Validate() error {
 			return errors.Wrapf(err, "failed to check for file %s", o.VersionFile)
 		}
 		if exists {
-			data, err := ioutil.ReadFile(o.VersionFile)
+			data, err := os.ReadFile(o.VersionFile)
 			if err != nil {
 				return errors.Wrapf(err, "failed to read version file %s", o.VersionFile)
 			}
@@ -168,25 +160,8 @@ func (o *Options) upgradeRepository(gitURL string) error {
 	// lets clear the branch name so we create a new one each time in a loop
 	o.BranchName = ""
 
-	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = fmt.Sprintf("chore: upgrade pipelines")
-	}
 	if o.CommitTitle == "" {
-		o.CommitTitle = o.PullRequestTitle
-	}
-	source := ""
-	details := &scm.PullRequest{
-		Source: source,
-		Title:  o.PullRequestTitle,
-		Body:   o.PullRequestBody,
-		Draft:  false,
-	}
-
-	for _, label := range o.Labels {
-		details.Labels = append(details.Labels, &scm.Label{
-			Name:        label,
-			Description: label,
-		})
+		o.CommitTitle = "chore: upgrade pipelines"
 	}
 
 	o.Function = func() error {
@@ -194,7 +169,7 @@ func (o *Options) upgradeRepository(gitURL string) error {
 		return o.ModifyApplicationFiles(dir, o.SourceGitURL, o.Version)
 	}
 
-	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
+	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
 	}

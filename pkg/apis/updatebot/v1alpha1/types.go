@@ -23,6 +23,8 @@ type UpdateConfig struct {
 
 // UpdateConfigSpec defines the rules to perform when updating.
 type UpdateConfigSpec struct {
+	// PullRequestLabels defines the labels to apply to created pull requests
+	PullRequestLabels []string `json:"pullRequestLabels,omitempty"`
 
 	// Rules defines the change rules
 	Rules []Rule `json:"rules,omitempty"`
@@ -38,6 +40,14 @@ type Rule struct {
 
 	// Fork if we should create the pull request from a fork of the repository
 	Fork bool `json:"fork,omitempty"`
+
+	// ReusePullRequest governs if existing pull requests for application are found and updated. Requires that --labels
+	// or UpdateConfigSpec.PullRequestLabels are supplied.
+	ReusePullRequest bool `json:"reusePullRequest,omitempty"`
+
+	// SparseCheckout governs if sparse checkout is made of repository. Only possible with regex and go changes.
+	// Note: Not all git servers support this.
+	SparseCheckout bool `json:"sparseCheckout,omitempty"`
 }
 
 // Change the kind of change to make on a repository

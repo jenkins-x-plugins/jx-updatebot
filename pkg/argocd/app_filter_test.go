@@ -51,12 +51,14 @@ func TestAppFilter(t *testing.T) {
 	for _, tc := range testCases {
 		filter := tc.filter
 
-		for _, v := range tc.matches {
+		for k := range tc.matches {
+			v := tc.matches[k]
 			actual := filter.Matches(&v)
 			assert.True(t, actual, "should match %#v", v)
 		}
 
-		for _, v := range tc.notMatches {
+		for k := range tc.notMatches {
+			v := tc.notMatches[k]
 			actual := filter.Matches(&v)
 			assert.False(t, actual, "should not match %#v", v)
 		}

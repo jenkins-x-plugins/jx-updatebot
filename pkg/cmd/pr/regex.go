@@ -1,7 +1,7 @@
 package pr
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 
@@ -13,8 +13,18 @@ import (
 	"github.com/yargevad/filepathx"
 )
 
+// SparseCheckoutPatternsRegex return the patterns to check out sparsely
+func (o *Options) SparseCheckoutPatternsRegex(regex *v1alpha1.Regex) []string {
+	res := make([]string, len(regex.Globs))
+	for _, p := range regex.Globs {
+		// Normal glob patterns are always defined compared to the root. For these patterns a prefix of / is needed for that
+		res = append(res, "/"+p)
+	}
+	return res
+}
+
 // ApplyRegex applies the regex change
-func (o *Options) ApplyRegex(dir string, gitURL string, change v1alpha1.Change, regex *v1alpha1.Regex) error {
+func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *v1alpha1.Regex) error {
 	pattern := regex.Pattern
 	if pattern == "" {
 		return errors.Errorf("no pattern for regex change %#v", change)
@@ -46,7 +56,7 @@ func (o *Options) ApplyRegex(dir string, gitURL string, change v1alpha1.Change, 
 		for _, f := range matches {
 			log.Logger().Infof("found file %s", f)
 
-			data, err := ioutil.ReadFile(f)
+			data, err := os.ReadFile(f)
 			if err != nil {
 				return errors.Wrapf(err, "failed to load file %s", f)
 			}
@@ -82,7 +92,7 @@ func (o *Options) ApplyRegex(dir string, gitURL string, change v1alpha1.Change, 
 			})
 
 			if text2 != text {
-				err = ioutil.WriteFile(f, []byte(text2), files.DefaultFileWritePermissions)
+				err = os.WriteFile(f, []byte(text2), files.DefaultFileWritePermissions)
 				if err != nil {
 					return errors.Wrapf(err, "failed to save file %s", f)
 				}

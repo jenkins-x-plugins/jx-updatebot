@@ -13,6 +13,12 @@ ORG := jenkins-x
 ORG_REPO := $(ORG)/$(NAME)
 RELEASE_ORG_REPO := $(ORG_REPO)
 ROOT_PACKAGE := github.com/$(ORG_REPO)
+# This version is just used to trigger a new build in case we update the version of go in jx3-pipeline-catalog, and dont have new PRs which use the updated version in the catalog.
+# This does not reflect the go binary version which was used to build the jx binary, and also does not reflect the version in the catalog.
+# The sole purpose of this variable is to build a new binary if we ever need to build a new jx binary with a new go version with no code change.
+# If you notice that this version is not the same as the catalog version, please open a PR, the maintainers are happy to review it.
+DUMMY_GO_VERSION := 1.18.6
+
 GO_VERSION := $(shell $(GO) version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES := $(call rwildcard,pkg/,*.go) $(call rwildcard,cmd/j,*.go)
 
@@ -28,6 +34,7 @@ GOTEST := $(GO) test
 
 CLIENTSET_GENERATOR_VERSION := kubernetes-1.15.12
 
+GOHOME ?= ${GOPATH}
 # set dev version unless VERSION is explicitly set via environment
 VERSION ?= $(shell echo "$$(git for-each-ref refs/tags/ --count=1 --sort=-version:refname --format='%(refname:short)' 2>/dev/null)-dev+$(REV)" | sed 's/^v//')
 
@@ -172,10 +179,10 @@ lint: ## Lint the code
 .PHONY: all
 all: fmt build lint test
 
-install-refdocs:
-	$(GO) get github.com/jenkins-x/gen-crd-api-reference-docs
+${GOHOME}/bin/gen-crd-api-reference-docs:
+	$(GO) install github.com/jenkins-x/gen-crd-api-reference-docs@latest
 
-generate-refdocs: install-refdocs
+generate-refdocs: ${GOHOME}/bin/gen-crd-api-reference-docs
 	${GOHOME}/bin/gen-crd-api-reference-docs -config "hack/configdocs/config.json" \
 	-template-dir hack/configdocs/templates \
     -api-dir "./pkg/apis/updatebot/v1alpha1" \

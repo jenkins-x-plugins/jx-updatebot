@@ -6,7 +6,7 @@ import (
 	"sigs.k8s.io/kustomize/kyaml/yaml"
 )
 
-func (o *Options) ModifyHelmReleaseFiles(dir, chart string, sourceRefName, version string) error {
+func (o *Options) ModifyHelmReleaseFiles(dir, chart, sourceRefName, version string) error {
 	modifyFn := func(node *yaml.RNode, path string) (bool, error) {
 		v := fluxcd.GetChartVersion(node, path)
 		if chart != v.Chart {

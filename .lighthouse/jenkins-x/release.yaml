@@ -22,25 +22,21 @@ spec:
         - name: next-version
           resources: {}
         - name: jx-variables
-          resources: {}
         - name: release-binary
           resources: {}
-        - name: build-and-push-image
-          resources: {}
-        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/cosign/cosign.yaml@versionStream
-          name: ""
-          resources: {}
+        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/build-scan-push/build-scan-push.yaml@versionStream
+          name: build-container
+        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/build-scan-push/build-scan-push.yaml@versionStream
+          name: push-container
         - name: chart-docs
           resources: {}
-        - image: gcr.io/jenkinsxio/jx-boot:3.0.773
-          name: release-chart
-          resources: {}
-          script: |
-            #!/usr/bin/env sh
-            if [ -d "/workspace/source/charts/$REPO_NAME" ]; then source .jx/variables.sh
-            cd /workspace/source/charts/$REPO_NAME
-            make release; else echo no charts; fi
+        - name: release-chart
         - name: changelog
+          resources: {}
+        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/supply-chain-security/task.yaml@versionStream
+          name: download-syft
+        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/supply-chain-security/task.yaml@versionStream
+          name: build-and-push-sbom
           resources: {}
         - name: upload-binaries
           resources: {}
@@ -48,5 +44,4 @@ spec:
           resources: {}
   podTemplate: {}
   serviceAccountName: tekton-bot
-  timeout: 240h0m0s
 status: {}

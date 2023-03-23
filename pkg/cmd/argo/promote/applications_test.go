@@ -1,7 +1,7 @@
 package promote_test
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -14,14 +14,13 @@ import (
 )
 
 func TestModifyApplicationFiles(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "")
-	require.NoError(t, err, "could not create temp dir")
+	tmpDir := t.TempDir()
 
 	t.Logf("using dir %s\n", tmpDir)
-	err = files.CopyDirOverwrite("test_data", tmpDir)
+	err := files.CopyDirOverwrite("test_data", tmpDir)
 	require.NoError(t, err, "failed to copy test data to %s", tmpDir)
 
-	dirNames, err := ioutil.ReadDir(tmpDir)
+	dirNames, err := os.ReadDir(tmpDir)
 	assert.NoError(t, err)
 
 	repoURL := "https://github.com/myorg/myrepo.git"
@@ -40,7 +39,7 @@ func TestModifyApplicationFiles(t *testing.T) {
 		err = o.ModifyApplicationFiles(srcDir, repoURL, version)
 		require.NoError(t, err, "failed to modify files")
 
-		fileNames, err := ioutil.ReadDir(srcDir)
+		fileNames, err := os.ReadDir(srcDir)
 		require.NoError(t, err, "failed to read fileNames")
 
 		for _, f := range fileNames {
@@ -50,7 +49,8 @@ func TestModifyApplicationFiles(t *testing.T) {
 			}
 			expectedFile := filepath.Join(tmpDir, dir, "expected", name)
 			srcFile := filepath.Join(srcDir, name)
-			testhelpers.AssertEqualFileText(t, expectedFile, srcFile)
+			err = testhelpers.AssertEqualFileText(t, expectedFile, srcFile)
+			require.NoError(t, err, "cannot assert expected file %s and actual file %s have the same text", expectedFile, srcFile)
 		}
 	}
 }

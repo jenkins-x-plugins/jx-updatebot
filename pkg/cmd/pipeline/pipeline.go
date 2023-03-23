@@ -1,8 +1,6 @@
 package pipeline
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +12,6 @@ import (
 	"github.com/jenkins-x-plugins/jx-gitops/pkg/sourceconfigs"
 	"github.com/jenkins-x-plugins/jx-pipeline/pkg/cmd/convert"
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
-	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cmdrunner"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
@@ -27,22 +24,18 @@ import (
 
 // Options the command line options
 type Options struct {
-	Dir              string
-	ConfigFile       string
-	Filter           string
-	KptBinary        string
-	Strategy         string
-	HomeDir          string
-	PullRequestTitle string
-	PullRequestBody  string
-	AutoMerge        bool
-	NoConvert        bool
+	Dir        string
+	ConfigFile string
+	Filter     string
+	KptBinary  string
+	Strategy   string
+	HomeDir    string
+	AutoMerge  bool
+	NoConvert  bool
 	environments.EnvironmentPullRequestOptions
 }
 
-var (
-	info = termcolor.ColorInfo
-)
+var info = termcolor.ColorInfo
 
 // NewCmdUpgradePipeline creates a command object
 func NewCmdUpgradePipeline() (*cobra.Command, *Options) {
@@ -62,17 +55,16 @@ func NewCmdUpgradePipeline() (*cobra.Command, *Options) {
 	cmd.Flags().StringVarP(&o.ConfigFile, "config", "c", "", "the configuration file to load for the repository configurations. If not specified we look in .jx/gitops/source-repositories.yaml")
 	cmd.Flags().StringVarP(&o.Strategy, "strategy", "s", "resource-merge", "the 'kpt' strategy to use. To see available strategies type 'kpt pkg update --help'. Typical values are: resource-merge, fast-forward, alpha-git-patch, force-delete-replace")
 
-	cmd.Flags().StringVar(&o.PullRequestTitle, "pull-request-title", "", "the PR title")
-	cmd.Flags().StringVar(&o.PullRequestBody, "pull-request-body", "", "the PR body")
+	cmd.Flags().StringVar(&o.CommitTitle, "pull-request-title", "", "the PR title")
+	cmd.Flags().StringVar(&o.CommitMessage, "pull-request-body", "", "the PR body")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
 	cmd.Flags().BoolVarP(&o.NoConvert, "no-convert", "", false, "disables converting from Kptfile based pipelines to the uses:sourceURI notation for reusing pipelines across repositories")
 	cmd.Flags().StringVarP(&o.KptBinary, "bin", "", "", "the 'kpt' binary name to use. If not specified this command will download the jx binary plugin into ~/.jx3/plugins/bin and use that")
 
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
 
-	eo := &o.EnvironmentPullRequestOptions
-	cmd.Flags().StringVarP(&eo.CommitTitle, "commit-title", "", "", "the commit title")
-	cmd.Flags().StringVarP(&eo.CommitMessage, "commit-message", "", "", "the commit message")
+	cmd.Flags().StringVarP(&o.CommitTitle, "commit-title", "", "", "the commit title")
+	cmd.Flags().StringVarP(&o.CommitMessage, "commit-message", "", "", "the commit message")
 	return cmd, o
 }
 
@@ -154,7 +146,10 @@ func (o *Options) LoadSourceConfig() (*v1alpha1.SourceConfig, error) {
 }
 
 func (o *Options) UpgradeRepository(config *v1alpha1.SourceConfig, group *v1alpha1.RepositoryGroup, repo *v1alpha1.Repository) error {
-	sourceconfigs.DefaultValues(config, group, repo)
+	err := sourceconfigs.DefaultValues(config, group, repo)
+	if err != nil {
+		return err
+	}
 	gitURL := repo.HTTPCloneURL
 	if gitURL == "" {
 		return nil
@@ -164,25 +159,8 @@ func (o *Options) UpgradeRepository(config *v1alpha1.SourceConfig, group *v1alph
 	// lets clear the branch name so we create a new one each time in a loop
 	o.BranchName = ""
 
-	if o.PullRequestTitle == "" {
-		o.PullRequestTitle = fmt.Sprintf("chore: upgrade pipelines")
-	}
 	if o.CommitTitle == "" {
-		o.CommitTitle = o.PullRequestTitle
-	}
-	source := ""
-	details := &scm.PullRequest{
-		Source: source,
-		Title:  o.PullRequestTitle,
-		Body:   o.PullRequestBody,
-		Draft:  false,
-	}
-
-	for _, label := range o.Labels {
-		details.Labels = append(details.Labels, &scm.Label{
-			Name:        label,
-			Description: label,
-		})
+		o.CommitTitle = "chore: upgrade pipelines"
 	}
 
 	o.Function = func() error {
@@ -193,7 +171,7 @@ func (o *Options) UpgradeRepository(config *v1alpha1.SourceConfig, group *v1alph
 		return o.convertPipelines(gitURL, dir)
 	}
 
-	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", details, o.AutoMerge)
+	_, err = o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
 	}
@@ -210,7 +188,7 @@ func (o *Options) upgradePipelinesViaKpt(dir string) error {
 		return nil
 	}
 
-	fs, err := ioutil.ReadDir(lhDir)
+	fs, err := os.ReadDir(lhDir)
 	if err != nil {
 		return errors.Wrapf(err, "failed to read dir %s", lhDir)
 	}

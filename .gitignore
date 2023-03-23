@@ -64,3 +64,17 @@ docs/apidocs/static/scroll.js
 pkg/jx/cmd/verify-pod.log
 
 plugin.gz
+
+# image tar files
+image.tar
+
+# syft
+bin/syft
+
+# docker credential binaries
+docker-credential-*
+
+# sbom json created by syft
+sbom.json
+
+
