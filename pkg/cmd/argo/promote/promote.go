@@ -33,10 +33,12 @@ type Options struct {
 
 var (
 	cmdLong = templates.LongDesc(`
-		Promotes a new Application version in an ArgoCD git repository
+		Promotes a new Application or ApplicationSet version in an ArgoCD git repository
 
-		This command will use the source git repository URL and version to find the ArgoCD Application resource in the target git URL and create a Pull Request if the version is different.
+		This command will use the source git repository URL and version to find the ArgoCD Application or ApplicationSet resource in the target git URL and create a Pull Request if the version is different.
 		This lets you push promotion pull requests into ArgoCD repositories as part of your CI release pipeline. 
+		
+		You can get the examples in the directory pkg/cmd/argo/promote/test_data/simple
 `)
 
 	cmdExample = templates.Examples(`
@@ -57,7 +59,7 @@ func NewCmdArgoPromote() (*cobra.Command, *Options) {
 
 	cmd := &cobra.Command{
 		Use:     "promote",
-		Short:   "Promotes a new Application version in an ArgoCD git repository",
+		Short:   "Promotes a new Application or ApplicationSet version in an ArgoCD git repository",
 		Long:    cmdLong,
 		Example: cmdExample,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -71,7 +73,7 @@ func NewCmdArgoPromote() (*cobra.Command, *Options) {
 	cmd.Flags().StringVarP(&o.TargetGitURL, "target-git-url", "", "", "the target git URL to create a Pull Request on")
 	cmd.Flags().StringVarP(&o.Version, "version", "", "", "the version number to promote. If not specified uses $VERSION or the version file")
 	cmd.Flags().StringVarP(&o.VersionFile, "version-file", "", "", "the file to load the version from if not specified directly or via a $VERSION environment variable. Defaults to VERSION in the current dir")
-	cmd.Flags().StringVarP(&o.VersionPrefix, "version-prefix", "", "v", "the prefix added to the version number that will be used in the Argo CD Application YAML if --version option is not specified and the version is defaulted from $VERSION or the VERSION file")
+	cmd.Flags().StringVarP(&o.VersionPrefix, "version-prefix", "", "v", "the prefix added to the version number that will be used in the Argo CD Application or ApplicationSet YAML if --version option is not specified and the version is defaulted from $VERSION or the VERSION file")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{"promote"}, "a list of labels to apply to the PR")
 
 	cmd.Flags().StringVar(&o.CommitTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")

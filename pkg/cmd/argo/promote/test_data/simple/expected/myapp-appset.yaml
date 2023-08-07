@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: my-v3-lts-node
+  namespace: argocd
+  annotations:
+    gitops.jenkins-x.io/sourceRepoUrl: https://github.com/myorg/myrepo.git
+spec:
+  generators:
+  - clusters: {}
+  template:
+    metadata:
+      name: "{{name}}-my-v3-lts-node"
+      annotations:
+        test1: test1
+    spec:
+      destination:
+        namespace: cheese
+        server: https://kubernetes.default.svc
+      project: default
+      source:
+        path: charts/my-chart
+        repoURL: https://github.com/myorg/myrepo.git
+        targetRevision: v1.2.3
+      syncPolicy:
+        automated:
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true

@@ -6,6 +6,6 @@ import (
 
 var (
 	ApplicationFilter = kyamls.Filter{
-		Kinds: []string{"argoproj.io/v1alpha1/Application"},
+		Kinds: []string{"argoproj.io/v1alpha1/Application", "argoproj.io/v1alpha1/ApplicationSet"},
 	}
 )
