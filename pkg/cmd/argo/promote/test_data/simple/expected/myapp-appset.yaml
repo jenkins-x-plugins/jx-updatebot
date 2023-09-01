@@ -16,7 +16,7 @@ spec:
     spec:
       destination:
         namespace: cheese
-        server: https://kubernetes.default.svc
+        server: "{{server}}"
       project: default
       source:
         path: charts/my-chart
