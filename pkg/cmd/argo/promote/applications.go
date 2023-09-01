@@ -16,8 +16,13 @@ func (o *Options) ModifyApplicationFiles(dir, repoURL, version string) error {
 		if gitops.TrimGitURLSuffix(repoURL) != gitops.TrimGitURLSuffix(text) {
 			return false, nil
 		}
-
-		err := argocd.SetAppVersion(node, path, version)
+		kind := kyamls.GetKind(node, path)
+		var err error
+		if kind == "Application" {
+			err = argocd.SetAppVersion(node, path, version)
+		} else if kind == "ApplicationSet" {
+			err = argocd.SetAppSetVersion(node, path, version)
+		}
 		if err != nil {
 			return false, err
 		}

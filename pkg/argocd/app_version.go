@@ -52,6 +52,16 @@ func GetAppVersion(node *yaml.RNode, path string) *AppVersion {
 	return v
 }
 
+// SetAppSetVersion sets the applicationSet version
+func SetAppSetVersion(node *yaml.RNode, path, version string) error {
+	err := node.PipeE(yaml.LookupCreate(yaml.ScalarNode, "spec", "template", "spec", "source", "targetRevision"), yaml.FieldSetter{StringValue: version})
+	if err != nil {
+		return errors.Wrapf(err, "failed to set spec.generators.template.source.targetRevision to %s", version)
+	}
+	log.Logger().Debugf("modified the version in file %s to %s", path, version)
+	return nil
+}
+
 // SetAppVersion sets the application version
 func SetAppVersion(node *yaml.RNode, path, version string) error {
 	err := node.PipeE(yaml.LookupCreate(yaml.ScalarNode, "spec", "source", "targetRevision"), yaml.FieldSetter{StringValue: version})
