@@ -5,11 +5,11 @@ require (
 	github.com/cpuguy83/go-md2man v1.0.10
 	github.com/google/go-cmp v0.5.9
 	github.com/helmfile/helmfile v0.146.0
-	github.com/jenkins-x-plugins/jx-gitops v0.10.5
+	github.com/jenkins-x-plugins/jx-gitops v0.15.6
 	github.com/jenkins-x-plugins/jx-pipeline v0.5.9
 	github.com/jenkins-x-plugins/jx-promote v0.6.4
 	github.com/jenkins-x/go-scm v1.12.0
-	github.com/jenkins-x/jx-api/v4 v4.6.2
+	github.com/jenkins-x/jx-api/v4 v4.7.4
 	github.com/jenkins-x/jx-helpers/v3 v3.5.3
 	github.com/jenkins-x/jx-logging/v3 v3.0.10
 	github.com/jenkins-x/lighthouse-client v0.0.597
@@ -68,7 +68,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/containerd/containerd v1.6.15 // indirect
+	github.com/containerd/containerd v1.6.18 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -151,7 +151,7 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-ieproxy v0.0.3 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/mattn/go-runewidth v0.0.10 // indirect
+	github.com/mattn/go-runewidth v0.0.12 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
@@ -206,7 +206,6 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/goleak v1.1.12 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
