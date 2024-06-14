@@ -113,6 +113,16 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 
 		for _, n := range ci.Names {
 			name := scm.Join(repoPrefix, n)
+			sv, err := versionstream.LoadStableVersion(dir, versionstream.VersionKind(kindStr), name)
+			if err != nil {
+				return fmt.Errorf("failed to load stable version for %s: %w", name, err)
+			}
+
+			oldVersion := sv.Version
+			if oldVersion == "" {
+				log.Logger().Debugf("no upgrade is done of chart %s since no version is set", name)
+				continue
+			}
 			info, err := o.Helmer.SearchCharts(name, true)
 			if err != nil {
 				return fmt.Errorf("failed to search for chart %s: %w", name, err)
@@ -128,12 +138,6 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 				continue
 			}
 
-			sv, err := versionstream.LoadStableVersion(dir, versionstream.VersionKind(kindStr), name)
-			if err != nil {
-				return fmt.Errorf("failed to load stable version for %s: %w", name, err)
-			}
-
-			oldVersion := sv.Version
 			if oldVersion != version {
 				_, err := versionstream.UpdateStableVersion(dir, kindStr, name, version)
 				if err != nil {
