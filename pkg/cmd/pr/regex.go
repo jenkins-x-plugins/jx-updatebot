@@ -1,6 +1,7 @@
 package pr
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -9,7 +10,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
-	"github.com/pkg/errors"
+
 	"github.com/yargevad/filepathx"
 )
 
@@ -27,11 +28,11 @@ func (o *Options) SparseCheckoutPatternsRegex(regex *v1alpha1.Regex) []string {
 func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *v1alpha1.Regex) error {
 	pattern := regex.Pattern
 	if pattern == "" {
-		return errors.Errorf("no pattern for regex change %#v", change)
+		return fmt.Errorf("no pattern for regex change %#v", change)
 	}
 	r, err := regexp.Compile(pattern)
 	if err != nil {
-		return errors.Wrapf(err, "failed to parse change regex: %s", pattern)
+		return fmt.Errorf("failed to parse change regex: %s: %w", pattern, err)
 	}
 
 	namedCaptures := make([]bool, 0)
@@ -51,14 +52,14 @@ func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *
 		path := filepath.Join(dir, g)
 		matches, err := filepathx.Glob(path)
 		if err != nil {
-			return errors.Wrapf(err, "failed to evaluate glob %s", path)
+			return fmt.Errorf("failed to evaluate glob %s: %w", path, err)
 		}
 		for _, f := range matches {
 			log.Logger().Infof("found file %s", f)
 
 			data, err := os.ReadFile(f)
 			if err != nil {
-				return errors.Wrapf(err, "failed to load file %s", f)
+				return fmt.Errorf("failed to load file %s: %w", f, err)
 			}
 
 			text := string(data)
@@ -66,7 +67,7 @@ func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *
 			if change.VersionTemplate != "" {
 				version, err = o.EvaluateVersionTemplate(change.VersionTemplate, gitURL)
 				if err != nil {
-					return errors.Wrapf(err, "failed to valuate version template %s", change.VersionTemplate)
+					return fmt.Errorf("failed to valuate version template %s: %w", change.VersionTemplate, err)
 				}
 			}
 
@@ -94,7 +95,7 @@ func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *
 			if text2 != text {
 				err = os.WriteFile(f, []byte(text2), files.DefaultFileWritePermissions)
 				if err != nil {
-					return errors.Wrapf(err, "failed to save file %s", f)
+					return fmt.Errorf("failed to save file %s: %w", f, err)
 				}
 				log.Logger().Infof("modified file %s", info(f))
 			}

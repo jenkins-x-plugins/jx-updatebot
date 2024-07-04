@@ -1,6 +1,8 @@
 package environment
 
 import (
+	"errors"
+	"fmt"
 	"os"
 
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
@@ -17,7 +19,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kube/jxenv"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +42,7 @@ func NewCmdUpgradeEnvironment() (*cobra.Command, *Options) {
 		Use:     "environment",
 		Aliases: []string{"env"},
 		Short:   "Creates a Pull Request to upgrade the environment git repository from the version stream",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			err := o.Run()
 			helper.CheckErr(err)
 		},
@@ -67,19 +69,19 @@ func NewCmdUpgradeEnvironment() (*cobra.Command, *Options) {
 func (o *Options) Run() error {
 	err := o.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate options")
+		return fmt.Errorf("failed to validate options: %w", err)
 	}
 
 	if o.GitSetup {
 		err = o.gitSetup()
 		if err != nil {
-			return errors.Wrapf(err, "failed to setup git")
+			return fmt.Errorf("failed to setup git: %w", err)
 		}
 	}
 	ns := o.EnvironmentPullRequestOptions.Namespace
 	envMap, envNames, err := jxenv.GetEnvironments(o.EnvironmentPullRequestOptions.JXClient, ns)
 	if err != nil {
-		return errors.Wrapf(err, "failed to load Environments from namespace %s", ns)
+		return fmt.Errorf("failed to load Environments from namespace %s: %w", ns, err)
 	}
 
 	if o.Env != "" {
@@ -90,12 +92,12 @@ func (o *Options) Run() error {
 
 		gitURL := env.Spec.Source.URL
 		if gitURL == "" {
-			return errors.Errorf("the Environment %s has no spec.source.url value so we cannot create a Pull Request", o.Env)
+			return fmt.Errorf("the Environment %s has no spec.source.url value so we cannot create a Pull Request", o.Env)
 		}
 
 		err = o.upgradeRepository(env, gitURL)
 		if err != nil {
-			return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
+			return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
 		}
 		return nil
 	}
@@ -112,7 +114,7 @@ func (o *Options) Run() error {
 
 		err = o.upgradeRepository(env, gitURL)
 		if err != nil {
-			errs = append(errs, errors.Wrapf(err, "failed to create Pull Request on repository %s for environment %s", gitURL, name))
+			errs = append(errs, fmt.Errorf("failed to create Pull Request on repository %s for environment %s: %w", gitURL, name, err))
 		}
 	}
 	return errorutil.CombineErrors(errs...)
@@ -123,7 +125,7 @@ func (o *Options) Validate() error {
 
 	o.EnvironmentPullRequestOptions.JXClient, o.EnvironmentPullRequestOptions.Namespace, err = jxclient.LazyCreateJXClientAndNamespace(o.EnvironmentPullRequestOptions.JXClient, o.EnvironmentPullRequestOptions.Namespace)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create jx client")
+		return fmt.Errorf("failed to create jx client: %w", err)
 	}
 
 	// lazy create the git client
@@ -148,7 +150,7 @@ func (o *Options) upgradeRepository(env *v1.Environment, gitURL string) error {
 
 	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
+		return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
 	}
 	return nil
 }
@@ -167,7 +169,7 @@ func (o *Options) gitopsUpgrade(dir string) error {
 	}
 	_, err := o.CommandRunner(c)
 	if err != nil {
-		return errors.Wrapf(err, "failed to run command %s", c.CLI())
+		return fmt.Errorf("failed to run command %s: %w", c.CLI(), err)
 	}
 	return nil
 }
@@ -176,7 +178,7 @@ func (o *Options) gitSetup() error {
 	// lets clone the dev cluster to get the jx-requirements...
 	dir, err := o.cloneClusterGitURL()
 	if err != nil {
-		return errors.Wrapf(err, "failed to clone the cluster git URL")
+		return fmt.Errorf("failed to clone the cluster git URL: %w", err)
 	}
 
 	args := []string{"gitops", "git", "setup"}
@@ -189,7 +191,7 @@ func (o *Options) gitSetup() error {
 	}
 	_, err = o.CommandRunner(c)
 	if err != nil {
-		return errors.Wrapf(err, "failed to run command %s", c.CLI())
+		return fmt.Errorf("failed to run command %s: %w", c.CLI(), err)
 	}
 	return nil
 }
@@ -197,7 +199,7 @@ func (o *Options) gitSetup() error {
 func (o *Options) cloneClusterGitURL() (string, error) {
 	settings, err := requirements.LoadSettings(".", true)
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to load settings")
+		return "", fmt.Errorf("failed to load settings: %w", err)
 	}
 	gitURL := ""
 	if settings != nil {
@@ -208,10 +210,10 @@ func (o *Options) cloneClusterGitURL() (string, error) {
 		ns := o.EnvironmentPullRequestOptions.Namespace
 		env, err := jxenv.GetDevEnvironment(jxClient, ns)
 		if err != nil {
-			return "", errors.Wrap(err, "failed to get dev environment")
+			return "", fmt.Errorf("failed to get dev environment: %w", err)
 		}
 		if env == nil {
-			return "", errors.Errorf("failed to find a dev environment source url as there is no 'dev' Environment resource in namespace %s", ns)
+			return "", fmt.Errorf("failed to find a dev environment source url as there is no 'dev' Environment resource in namespace %s", ns)
 		}
 		gitURL = env.Spec.Source.URL
 		if gitURL == "" {
@@ -220,7 +222,7 @@ func (o *Options) cloneClusterGitURL() (string, error) {
 	}
 	_, clusterDir, err := requirements.GetRequirementsAndGit(o.EnvironmentPullRequestOptions.Git(), gitURL)
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to clone cluster git repository %s", gitURL)
+		return "", fmt.Errorf("failed to clone cluster git repository %s: %w", gitURL, err)
 	}
 	return clusterDir, nil
 }

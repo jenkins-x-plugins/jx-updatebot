@@ -5,7 +5,7 @@ import (
 
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -39,10 +39,10 @@ func (o *Options) ChooseEnvironments() error {
 		// lets pick a source environment
 		o.Source.EnvironmentName, err = o.Input.PickNameWithDefault(o.EnvNames, "source environment: ", "", "pick the name of the source Environment you want to sync")
 		if err != nil {
-			return errors.Wrapf(err, "failed to pick a source environment")
+			return fmt.Errorf("failed to pick a source environment: %w", err)
 		}
 		if o.Source.EnvironmentName == "" {
-			return errors.Errorf("no source environment")
+			return fmt.Errorf("no source environment")
 		}
 	}
 	if o.Target.IsBlank() {
@@ -53,26 +53,26 @@ func (o *Options) ChooseEnvironments() error {
 		}
 		o.Target.EnvironmentName, err = o.Input.PickNameWithDefault(targetEnvNames, "target environment: ", "", "pick the name of the target Environment you want to sync")
 		if err != nil {
-			return errors.Wrapf(err, "failed to pick a target environment")
+			return fmt.Errorf("failed to pick a target environment: %w", err)
 		}
 		if o.Target.EnvironmentName == "" {
-			return errors.Errorf("no target environment")
+			return fmt.Errorf("no target environment")
 		}
 	}
 
 	err = o.ValidateEnvironment(&o.Source, true)
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate the source")
+		return fmt.Errorf("failed to validate the source: %w", err)
 	}
 	err = o.ValidateEnvironment(&o.Target, false)
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate the target")
+		return fmt.Errorf("failed to validate the target: %w", err)
 	}
 
 	// lets validate the setup
 	if o.Source.GitCloneURL == o.Target.GitCloneURL {
 		if o.Source.Namespace == o.Target.Namespace {
-			return errors.Errorf("cannot use the same source and target git URL and namespace. You must sync with either different repositories or namespaces")
+			return fmt.Errorf("cannot use the same source and target git URL and namespace. You must sync with either different repositories or namespaces")
 		}
 	}
 	return nil
@@ -98,7 +98,7 @@ func (o *Options) ValidateEnvironment(env *EnvironmentOptions, source bool) erro
 		env.GitCloneURL = e.Spec.Source.URL
 	}
 	if o.Namespace == "" && envName == "" {
-		return errors.Errorf("no %s environment name or namespace for", name)
+		return fmt.Errorf("no %s environment name or namespace for", name)
 	}
 	if env.GitCloneURL == "" {
 		env.GitCloneURL, err = o.GetDevCloneGitURL()
@@ -112,10 +112,10 @@ func (o *Options) ValidateEnvironment(env *EnvironmentOptions, source bool) erro
 func (o *Options) GetDevCloneGitURL() (string, error) {
 	e := o.EnvMap["dev"]
 	if e == nil {
-		return "", errors.Errorf("no dev Environment found so cannot discover the cluster source git URL")
+		return "", fmt.Errorf("no dev Environment found so cannot discover the cluster source git URL")
 	}
 	if e.Spec.Source.URL == "" {
-		return "", errors.Errorf("dev Environment has no cluster source git URL")
+		return "", fmt.Errorf("dev Environment has no cluster source git URL")
 	}
 	gitURL := e.Spec.Source.URL
 	return gitURL, nil

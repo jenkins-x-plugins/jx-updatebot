@@ -1,6 +1,7 @@
 package promote
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,7 +14,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kube/jxclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -58,7 +59,7 @@ func NewCmdFluxPromote() (*cobra.Command, *Options) {
 		Short:   "Promotes a new HelmRelease version in a FluxCD git repository",
 		Long:    cmdLong,
 		Example: cmdExample,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			err := o.Run()
 			helper.CheckErr(err)
 		},
@@ -88,12 +89,12 @@ func NewCmdFluxPromote() (*cobra.Command, *Options) {
 func (o *Options) Run() error {
 	err := o.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate options")
+		return fmt.Errorf("failed to validate options: %w", err)
 	}
 
 	err = o.upgradeRepository(o.TargetGitURL)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create Pull Request on repository %s", o.TargetGitURL)
+		return fmt.Errorf("failed to create Pull Request on repository %s: %w", o.TargetGitURL, err)
 	}
 	return nil
 }
@@ -110,7 +111,7 @@ func (o *Options) Validate() error {
 		}
 		abs, err := filepath.Abs(o.Dir)
 		if err != nil {
-			return errors.Wrapf(err, "failed to resolve absolute dir for %s", o.Dir)
+			return fmt.Errorf("failed to resolve absolute dir for %s: %w", o.Dir, err)
 		}
 		_, o.Chart = filepath.Split(abs)
 	}
@@ -125,12 +126,12 @@ func (o *Options) Validate() error {
 		}
 		exists, err := files.FileExists(o.VersionFile)
 		if err != nil {
-			return errors.Wrapf(err, "failed to check for file %s", o.VersionFile)
+			return fmt.Errorf("failed to check for file %s: %w", o.VersionFile, err)
 		}
 		if exists {
 			data, err := os.ReadFile(o.VersionFile)
 			if err != nil {
-				return errors.Wrapf(err, "failed to read version file %s", o.VersionFile)
+				return fmt.Errorf("failed to read version file %s: %w", o.VersionFile, err)
 			}
 			o.Version = strings.TrimSpace(string(data))
 		} else {
@@ -149,7 +150,7 @@ func (o *Options) Validate() error {
 
 	o.EnvironmentPullRequestOptions.JXClient, o.EnvironmentPullRequestOptions.Namespace, err = jxclient.LazyCreateJXClientAndNamespace(o.EnvironmentPullRequestOptions.JXClient, o.EnvironmentPullRequestOptions.Namespace)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create jx client")
+		return fmt.Errorf("failed to create jx client: %w", err)
 	}
 
 	// lazy create the git client
@@ -172,7 +173,7 @@ func (o *Options) upgradeRepository(gitURL string) error {
 
 	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
+		return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
 	}
 	return nil
 }

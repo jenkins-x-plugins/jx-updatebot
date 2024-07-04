@@ -24,7 +24,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/yamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -71,7 +71,7 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 		Short:   "Create a Pull Request on each downstream repository",
 		Long:    cmdLong,
 		Example: fmt.Sprintf(cmdExample, rootcmd.BinaryName),
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			err := o.Run()
 			helper.CheckErr(err)
 		},
@@ -104,7 +104,7 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 func (o *Options) Run() error {
 	err := o.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate")
+		return fmt.Errorf("failed to validate: %w", err)
 	}
 
 	if o.CommitMessage == "" || o.CommitTitle == "" || o.Application == "" {
@@ -137,7 +137,7 @@ func (o *Options) Run() error {
 	if o.AddChangelog != "" {
 		changelog, err := os.ReadFile(o.AddChangelog)
 		if err != nil {
-			return errors.Wrapf(err, "failed to read changelog file %s", o.AddChangelog)
+			return fmt.Errorf("failed to read changelog file %s: %w", o.AddChangelog, err)
 		}
 		o.EnvironmentPullRequestOptions.CommitChangelog = string(changelog)
 	}
@@ -148,7 +148,7 @@ func (o *Options) Run() error {
 		rule := &o.UpdateConfig.Spec.Rules[i]
 		err = o.FindURLs(rule)
 		if err != nil {
-			return errors.Wrapf(err, "failed to find URLs")
+			return fmt.Errorf("failed to find URLs: %w", err)
 		}
 
 		o.Fork = rule.Fork
@@ -180,7 +180,7 @@ func (o *Options) Run() error {
 				for _, ch := range rule.Changes {
 					err := o.ApplyChanges(dir, gitURL, ch)
 					if err != nil {
-						return errors.Wrapf(err, "failed to apply change")
+						return fmt.Errorf("failed to apply change: %w", err)
 					}
 
 				}
@@ -202,7 +202,7 @@ func (o *Options) Run() error {
 
 			pr, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 			if err != nil {
-				return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
+				return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
 			}
 			if pr == nil {
 				log.Logger().Infof("no Pull Request created")
@@ -227,12 +227,12 @@ func (o *Options) Validate() error {
 		}
 		exists, err := files.FileExists(o.VersionFile)
 		if err != nil {
-			return errors.Wrapf(err, "failed to check for file %s", o.VersionFile)
+			return fmt.Errorf("failed to check for file %s: %w", o.VersionFile, err)
 		}
 		if exists {
 			data, err := os.ReadFile(o.VersionFile)
 			if err != nil {
-				return errors.Wrapf(err, "failed to read version file %s", o.VersionFile)
+				return fmt.Errorf("failed to read version file %s: %w", o.VersionFile, err)
 			}
 			o.Version = strings.TrimSpace(string(data))
 		} else {
@@ -252,12 +252,12 @@ func (o *Options) Validate() error {
 	}
 	exists, err := files.FileExists(o.ConfigFile)
 	if err != nil {
-		return errors.Wrapf(err, "failed to check for file %s", o.ConfigFile)
+		return fmt.Errorf("failed to check for file %s: %w", o.ConfigFile, err)
 	}
 	if exists {
 		err = yamls.LoadFile(o.ConfigFile, &o.UpdateConfig)
 		if err != nil {
-			return errors.Wrapf(err, "failed to load config file %s", o.ConfigFile)
+			return fmt.Errorf("failed to load config file %s: %w", o.ConfigFile, err)
 		}
 	} else {
 		log.Logger().Warnf("file %s does not exist so cannot create any updatebot Pull Requests", o.ConfigFile)
@@ -276,7 +276,7 @@ func (o *Options) Validate() error {
 
 	_, _, err = gitclient.EnsureUserAndEmailSetup(g, o.Dir, o.GitCommitUsername, o.GitCommitUserEmail)
 	if err != nil {
-		return errors.Wrapf(err, "failed to setup git user and email")
+		return fmt.Errorf("failed to setup git user and email: %w", err)
 	}
 
 	// lets try default the git user/token
@@ -291,17 +291,17 @@ func (o *Options) Validate() error {
 			}
 			err := discover.Validate()
 			if err != nil {
-				return errors.Wrapf(err, "failed to discover repository details")
+				return fmt.Errorf("failed to discover repository details: %w", err)
 			}
 			o.ScmClientFactory.GitServerURL = discover.GitServerURL
 			o.ScmClientFactory.GitToken = discover.GitToken
 		}
 		if o.ScmClientFactory.GitServerURL == "" {
-			return errors.Errorf("no git-server could be found")
+			return fmt.Errorf("no git-server could be found")
 		}
 		err = o.ScmClientFactory.FindGitToken()
 		if err != nil {
-			return errors.Wrapf(err, "failed to find git token")
+			return fmt.Errorf("failed to find git token: %w", err)
 		}
 	}
 	if o.GitCommitUsername == "" {
@@ -316,7 +316,7 @@ func (o *Options) Validate() error {
 
 	if o.GitCredentials {
 		if o.ScmClientFactory.GitToken == "" {
-			return errors.Errorf("missing git token environment variable. Try setting GIT_TOKEN or GITHUB_TOKEN")
+			return fmt.Errorf("missing git token environment variable. Try setting GIT_TOKEN or GITHUB_TOKEN")
 		}
 		_, gc := setup.NewCmdGitSetup()
 		gc.Dir = o.Dir
@@ -327,7 +327,7 @@ func (o *Options) Validate() error {
 		gc.GitProviderURL = "https://github.com"
 		err = gc.Run()
 		if err != nil {
-			return errors.Wrapf(err, "failed to setup git credentials file")
+			return fmt.Errorf("failed to setup git credentials file: %w", err)
 		}
 		log.Logger().Infof("setup git credentials file for user %s and email %s", gc.UserName, gc.UserEmail)
 	}
@@ -359,16 +359,16 @@ func (o *Options) GetSparseCheckoutPatterns(rule v1alpha1.Rule) ([]string, error
 // ApplyChanges applies the changes to the given dir
 func (o *Options) ApplyChanges(dir, gitURL string, change v1alpha1.Change) error {
 	if change.Command != nil {
-		return o.ApplyCommand(dir, gitURL, change, change.Command)
+		return o.ApplyCommand(dir, change.Command)
 	}
 	if change.Go != nil {
-		return o.ApplyGo(dir, gitURL, change, change.Go)
+		return o.ApplyGo(dir, gitURL, change.Go)
 	}
 	if change.Regex != nil {
 		return o.ApplyRegex(dir, gitURL, change, change.Regex)
 	}
 	if change.VersionStream != nil {
-		return o.ApplyVersionStream(dir, gitURL, change, change.VersionStream)
+		return o.ApplyVersionStream(dir, change.VersionStream)
 	}
 	log.Logger().Infof("ignoring unknown change %#v", change)
 	return nil
@@ -377,9 +377,9 @@ func (o *Options) ApplyChanges(dir, gitURL string, change v1alpha1.Change) error
 func (o *Options) FindURLs(rule *v1alpha1.Rule) error {
 	for _, change := range rule.Changes {
 		if change.Go != nil {
-			err := o.GoFindURLs(rule, change, change.Go)
+			err := o.GoFindURLs(rule, change.Go)
 			if err != nil {
-				return errors.Wrapf(err, "failed to find go repositories to update")
+				return fmt.Errorf("failed to find go repositories to update: %w", err)
 			}
 
 		}

@@ -19,7 +19,7 @@ func Main() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   rootcmd.TopLevelCommand,
 		Short: "commands for creating Pull Requests on repositories when versions change",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			err := cmd.Help()
 			if err != nil {
 				log.Logger().Errorf(err.Error())
