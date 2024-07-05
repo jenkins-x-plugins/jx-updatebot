@@ -13,11 +13,10 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/versionstream"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
-	"github.com/pkg/errors"
 )
 
 // ApplyVersionStream applies the version stream change
-func (o *Options) ApplyVersionStream(dir, gitURL string, change v1alpha1.Change, vs *v1alpha1.VersionStreamChange) error {
+func (o *Options) ApplyVersionStream(dir string, vs *v1alpha1.VersionStreamChange) error {
 	kind := vs.Kind
 	if kind == "" {
 		return options.MissingOption("kind")
@@ -29,7 +28,7 @@ func (o *Options) ApplyVersionStream(dir, gitURL string, change v1alpha1.Change,
 	if kind == string(versionstream.KindChart) {
 		err := o.applyVersionStreamCharts(dir, vs, kind)
 		if err != nil {
-			return errors.Wrapf(err, "failed to apply kind %s", kind)
+			return fmt.Errorf("failed to apply kind %s: %w", kind, err)
 		}
 	}
 
@@ -39,19 +38,19 @@ func (o *Options) ApplyVersionStream(dir, gitURL string, change v1alpha1.Change,
 func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStreamChange, kindStr string) error {
 	prefixes, err := versionstream.GetRepositoryPrefixes(dir)
 	if err != nil {
-		return errors.Wrapf(err, "failed to load chart repository prefixes")
+		return fmt.Errorf("failed to load chart repository prefixes: %w", err)
 	}
 
 	kindDir := filepath.Join(dir, kindStr)
 	glob := filepath.Join(kindDir, "*", "defaults.yaml")
 	paths, err := filepath.Glob(glob)
 	if err != nil {
-		return errors.Wrapf(err, "bad glob pattern %s", glob)
+		return fmt.Errorf("bad glob pattern %s: %w", glob, err)
 	}
 	glob = filepath.Join(kindDir, "*", "*", "defaults.yaml")
 	morePaths, err := filepath.Glob(glob)
 	if err != nil {
-		return errors.Wrapf(err, "bad glob pattern %s", glob)
+		return fmt.Errorf("bad glob pattern %s: %w", glob, err)
 	}
 	paths = append(paths, morePaths...)
 
@@ -62,7 +61,7 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 	for _, path := range paths {
 		rel, err := filepath.Rel(kindDir, path)
 		if err != nil {
-			return errors.Wrapf(err, "failed to get relative path of %s", path)
+			return fmt.Errorf("failed to get relative path of %s: %w", path, err)
 		}
 
 		paths := strings.Split(rel, string(os.PathSeparator))
@@ -98,7 +97,7 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 
 		_, err = helmer.AddHelmRepoIfMissing(o.Helmer, ci.RepoURL, repoPrefix, "", "")
 		if err != nil {
-			return errors.Wrapf(err, "failed to add helm repository %s for prefix %s", ci.RepoURL, repoPrefix)
+			return fmt.Errorf("failed to add helm repository %s for prefix %s: %w", ci.RepoURL, repoPrefix, err)
 		}
 	}
 
@@ -116,7 +115,7 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 			name := scm.Join(repoPrefix, n)
 			info, err := o.Helmer.SearchCharts(name, true)
 			if err != nil {
-				return errors.Wrapf(err, "failed to search for chart %s", name)
+				return fmt.Errorf("failed to search for chart %s: %w", name, err)
 			}
 			if len(info) == 0 {
 				log.Logger().Warnf("no version found for chart %s", name)
@@ -131,14 +130,14 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 
 			sv, err := versionstream.LoadStableVersion(dir, versionstream.VersionKind(kindStr), name)
 			if err != nil {
-				return errors.Wrapf(err, "failed to load stable version for %s", name)
+				return fmt.Errorf("failed to load stable version for %s: %w", name, err)
 			}
 
 			oldVersion := sv.Version
 			if oldVersion != version {
 				_, err := versionstream.UpdateStableVersion(dir, kindStr, name, version)
 				if err != nil {
-					return errors.Wrapf(err, "failed to upgrade version of %s to %s", name, version)
+					return fmt.Errorf("failed to upgrade version of %s to %s: %w", name, version, err)
 				}
 				log.Logger().Infof("updated chart %s from %s to %s", name, oldVersion, version)
 

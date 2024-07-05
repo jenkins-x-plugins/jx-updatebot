@@ -1,6 +1,7 @@
 package sync
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/helmfile/helmfile/pkg/state"
@@ -18,7 +19,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/versionstream"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/yaml2s"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -86,7 +87,7 @@ func NewCmdEnvironmentSync() (*cobra.Command, *Options) {
 		Short:   "Synchronizes some or all applications in an environment/namespace to another environment/namespace to reduce version drift",
 		Long:    cmdLong,
 		Example: cmdExample,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			err := o.Run()
 			helper.CheckErr(err)
 		},
@@ -120,18 +121,18 @@ func NewCmdEnvironmentSync() (*cobra.Command, *Options) {
 func (o *Options) Validate() error {
 	err := o.BaseOptions.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate base options")
+		return fmt.Errorf("failed to validate base options: %w", err)
 	}
 	if o.Input == nil {
 		o.Input = inputfactory.NewInput(&o.BaseOptions)
 	}
 	o.JXClient, o.Namespace, err = jxclient.LazyCreateJXClientAndNamespace(o.JXClient, o.Namespace)
 	if err != nil {
-		return errors.Wrap(err, "failed to create JX client")
+		return fmt.Errorf("failed to create JX client: %w", err)
 	}
 	o.EnvMap, o.EnvNames, err = jxenv.GetOrderedEnvironments(o.JXClient, o.Namespace)
 	if err != nil {
-		return errors.Wrapf(err, "failed to load environments")
+		return fmt.Errorf("failed to load environments: %w", err)
 	}
 	// lets remove the dev env name as we don't promote to/from it
 	o.EnvNames = stringhelpers.RemoveStringFromSlice(o.EnvNames, "dev")
@@ -145,17 +146,17 @@ func (o *Options) Validate() error {
 func (o *Options) Run() error {
 	err := o.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate options")
+		return fmt.Errorf("failed to validate options: %w", err)
 	}
 
 	err = o.ChooseEnvironments()
 	if err != nil {
-		return errors.Wrapf(err, "failed to choose environments")
+		return fmt.Errorf("failed to choose environments: %w", err)
 	}
 
 	gitURL := o.Target.GitCloneURL
 	if gitURL == "" {
-		return errors.Errorf("no target git clone URL")
+		return fmt.Errorf("no target git clone URL")
 	}
 
 	o.SourceDir = ""
@@ -163,7 +164,7 @@ func (o *Options) Run() error {
 	if sourceGitURL != "" && gitURL != sourceGitURL {
 		o.SourceDir, err = gitclient.CloneToDir(o.Git(), sourceGitURL, "")
 		if err != nil {
-			return errors.Wrapf(err, "failed to clone source cluster %s", sourceGitURL)
+			return fmt.Errorf("failed to clone source cluster %s: %w", sourceGitURL, err)
 		}
 	}
 
@@ -181,7 +182,7 @@ func (o *Options) Run() error {
 
 	_, err = o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
+		return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
 	}
 	return nil
 }
@@ -194,14 +195,14 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 
 	targetHelmfiles, err := helmfiles.GatherHelmfiles(o.Target.Helmfile, targetDir)
 	if err != nil {
-		return errors.Wrapf(err, "failed to gather target helmfiles from %s", targetDir)
+		return fmt.Errorf("failed to gather target helmfiles from %s: %w", targetDir, err)
 	}
 
 	sourceHelmfiles := targetHelmfiles
 	if sourceDir != "" {
 		sourceHelmfiles, err = helmfiles.GatherHelmfiles(o.Source.Helmfile, sourceDir)
 		if err != nil {
-			return errors.Wrapf(err, "failed to gather source helmfiles from %s", sourceDir)
+			return fmt.Errorf("failed to gather source helmfiles from %s: %w", sourceDir, err)
 		}
 	} else {
 		sourceDir = targetDir
@@ -214,22 +215,22 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 		var err error
 		o.Prefixes, err = versionstream.GetRepositoryPrefixes(o.VersionStreamDir)
 		if err != nil {
-			return errors.Wrapf(err, "failed to load repository prefixes from version stream dir %s", o.VersionStreamDir)
+			return fmt.Errorf("failed to load repository prefixes from version stream dir %s: %w", o.VersionStreamDir, err)
 		}
 	}
 
 	editor, err := helmfiles.NewEditor(targetDir, targetHelmfiles)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create helmfile editor")
+		return fmt.Errorf("failed to create helmfile editor: %w", err)
 	}
 	err = o.syncHelmfileVersions(sourceHelmfiles, editor)
 	if err != nil {
-		return errors.Wrapf(err, "failed to sync versions")
+		return fmt.Errorf("failed to sync versions: %w", err)
 	}
 
 	err = editor.Save()
 	if err != nil {
-		return errors.Wrapf(err, "failed to save modified files")
+		return fmt.Errorf("failed to save modified files: %w", err)
 	}
 	return nil
 }
@@ -241,7 +242,7 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 		path := src.Filepath
 		err := yaml2s.LoadFile(path, helmState)
 		if err != nil {
-			return errors.Wrapf(err, "failed to load helmfile %s", path)
+			return fmt.Errorf("failed to load helmfile %s: %w", path, err)
 		}
 
 		for i := range helmState.Releases {
@@ -258,7 +259,7 @@ func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, edi
 			}
 			err = editor.AddChart(details)
 			if err != nil {
-				return errors.Wrapf(err, "failed to add chart %s", details.String())
+				return fmt.Errorf("failed to add chart %s: %w", details.String(), err)
 			}
 		}
 	}

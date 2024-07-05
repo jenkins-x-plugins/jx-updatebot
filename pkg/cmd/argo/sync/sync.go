@@ -1,6 +1,8 @@
 package sync
 
 import (
+	"fmt"
+
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/argocd"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/gitops"
@@ -14,7 +16,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/versionstream"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/kustomize/kyaml/yaml"
 )
@@ -72,7 +74,7 @@ func NewCmdArgoSync() (*cobra.Command, *Options) {
 		Short:   "Synchronizes some or all applications in an ArgoCD git repository to reduce version drift",
 		Long:    cmdLong,
 		Example: cmdExample,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			err := o.Run()
 			helper.CheckErr(err)
 		},
@@ -109,7 +111,7 @@ func (o *Options) Validate() error {
 	}
 	err := o.BaseOptions.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate base options")
+		return fmt.Errorf("failed to validate base options: %w", err)
 	}
 	if o.Input == nil {
 		o.Input = inputfactory.NewInput(&o.BaseOptions)
@@ -130,10 +132,10 @@ func (o *Options) Validate() error {
 		} else {
 			o.Source.Dir, err = gitclient.CloneToDir(o.Git(), sourceGitURL, "")
 			if err != nil {
-				return errors.Wrapf(err, "failed to clone source cluster %s", sourceGitURL)
+				return fmt.Errorf("failed to clone source cluster %s: %w", sourceGitURL, err)
 			}
 			if o.Source.Dir == "" {
-				return errors.Errorf("failed to clone the source repository to a directory %s", sourceGitURL)
+				return fmt.Errorf("failed to clone the source repository to a directory %s", sourceGitURL)
 			}
 		}
 	}
@@ -144,12 +146,12 @@ func (o *Options) Validate() error {
 func (o *Options) Run() error {
 	err := o.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate options")
+		return fmt.Errorf("failed to validate options: %w", err)
 	}
 
 	gitURL := o.Target.GitCloneURL
 	if gitURL == "" {
-		return errors.Errorf("no target git clone URL")
+		return fmt.Errorf("no target git clone URL")
 	}
 
 	// lets clear the branch name so we create a new one each time in a loop
@@ -166,7 +168,7 @@ func (o *Options) Run() error {
 
 	_, err = o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
+		return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
 	}
 	return nil
 }
@@ -175,12 +177,12 @@ func (o *Options) Run() error {
 func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 	err := o.findSourceApplications(sourceDir)
 	if err != nil {
-		return errors.Wrapf(err, "failed to find source Applications")
+		return fmt.Errorf("failed to find source Applications: %w", err)
 	}
 
 	err = o.syncAppVersions(targetDir)
 	if err != nil {
-		return errors.Wrapf(err, "failed to modify target Applications")
+		return fmt.Errorf("failed to modify target Applications: %w", err)
 	}
 	return nil
 }

@@ -1,14 +1,14 @@
 package pr
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cmdrunner"
-	"github.com/pkg/errors"
 )
 
-func (o *Options) ApplyCommand(dir, url string, change v1alpha1.Change, command *v1alpha1.Command) error {
+func (o *Options) ApplyCommand(dir string, command *v1alpha1.Command) error {
 	c := &cmdrunner.Command{
 		Dir:  dir,
 		Name: command.Name,
@@ -27,7 +27,7 @@ func (o *Options) ApplyCommand(dir, url string, change v1alpha1.Change, command 
 
 	_, err := o.CommandRunner(c)
 	if err != nil {
-		return errors.Wrapf(err, "failed to run command %s", c.CLI())
+		return fmt.Errorf("failed to run command %s: %w", c.CLI(), err)
 	}
 	return nil
 }

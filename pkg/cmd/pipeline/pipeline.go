@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,7 +19,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/yamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -45,7 +46,7 @@ func NewCmdUpgradePipeline() (*cobra.Command, *Options) {
 		Use:     "pipeline",
 		Aliases: []string{"pipelines"},
 		Short:   "Upgrades the pipelines in the source repositories to the latest version stream and pipeline catalog",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			err := o.Run()
 			helper.CheckErr(err)
 		},
@@ -72,12 +73,12 @@ func NewCmdUpgradePipeline() (*cobra.Command, *Options) {
 func (o *Options) Run() error {
 	err := o.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate options")
+		return fmt.Errorf("failed to validate options: %w", err)
 	}
 
 	config, err := o.LoadSourceConfig()
 	if err != nil {
-		return errors.Wrapf(err, "failed to load source config")
+		return fmt.Errorf("failed to load source config: %w", err)
 	}
 
 	for i := range config.Spec.Groups {
@@ -102,13 +103,13 @@ func (o *Options) Validate() error {
 	if o.KptBinary == "" {
 		o.KptBinary, err = plugins.GetKptBinary(plugins.KptVersion)
 		if err != nil {
-			return errors.Wrapf(err, "failed to get kpt plugin")
+			return fmt.Errorf("failed to get kpt plugin: %w", err)
 		}
 	}
 	if o.HomeDir == "" {
 		o.HomeDir, err = os.UserHomeDir()
 		if err != nil {
-			return errors.Wrapf(err, "failed to get home dir")
+			return fmt.Errorf("failed to get home dir: %w", err)
 		}
 	}
 
@@ -131,16 +132,16 @@ func (o *Options) LoadSourceConfig() (*v1alpha1.SourceConfig, error) {
 
 	exists, err := files.FileExists(o.ConfigFile)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to check if file exists %s", o.ConfigFile)
+		return nil, fmt.Errorf("failed to check if file exists %s: %w", o.ConfigFile, err)
 	}
 
 	config := &v1alpha1.SourceConfig{}
 	if !exists {
-		return nil, errors.Errorf("no file %s please you sure you are running this command inside a git clone of your developent cluster repository", o.ConfigFile)
+		return nil, fmt.Errorf("no file %s please you sure you are running this command inside a git clone of your developent cluster repository", o.ConfigFile)
 	}
 	err = yamls.LoadFile(o.ConfigFile, config)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to load file %s", o.ConfigFile)
+		return nil, fmt.Errorf("failed to load file %s: %w", o.ConfigFile, err)
 	}
 	return config, nil
 }
@@ -173,7 +174,7 @@ func (o *Options) UpgradeRepository(config *v1alpha1.SourceConfig, group *v1alph
 
 	_, err = o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create Pull Request on repository %s", gitURL)
+		return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
 	}
 	return nil
 }
@@ -182,7 +183,7 @@ func (o *Options) upgradePipelinesViaKpt(dir string) error {
 	lhDir := filepath.Join(dir, ".lighthouse")
 	exists, err := files.DirExists(lhDir)
 	if err != nil {
-		return errors.Wrapf(err, "failed to check if dir %s exists", lhDir)
+		return fmt.Errorf("failed to check if dir %s exists: %w", lhDir, err)
 	}
 	if !exists {
 		return nil
@@ -190,7 +191,7 @@ func (o *Options) upgradePipelinesViaKpt(dir string) error {
 
 	fs, err := os.ReadDir(lhDir)
 	if err != nil {
-		return errors.Wrapf(err, "failed to read dir %s", lhDir)
+		return fmt.Errorf("failed to read dir %s: %w", lhDir, err)
 	}
 	for _, f := range fs {
 		if !f.IsDir() {
@@ -201,7 +202,7 @@ func (o *Options) upgradePipelinesViaKpt(dir string) error {
 		kptFile := filepath.Join(lhDir, name, "Kptfile")
 		exists, err := files.FileExists(kptFile)
 		if err != nil {
-			return errors.Wrapf(err, "failed to check if file exists %s", kptFile)
+			return fmt.Errorf("failed to check if file exists %s: %w", kptFile, err)
 		}
 		if !exists {
 			continue
@@ -226,7 +227,7 @@ func (o *Options) upgradePipelinesViaKpt(dir string) error {
 		}
 		_, err = o.CommandRunner(c)
 		if err != nil {
-			return errors.Wrapf(err, "failed to run %s", c.CLI())
+			return fmt.Errorf("failed to run %s: %w", c.CLI(), err)
 		}
 	}
 	return nil
@@ -236,19 +237,19 @@ func (o *Options) convertPipelines(gitURL, dir string) error {
 	lhDir := filepath.Join(dir, ".lighthouse")
 	exists, err := files.DirExists(lhDir)
 	if err != nil {
-		return errors.Wrapf(err, "failed to check if dir %s exists", lhDir)
+		return fmt.Errorf("failed to check if dir %s exists: %w", lhDir, err)
 	}
 	if !exists {
 		return nil
 	}
 
-	_, co := convert.NewCmdPipelineConvert()
+	_, co := convert.NewCmdPipelineConvertUses()
 
 	co.Dir = dir
 
 	err = co.Run()
 	if err != nil {
-		return errors.Wrapf(err, "failed to update pipelines for repository %s in dir %s", gitURL, dir)
+		return fmt.Errorf("failed to update pipelines for repository %s in dir %s: %w", gitURL, dir, err)
 	}
 	return nil
 }

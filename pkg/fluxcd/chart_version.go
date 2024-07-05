@@ -1,9 +1,11 @@
 package fluxcd
 
 import (
+	"fmt"
+
 	"github.com/jenkins-x/jx-helpers/v3/pkg/kyamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
-	"github.com/pkg/errors"
+
 	"sigs.k8s.io/kustomize/kyaml/yaml"
 )
 
@@ -41,7 +43,7 @@ func GetChartVersion(node *yaml.RNode, path string) *ChartVersion {
 func SetChartVersion(node *yaml.RNode, path, version string) error {
 	err := node.PipeE(yaml.LookupCreate(yaml.ScalarNode, "spec", "chart", "spec", "version"), yaml.FieldSetter{StringValue: version})
 	if err != nil {
-		return errors.Wrapf(err, "failed to set spec.chart.spec.version to %s", version)
+		return fmt.Errorf("failed to set spec.chart.spec.version to %s: %w", version, err)
 	}
 	log.Logger().Debugf("modified the version in file %s to %s", path, version)
 	return nil

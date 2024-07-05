@@ -10,7 +10,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cmdrunner"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
-	"github.com/pkg/errors"
+
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
@@ -21,7 +21,7 @@ func (o *Options) SparseCheckoutPatternsGo() []string {
 }
 
 // GoFindURLs find the git URLs for the given go dependency change
-func (o *Options) GoFindURLs(rule *v1alpha1.Rule, change v1alpha1.Change, gc *v1alpha1.GoChange) error {
+func (o *Options) GoFindURLs(rule *v1alpha1.Rule, gc *v1alpha1.GoChange) error {
 	ctx := context.Background()
 
 	if o.GraphQLClient == nil {
@@ -39,14 +39,14 @@ func (o *Options) GoFindURLs(rule *v1alpha1.Rule, change v1alpha1.Change, gc *v1
 
 	for _, owner := range gc.Owners {
 		if err := queryRepositoriesWithGoMod(ctx, o.GraphQLClient, rule, gc, owner); err != nil {
-			return errors.Wrapf(err, "failed to query repositories")
+			return fmt.Errorf("failed to query repositories: %w", err)
 		}
 	}
 	return nil
 }
 
 // ApplyGo applies the go change
-func (o *Options) ApplyGo(dir, gitURL string, change v1alpha1.Change, gc *v1alpha1.GoChange) error {
+func (o *Options) ApplyGo(dir, gitURL string, gc *v1alpha1.GoChange) error {
 	o.CommitTitle = "chore(deps): upgrade go dependencies"
 
 	log.Logger().Infof("finding all the go dependences for repository: %s", gitURL)
@@ -125,7 +125,7 @@ func queryRepositoriesWithGoMod(ctx context.Context, client *githubv4.Client, ru
 	for {
 		err := client.Query(ctx, &q, v)
 		if err != nil {
-			return errors.Wrapf(err, "github query failed")
+			return fmt.Errorf("github query failed: %w", err)
 		}
 
 		for _, edge := range q.Organisation.Repositories.Edges {
