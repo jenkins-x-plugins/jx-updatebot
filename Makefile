@@ -9,9 +9,8 @@ MAIN_SRC_FILE=cmd/main.go
 GO := GO111MODULE=on go
 GO_NOMOD :=GO111MODULE=off go
 REV := $(shell git rev-parse --short HEAD 2> /dev/null || echo 'unknown')
-ORG := jenkins-x
+ORG := jenkins-x-plugins
 ORG_REPO := $(ORG)/$(NAME)
-RELEASE_ORG_REPO := $(ORG_REPO)
 ROOT_PACKAGE := github.com/$(ORG_REPO)
 # This version is just used to trigger a new build in case we update the version of go in jx3-pipeline-catalog, and dont have new PRs which use the updated version in the catalog.
 # This does not reflect the go binary version which was used to build the jx binary, and also does not reflect the version in the catalog.
