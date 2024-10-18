@@ -8,10 +8,10 @@ require (
 	github.com/jenkins-x-plugins/jx-gitops v0.21.0
 	github.com/jenkins-x-plugins/jx-pipeline v0.7.7
 	github.com/jenkins-x-plugins/jx-promote v0.6.10
-	github.com/jenkins-x/go-scm v1.14.37
+	github.com/jenkins-x/go-scm v1.14.43
 	github.com/jenkins-x/jx-api/v4 v4.7.6
 	github.com/jenkins-x/jx-helpers/v3 v3.7.1
-	github.com/jenkins-x/jx-logging/v3 v3.0.16
+	github.com/jenkins-x/jx-logging/v3 v3.0.17
 	github.com/jenkins-x/lighthouse-client v0.0.1239
 	github.com/shurcooL/githubv4 v0.0.0-20191102174205-af46314aec7b
 	github.com/spf13/cobra v1.8.1
@@ -19,7 +19,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/yargevad/filepathx v0.0.0-20161019152617-907099cb5a62
 	golang.org/x/oauth2 v0.21.0
-	k8s.io/apimachinery v0.30.2
+	k8s.io/apimachinery v0.30.3
 	sigs.k8s.io/kustomize/kyaml v0.17.1
 )
 
@@ -101,7 +101,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
-	github.com/bluekeyes/go-gitdiff v0.7.1 // indirect
+	github.com/bluekeyes/go-gitdiff v0.8.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect

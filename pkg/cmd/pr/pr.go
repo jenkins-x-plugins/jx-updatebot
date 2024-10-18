@@ -15,7 +15,6 @@ import (
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
-	"github.com/jenkins-x-plugins/jx-updatebot/pkg/rootcmd"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/templates"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
@@ -34,10 +33,6 @@ var (
 	cmdLong = templates.LongDesc(`
 		Create a Pull Request on each downstream repository
 `)
-
-	cmdExample = templates.Examples(`
-		%s pr --test-url https://github.com/myorg/mytest.git
-	`)
 )
 
 // Options the options for the command
@@ -67,10 +62,9 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 	o := &Options{}
 
 	cmd := &cobra.Command{
-		Use:     "pr",
-		Short:   "Create a Pull Request on each downstream repository",
-		Long:    cmdLong,
-		Example: fmt.Sprintf(cmdExample, rootcmd.BinaryName),
+		Use:   "pr",
+		Short: "Create a Pull Request on each downstream repository",
+		Long:  cmdLong,
 		Run: func(_ *cobra.Command, _ []string) {
 			err := o.Run()
 			helper.CheckErr(err)
