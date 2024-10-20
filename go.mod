@@ -10,7 +10,7 @@ require (
 	github.com/jenkins-x-plugins/jx-promote v0.6.10
 	github.com/jenkins-x/go-scm v1.14.43
 	github.com/jenkins-x/jx-api/v4 v4.7.6
-	github.com/jenkins-x/jx-helpers/v3 v3.7.1
+	github.com/jenkins-x/jx-helpers/v3 v3.8.1
 	github.com/jenkins-x/jx-logging/v3 v3.0.17
 	github.com/jenkins-x/lighthouse-client v0.0.1239
 	github.com/shurcooL/githubv4 v0.0.0-20191102174205-af46314aec7b
