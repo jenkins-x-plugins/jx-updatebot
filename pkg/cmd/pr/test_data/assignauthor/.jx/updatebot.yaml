@@ -1,0 +1,19 @@
+apiVersion: updatebot.jenkins-x.io/v1alpha1
+kind: UpdateConfig
+spec:
+  rules:
+  - urls:
+    - https://github.com/jx3-gitops-repositories/jx3-kubernetes
+    changes:
+    - command:
+        name: sh
+        args:
+        - -c
+        - "echo $CHEESE > cheese.txt"
+        env:
+        - name: CHEESE
+          value: Edam
+    pullRequestAssignees:
+      - foo
+      - bar
+    assignAuthorToPullRequests: true

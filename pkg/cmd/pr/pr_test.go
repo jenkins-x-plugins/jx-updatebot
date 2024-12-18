@@ -1,6 +1,7 @@
 package pr_test
 
 import (
+	"github.com/jenkins-x/go-scm/scm"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,7 +21,7 @@ import (
 func TestCreate(t *testing.T) {
 	ev := os.Getenv("JX_EXCLUDE_TEST")
 	if ev == "" {
-		ev = "go"
+		ev = "go,assignauthor"
 	}
 	excludeTests := strings.Split(ev, ",")
 	runner := &fakerunner.FakeRunner{
@@ -83,5 +84,73 @@ func TestCreate(t *testing.T) {
 			t.Logf("body: %s\n\n", pr.Body)
 		}
 
+	}
+}
+
+func TestAssignAuthorToCommit(t *testing.T) {
+	fileNames, err := os.ReadDir("test_data")
+	assert.NoError(t, err)
+
+	for _, f := range fileNames {
+		if !f.IsDir() || f.Name() != "assignauthor" {
+			continue
+		}
+
+		t.Logf("Running test for %s\n", f.Name())
+
+		dir := filepath.Join("test_data", f.Name())
+		fakeScmClient, fakeData := fake.NewDefault()
+
+		// Prepopulate fake data
+		fakeData.Commits["dummy-sha"] = &scm.Commit{
+			Sha: "dummy-sha",
+			Author: scm.Signature{
+				Login: "test-author",
+			},
+		}
+		fakeData.PullRequests[1] = &scm.PullRequest{
+			Number: 1,
+			Title:  "Test PR",
+		}
+
+		fakeData.AssigneesAdded = []string{}
+
+		runner := &fakerunner.FakeRunner{
+			CommandRunner: func(c *cmdrunner.Command) (string, error) {
+				if c.Name == "git" && len(c.Args) > 0 && c.Args[0] == "push" {
+					t.Logf("faking command %s in dir %s\n", c.CLI(), c.Dir)
+					return "", nil
+				}
+				return cmdrunner.DefaultCommandRunner(c)
+			},
+		}
+
+		// Configure the Options object
+		_, o := pr.NewCmdPullRequest()
+		o.Dir = dir
+		o.CommandRunner = runner.Run
+		o.ScmClient = fakeScmClient
+		o.ScmClientFactory.ScmClient = fakeScmClient
+		o.ScmClientFactory.NoWriteGitCredentialsFile = true
+		o.Version = "1.2.3"
+		o.PipelineCommitSha = "dummy-sha"
+		o.EnvironmentPullRequestOptions.ScmClientFactory.GitServerURL = "https://github.com"
+		o.EnvironmentPullRequestOptions.ScmClientFactory.GitToken = "dummytoken"
+		o.EnvironmentPullRequestOptions.ScmClientFactory.GitUsername = "dummyuser"
+
+		// Run the command
+		err = o.Run()
+		require.NoError(t, err, "failed to run command for test %s", f.Name())
+
+		// Validate the assignments
+		expectedAssignees := []string{"foo", "bar", "test-author"}
+		actualAssignees := []string{}
+		for _, assignee := range fakeData.AssigneesAdded {
+			parts := strings.Split(assignee, ":")
+			actualAssignees = append(actualAssignees, parts[1])
+		}
+
+		assert.ElementsMatch(t, expectedAssignees, actualAssignees, "PR should include all specified assignees")
+		t.Logf("PR created successfully with assignees: %v\n", actualAssignees)
 	}
 }

@@ -1,6 +1,7 @@
 package pr
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
+	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/templates"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
@@ -46,9 +48,11 @@ type Options struct {
 	AddChangelog       string
 	GitCommitUsername  string
 	GitCommitUserEmail string
+	PipelineCommitSha  string
 	AutoMerge          bool
 	NoVersion          bool
 	GitCredentials     bool
+	PRAssignees        []string
 	Labels             []string
 	TemplateData       map[string]interface{}
 	PullRequestSHAs    map[string]string
@@ -81,7 +85,9 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 	cmd.Flags().StringVar(&o.CommitMessage, "pull-request-body", "", "the PR body")
 	cmd.Flags().StringVarP(&o.GitCommitUsername, "git-user-name", "", "", "the user name to git commit")
 	cmd.Flags().StringVarP(&o.GitCommitUserEmail, "git-user-email", "", "", "the user email to git commit")
+	cmd.Flags().StringVarP(&o.PipelineCommitSha, "pipeline-commit-sha", "", os.Getenv("PULL_BASE_SHA"), "the git SHA of the commit that triggered the pipeline")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
+	cmd.Flags().StringSliceVar(&o.PRAssignees, "pull-request-assign", []string{}, "Assignees of created PRs")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
 	cmd.Flags().BoolVarP(&o.NoVersion, "no-version", "", false, "disables validation on requiring a '--version' option or environment variable to be required")
 	cmd.Flags().BoolVarP(&o.GitCredentials, "git-credentials", "", false, "ensures the git credentials are setup so we can push to git")
@@ -128,6 +134,10 @@ func (o *Options) Run() error {
 		err = o.CreateOrReusePullRequests(rule, o.Labels, o.AutoMerge)
 		if err != nil {
 			return fmt.Errorf("failed to create Pull Requests: %w", err)
+		}
+		err = o.AssignUsersToPullRequests(rule, pullRequests, gitURL)
+		if err != nil {
+			return fmt.Errorf("failed to set assignees: %w", err)
 		}
 	}
 	return nil
@@ -313,6 +323,43 @@ func (o *Options) SetChangeLog(addChangeLog string) error {
 			return fmt.Errorf("failed to read changelog file %s: %w", addChangeLog, err)
 		}
 		o.EnvironmentPullRequestOptions.CommitChangelog = string(changelog)
+	}
+	return nil
+}
+
+// FindCommitAuthor finds the commit author for the given SHA
+func (o *Options) FindCommitAuthor(gitURL string, sha string) (string, error) {
+	ctx := context.Background()
+	scmClient, repoFullName, err := o.GetScmClient(gitURL, o.GitKind)
+	if err != nil {
+		return "", fmt.Errorf("failed to create ScmClient: %w", err)
+	}
+	commit, _, err := scmClient.Git.FindCommit(ctx, repoFullName, sha)
+	if err != nil {
+		return "", fmt.Errorf("failed to find commit %s: %w", sha, err)
+	}
+
+	author := commit.Author.Login
+	if author == "" {
+		return "", fmt.Errorf("no user found for author of commit %s", sha)
+	}
+
+	return author, nil
+}
+
+// AssignUsersToCommit adds users as an assignee to the PR Issue
+func (o *Options) AssignUsersToCommit(pr *scm.PullRequest, users []string, gitURL string) error {
+	ctx := context.Background()
+	scmClient, repoFullName, err := o.GetScmClient(gitURL, o.GitKind)
+	if err != nil {
+		return fmt.Errorf("failed to create ScmClient: %w", err)
+	}
+	fmt.Printf("Debug: Successfully created ScmClient. repoFullName=%s\n", repoFullName)
+
+	fmt.Printf("Debug: Assigning users=%v to PR=%d...\n", users, pr.Number)
+	_, err = scmClient.PullRequests.AssignIssue(ctx, repoFullName, pr.Number, users)
+	if err != nil {
+		return fmt.Errorf("failed to assign user to PR %d: %w", pr.Number, err)
 	}
 	return nil
 }
