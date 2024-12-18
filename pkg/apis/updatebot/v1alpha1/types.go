@@ -48,6 +48,12 @@ type Rule struct {
 	// SparseCheckout governs if sparse checkout is made of repository. Only possible with regex and go changes.
 	// Note: Not all git servers support this.
 	SparseCheckout bool `json:"sparseCheckout,omitempty"`
+
+	// PullRequestAssignees
+	PullRequestAssignees []string `json:"pullRequestAssignees,omitempty"`
+
+	// AssignAuthorToPullRequests governs if downstream pull requests are automatically assigned to the upstream author
+	AssignAuthorToPullRequests bool `json:"assignAuthorToPullRequests,omitempty"`
 }
 
 // Change the kind of change to make on a repository
