@@ -2,6 +2,7 @@ package pr
 
 import (
 	"fmt"
+	"github.com/jenkins-x/go-scm/scm"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,7 +11,6 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/scmhelpers"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/shurcooL/githubv4"
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
@@ -102,7 +102,7 @@ func (o *Options) Run() error {
 	}
 
 	// Auto-discover git URL and commit details if not provided
-	gitURL, err := o.SetCommitDetails(o.Dir, o.CommitMessage, o.CommitTitle, o.Application)
+	_, err = o.SetCommitDetails(o.Dir, o.CommitMessage, o.CommitTitle, o.Application)
 	if err != nil {
 		return fmt.Errorf("failed to set commit details: %w", err)
 	}
@@ -125,7 +125,7 @@ func (o *Options) Run() error {
 		if err != nil {
 			return fmt.Errorf("failed to process URLs: %w", err)
 		}
-		err := o.CreatePullRequests(rule, o.Labels, o.AutoMerge)
+		_, err = o.CreatePullRequests(rule, o.Labels, o.AutoMerge)
 		if err != nil {
 			return fmt.Errorf("failed to create Pull Requests: %w", err)
 		}
@@ -365,7 +365,7 @@ func (o *Options) ProcessRule(rule v1alpha1.Rule, index int) error {
 	if rule.SparseCheckout {
 		o.EnvironmentPullRequestOptions.SparseCheckoutPatterns, err = o.GetSparseCheckoutPatterns(rule)
 		if err != nil {
-			return fmt.Errorf("Error: Failed to get sparse checkout patterns for rule #%d, error=%v\n", index, err)
+			return fmt.Errorf("error: failed to get sparse checkout patterns for rule #%d, error=%v\n", index, err)
 		}
 	}
 	return nil
