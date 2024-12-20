@@ -2,7 +2,6 @@ package pr
 
 import (
 	"fmt"
-	"github.com/jenkins-x/go-scm/scm"
 	"os"
 	"path/filepath"
 	"strings"
