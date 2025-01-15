@@ -10,7 +10,6 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/scmhelpers"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/shurcooL/githubv4"
 
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
@@ -20,6 +19,7 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/files"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/gitclient/gitdiscovery"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
+	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/yamls"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
@@ -101,108 +101,33 @@ func (o *Options) Run() error {
 		return fmt.Errorf("failed to validate: %w", err)
 	}
 
-	if o.CommitMessage == "" || o.CommitTitle == "" || o.Application == "" {
-		// lets try discover the current git URL
-		if o.Application == "" || o.CommitMessage == "" {
-			gitURL, err := gitdiscovery.FindGitURLFromDir(o.Dir, true)
-			if err != nil {
-				log.Logger().Warnf("failed to find git URL %s", err.Error())
-			} else if gitURL != "" {
-				if o.Application == "" {
-					gitURLpart := strings.Split(gitURL, "/")
-					o.Application = gitURLpart[len(gitURLpart)-2] + "/" +
-						strings.TrimSuffix(gitURLpart[len(gitURLpart)-1], ".git")
-				}
-				if o.CommitMessage == "" {
-					o.CommitMessage = fmt.Sprintf("from: %s\n", gitURL)
-				}
-			}
-		}
-
-		if o.CommitTitle == "" {
-			if o.Application == "" {
-				o.CommitTitle = fmt.Sprintf("chore(deps): upgrade to version %s", o.Version)
-			} else {
-				o.CommitTitle = fmt.Sprintf("chore(deps): upgrade %s to version %s", o.Application, o.Version)
-			}
-		}
+	// Auto-discover git URL and commit details if not provided
+	err = o.SetCommitDetails(o.Dir, o.CommitMessage, o.CommitTitle, o.Application)
+	if err != nil {
+		return fmt.Errorf("failed to set commit details: %w", err)
 	}
 
-	if o.AddChangelog != "" {
-		changelog, err := os.ReadFile(o.AddChangelog)
-		if err != nil {
-			return fmt.Errorf("failed to read changelog file %s: %w", o.AddChangelog, err)
-		}
-		o.EnvironmentPullRequestOptions.CommitChangelog = string(changelog)
+	// Handle changelog
+	err = o.SetChangeLog(o.AddChangelog)
+	if err != nil {
+		return fmt.Errorf("failed to set changelog: %w", err)
 	}
 
 	BaseBranchName := o.BaseBranchName
 
-	for i := range o.UpdateConfig.Spec.Rules {
-		rule := &o.UpdateConfig.Spec.Rules[i]
-		err = o.FindURLs(rule)
+	for i, rule := range o.UpdateConfig.Spec.Rules {
+		err = o.ProcessRule(&rule, i)
 		if err != nil {
-			return fmt.Errorf("failed to find URLs: %w", err)
+			return fmt.Errorf("failed to process rule #%d: %w", i, err)
 		}
 
-		o.Fork = rule.Fork
-		if len(rule.URLs) == 0 {
-			log.Logger().Warnf("no URLs to process for rule %d", i)
+		err = o.ProcessRuleURLs(&rule, BaseBranchName)
+		if err != nil {
+			return fmt.Errorf("failed to process URLs: %w", err)
 		}
-		o.EnvironmentPullRequestOptions.SparseCheckoutPatterns = []string{}
-		if rule.SparseCheckout {
-			o.EnvironmentPullRequestOptions.SparseCheckoutPatterns, err = o.GetSparseCheckoutPatterns(*rule)
-			if err != nil {
-				return err
-			}
-		}
-
-		for _, gitURL := range rule.URLs {
-			if gitURL == "" {
-				log.Logger().Warnf("missing out repository %d as it has no git URL", i)
-				continue
-			}
-
-			// lets clear the branch name so we create a new one each time in a loop
-			o.BranchName = ""
-			// lets reset the base branch name each time in a loop to avoid side effects when reusing pull requests
-			o.BaseBranchName = BaseBranchName
-
-			o.Function = func() error {
-				dir := o.OutDir
-
-				for _, ch := range rule.Changes {
-					err := o.ApplyChanges(dir, gitURL, ch)
-					if err != nil {
-						return fmt.Errorf("failed to apply change: %w", err)
-					}
-
-				}
-				return nil
-			}
-
-			if rule.ReusePullRequest {
-				if len(o.Labels) == 0 {
-					return fmt.Errorf("to be able to reuse pull request you need to supply pullRequestLabels in config file or --labels")
-				}
-				o.PullRequestFilter = &environments.PullRequestFilter{Labels: []string{}}
-				for _, label := range o.Labels {
-					o.PullRequestFilter.Labels = stringhelpers.EnsureStringArrayContains(o.PullRequestFilter.Labels, label)
-				}
-				if o.AutoMerge {
-					o.PullRequestFilter.Labels = stringhelpers.EnsureStringArrayContains(o.PullRequestFilter.Labels, environments.LabelUpdatebot)
-				}
-			}
-
-			pr, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
-			if err != nil {
-				return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
-			}
-			if pr == nil {
-				log.Logger().Infof("no Pull Request created")
-				continue
-			}
-			o.AddPullRequest(pr)
+		err = o.CreateOrReusePullRequests(rule, o.Labels, o.AutoMerge)
+		if err != nil {
+			return fmt.Errorf("failed to create Pull Requests: %w", err)
 		}
 	}
 	return nil
@@ -331,14 +256,14 @@ func (o *Options) Validate() error {
 	return nil
 }
 
-func (o *Options) GetSparseCheckoutPatterns(rule v1alpha1.Rule) ([]string, error) {
+func (o *Options) GetSparseCheckoutPatterns(rule *v1alpha1.Rule) ([]string, error) {
 	patterns := make([]string, len(rule.Changes))
 	for _, change := range rule.Changes {
 		if change.Command != nil {
-			return nil, fmt.Errorf("Sparse checkout not supported for Command change")
+			return nil, fmt.Errorf("sparse checkout not supported for command change")
 		}
 		if change.VersionStream != nil {
-			return nil, fmt.Errorf("Sparse checkout not supported for VersionStream change")
+			return nil, fmt.Errorf("sparse checkout not supported for VersionStream change")
 		}
 		if change.Go != nil {
 			patterns = append(patterns, o.SparseCheckoutPatternsGo()...)
@@ -376,6 +301,129 @@ func (o *Options) FindURLs(rule *v1alpha1.Rule) error {
 				return fmt.Errorf("failed to find go repositories to update: %w", err)
 			}
 
+		}
+	}
+	return nil
+}
+
+func (o *Options) SetChangeLog(addChangeLog string) error {
+	if addChangeLog != "" {
+		changelog, err := os.ReadFile(addChangeLog)
+		if err != nil {
+			return fmt.Errorf("failed to read changelog file %s: %w", addChangeLog, err)
+		}
+		o.EnvironmentPullRequestOptions.CommitChangelog = string(changelog)
+	}
+	return nil
+}
+
+// SetCommitDetails discovers the git URL, and sets the application name, commit message and title
+func (o *Options) SetCommitDetails(dir, commitMessage, commitTitle, application string) error {
+	if commitMessage == "" || commitTitle == "" || application == "" {
+		if application == "" || commitMessage == "" {
+			{
+				gitURL, err := gitdiscovery.FindGitURLFromDir(dir, true)
+				if err != nil {
+					log.Logger().Warnf("failed to find git URL %s", err.Error())
+				} else if gitURL != "" {
+					if application == "" {
+						gitURLPart := strings.Split(gitURL, "/")
+						o.Application = gitURLPart[len(gitURLPart)-2] + "/" +
+							strings.TrimSuffix(gitURLPart[len(gitURLPart)-1], ".git")
+					}
+					if commitMessage == "" {
+						o.CommitMessage = fmt.Sprintf("from: %s\n", gitURL)
+					}
+				}
+
+				if commitTitle == "" {
+					if application == "" {
+						o.CommitTitle = fmt.Sprintf("chore(deps): upgrade to version %s", o.Version)
+					} else {
+						o.CommitTitle = fmt.Sprintf("chore(deps): upgrade %s to version %s", o.Application, o.Version)
+					}
+				}
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
+// ProcessRule sets the Fork and SparseCheckoutPatterns for the given rule
+func (o *Options) ProcessRule(rule *v1alpha1.Rule, index int) error {
+	err := o.FindURLs(rule)
+	if err != nil {
+		return fmt.Errorf("failed to find URLs: %w", err)
+	}
+
+	o.Fork = rule.Fork
+	if len(rule.URLs) == 0 {
+		log.Logger().Warnf("no URLs found for rule #%d, skipping...\n", index)
+		return nil
+	}
+
+	o.EnvironmentPullRequestOptions.SparseCheckoutPatterns = []string{}
+	if rule.SparseCheckout {
+		o.EnvironmentPullRequestOptions.SparseCheckoutPatterns, err = o.GetSparseCheckoutPatterns(rule)
+		if err != nil {
+			return fmt.Errorf("error: failed to get sparse checkout patterns for rule #%d, error=%v", index, err)
+		}
+	}
+	return nil
+}
+
+// ProcessRuleURLs apply changes to the set of URLs in the given rule
+func (o *Options) ProcessRuleURLs(rule *v1alpha1.Rule, baseBranch string) error {
+	for _, gitURL := range rule.URLs {
+		if gitURL == "" {
+			log.Logger().Warnf("skipping empty git URL")
+			continue
+		}
+
+		o.BranchName = ""
+		o.BaseBranchName = baseBranch
+
+		o.Function = func() error {
+			dir := o.OutDir
+			for _, ch := range rule.Changes {
+				err := o.ApplyChanges(dir, gitURL, ch)
+				if err != nil {
+					return fmt.Errorf("failed to apply change: %w", err)
+				}
+			}
+			return nil
+		}
+	}
+	return nil
+}
+
+// CreateOrReusePullRequests creates or reuses a PR on each of the given rule URLs
+func (o *Options) CreateOrReusePullRequests(rule v1alpha1.Rule, labels []string, automerge bool) error {
+	for _, gitURL := range rule.URLs {
+		if gitURL == "" {
+			log.Logger().Warnf("skipping empty git URL")
+			continue
+		}
+		if rule.ReusePullRequest {
+			if len(o.Labels) == 0 {
+				return fmt.Errorf("to be able to reuse pull request you need to supply pullRequestLabels in config file or --labels")
+			}
+			o.PullRequestFilter = &environments.PullRequestFilter{Labels: []string{}}
+			for _, label := range o.Labels {
+				o.PullRequestFilter.Labels = stringhelpers.EnsureStringArrayContains(o.PullRequestFilter.Labels, label)
+			}
+			if o.AutoMerge {
+				o.PullRequestFilter.Labels = stringhelpers.EnsureStringArrayContains(o.PullRequestFilter.Labels, environments.LabelUpdatebot)
+			}
+		}
+
+		pr, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", labels, automerge)
+		if err != nil {
+			return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
+		}
+		if pr != nil {
+			o.AddPullRequest(pr)
 		}
 	}
 	return nil
