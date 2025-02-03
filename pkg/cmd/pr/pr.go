@@ -49,6 +49,7 @@ type Options struct {
 	GitCommitUsername  string
 	GitCommitUserEmail string
 	PipelineCommitSha  string
+	PipelineRepoURL    string
 	AutoMerge          bool
 	NoVersion          bool
 	GitCredentials     bool
@@ -86,6 +87,7 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 	cmd.Flags().StringVarP(&o.GitCommitUsername, "git-user-name", "", "", "the user name to git commit")
 	cmd.Flags().StringVarP(&o.GitCommitUserEmail, "git-user-email", "", "", "the user email to git commit")
 	cmd.Flags().StringVarP(&o.PipelineCommitSha, "pipeline-commit-sha", "", os.Getenv("PULL_BASE_SHA"), "the git SHA of the commit that triggered the pipeline")
+	cmd.Flags().StringVarP(&o.PipelineRepoURL, "pipeline-repo-url", "", os.Getenv("REPO_URL"), "the git URL of the repository that triggered the pipeline")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
 	cmd.Flags().StringSliceVar(&o.PRAssignees, "pull-request-assign", []string{}, "Assignees of created PRs")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", true, "should we automatically merge if the PR pipeline is green")
@@ -406,8 +408,8 @@ func (o *Options) ProcessRuleURLs(rule *v1alpha1.Rule, baseBranch string) error 
 
 // CreateOrReusePullRequests creates or reuses a PR on each of the given rule URLs
 func (o *Options) CreateOrReusePullRequests(rule *v1alpha1.Rule, labels []string, automerge bool) error {
-	for _, gitURL := range rule.URLs {
-		if gitURL == "" {
+	for _, ruleURL := range rule.URLs {
+		if ruleURL == "" {
 			log.Logger().Warnf("skipping empty git URL")
 			continue
 		}
@@ -424,11 +426,11 @@ func (o *Options) CreateOrReusePullRequests(rule *v1alpha1.Rule, labels []string
 			}
 		}
 
-		pr, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", labels, automerge)
+		pr, err := o.EnvironmentPullRequestOptions.Create(ruleURL, "", labels, automerge)
 		if err != nil {
-			return fmt.Errorf("failed to create Pull Request on repository %s: %w", gitURL, err)
+			return fmt.Errorf("failed to create Pull Request on repository %s: %w", ruleURL, err)
 		}
-		err = o.AssignUsersToPullRequestIssue(rule, pr, gitURL, o.PipelineCommitSha, o.GitKind)
+		err = o.AssignUsersToPullRequestIssue(rule, pr, ruleURL, o.PipelineRepoURL, o.PipelineCommitSha, o.GitKind)
 		if err != nil {
 			return fmt.Errorf("failed to assign users to PR: %w", err)
 		}
@@ -437,13 +439,13 @@ func (o *Options) CreateOrReusePullRequests(rule *v1alpha1.Rule, labels []string
 }
 
 // AssignUsersToPullRequestIssue assigns user to a downstream PR issue
-func (o *Options) AssignUsersToPullRequestIssue(rule *v1alpha1.Rule, pullRequest *scm.PullRequest, gitURL, pipelineSHA, gitKind string) error {
+func (o *Options) AssignUsersToPullRequestIssue(rule *v1alpha1.Rule, pullRequest *scm.PullRequest, ruleURL, pipelineURL, pipelineSHA, gitKind string) error {
 	var assignees []string
 	for _, pullRequestAssignee := range rule.PullRequestAssignees {
 		assignees = stringhelpers.EnsureStringArrayContains(assignees, pullRequestAssignee)
 	}
 	if rule.AssignAuthorToPullRequests {
-		author, err := o.FindCommitAuthor(gitURL, pipelineSHA, gitKind)
+		author, err := o.FindCommitAuthor(pipelineURL, pipelineSHA, gitKind)
 		if err != nil {
 			return fmt.Errorf("failed to find commit author: %w", err)
 		}
@@ -452,7 +454,7 @@ func (o *Options) AssignUsersToPullRequestIssue(rule *v1alpha1.Rule, pullRequest
 		}
 	}
 	if len(assignees) > 0 {
-		err := o.AssignUsersToIssue(pullRequest, assignees, gitURL, gitKind)
+		err := o.AssignUsersToIssue(pullRequest, assignees, ruleURL, gitKind)
 		if err != nil {
 			return fmt.Errorf("failed to assign users to PR: %w", err)
 		}
