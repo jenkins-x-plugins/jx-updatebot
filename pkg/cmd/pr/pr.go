@@ -378,12 +378,11 @@ func (o *Options) ProcessRule(rule *v1alpha1.Rule, index int) error {
 
 // ProcessAndCreatePullRequests handles the URL loop, sets the closure, and creates/reuses PRs.
 func (o *Options) ProcessAndCreatePullRequests(rule *v1alpha1.Rule, baseBranch string, labels []string, automerge bool) error {
-	for _, url := range rule.URLs {
-		if url == "" {
+	for _, ruleURL := range rule.URLs {
+		if ruleURL == "" {
 			log.Logger().Warnf("skipping empty git URL")
 			continue
 		}
-		ruleURL := url
 		o.BranchName = ""
 		o.BaseBranchName = baseBranch
 
