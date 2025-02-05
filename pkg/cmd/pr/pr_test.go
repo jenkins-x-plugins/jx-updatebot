@@ -134,6 +134,7 @@ func TestAssignAuthorToCommit(t *testing.T) {
 		o.ScmClientFactory.NoWriteGitCredentialsFile = true
 		o.Version = "1.2.3"
 		o.PipelineCommitSha = "dummy-sha"
+		o.PipelineRepoURL = "https://github.com/testorg/testing.git"
 		o.EnvironmentPullRequestOptions.ScmClientFactory.GitServerURL = "https://github.com"
 		o.EnvironmentPullRequestOptions.ScmClientFactory.GitToken = "dummytoken"
 		o.EnvironmentPullRequestOptions.ScmClientFactory.GitUsername = "dummyuser"
