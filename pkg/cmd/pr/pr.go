@@ -48,6 +48,7 @@ type Options struct {
 	AddChangelog       string
 	GitCommitUsername  string
 	GitCommitUserEmail string
+	PipelineBaseRef    string
 	PipelineCommitSha  string
 	PipelineRepoURL    string
 	AutoMerge          bool
@@ -87,6 +88,7 @@ func NewCmdPullRequest() (*cobra.Command, *Options) {
 	cmd.Flags().StringVarP(&o.GitCommitUsername, "git-user-name", "", "", "the user name to git commit")
 	cmd.Flags().StringVarP(&o.GitCommitUserEmail, "git-user-email", "", "", "the user email to git commit")
 	cmd.Flags().StringVarP(&o.PipelineCommitSha, "pipeline-commit-sha", "", os.Getenv("PULL_BASE_SHA"), "the git SHA of the commit that triggered the pipeline")
+	cmd.Flags().StringVarP(&o.PipelineBaseRef, "pipeline-base-ref", "", os.Getenv("PULL_BASE_REF"), "the git base ref of the commit that triggered the pipeline")
 	cmd.Flags().StringVarP(&o.PipelineRepoURL, "pipeline-repo-url", "", os.Getenv("REPO_URL"), "the git URL of the repository that triggered the pipeline")
 	cmd.Flags().StringSliceVar(&o.Labels, "labels", []string{}, "a list of labels to apply to the PR")
 	cmd.Flags().StringSliceVar(&o.PRAssignees, "pull-request-assign", []string{}, "Assignees of created PRs")
@@ -430,7 +432,7 @@ func (o *Options) CreateOrReusePullRequests(rule *v1alpha1.Rule, labels []string
 		if err != nil {
 			return fmt.Errorf("failed to create Pull Request on repository %s: %w", ruleURL, err)
 		}
-		err = o.AssignUsersToPullRequestIssue(rule, pr, ruleURL, o.PipelineRepoURL, o.PipelineCommitSha, o.GitKind)
+		err = o.AssignUsersToPullRequestIssue(rule, pr, ruleURL, o.PipelineRepoURL, o.PipelineCommitSha, o.PipelineBaseRef, o.GitKind)
 		if err != nil {
 			return fmt.Errorf("failed to assign users to PR: %w", err)
 		}
@@ -439,13 +441,13 @@ func (o *Options) CreateOrReusePullRequests(rule *v1alpha1.Rule, labels []string
 }
 
 // AssignUsersToPullRequestIssue assigns user to a downstream PR issue
-func (o *Options) AssignUsersToPullRequestIssue(rule *v1alpha1.Rule, pullRequest *scm.PullRequest, ruleURL, pipelineURL, pipelineSHA, gitKind string) error {
+func (o *Options) AssignUsersToPullRequestIssue(rule *v1alpha1.Rule, pullRequest *scm.PullRequest, ruleURL, pipelineURL, pipelineSHA, pipelineBaseRef, gitKind string) error {
 	var assignees []string
 	for _, pullRequestAssignee := range rule.PullRequestAssignees {
 		assignees = stringhelpers.EnsureStringArrayContains(assignees, pullRequestAssignee)
 	}
 	if rule.AssignAuthorToPullRequests {
-		author, err := o.FindCommitAuthor(pipelineURL, pipelineSHA, gitKind)
+		author, err := o.FindParentCommitAuthor(pipelineURL, pipelineSHA, pipelineBaseRef, gitKind)
 		if err != nil {
 			return fmt.Errorf("failed to find commit author: %w", err)
 		}
@@ -462,24 +464,42 @@ func (o *Options) AssignUsersToPullRequestIssue(rule *v1alpha1.Rule, pullRequest
 	return nil
 }
 
-// FindCommitAuthor finds the author for the given commit SHA
-func (o *Options) FindCommitAuthor(gitURL, sha, gitKind string) (string, error) {
+// FindParentCommitAuthor finds the author of the parent commit given current commit SHA
+func (o *Options) FindParentCommitAuthor(gitURL, sha, baseRef, gitKind string) (string, error) {
 	ctx := context.Background()
 	scmClient, repoFullName, err := o.GetScmClient(gitURL, gitKind)
 	if err != nil {
 		return "", fmt.Errorf("failed to create ScmClient: %w", err)
 	}
 
-	commit, _, err := scmClient.Git.FindCommit(ctx, repoFullName, sha)
+	// Find the parent commit by listing all commits and choosing commit after the current one
+	// Set a reasonable default for returned commit list size
+	commitOpts := scm.CommitListOptions{
+		Ref:  baseRef,
+		Page: 1,
+		Size: 50,
+		Path: "",
+	}
+	commits, _, err := scmClient.Git.ListCommits(ctx, repoFullName, commitOpts)
 	if err != nil {
-		return "", fmt.Errorf("failed to find commit %s: %w", sha, err)
+		return "", fmt.Errorf("failed to list commits: %w", err)
 	}
-
-	author := commit.Author.Login
-	if author == "" {
-		log.Logger().Warnf("no author found for commit %s", sha)
+	if len(commits) < 2 {
+		return "", fmt.Errorf("no possible parent commit found for commit %s", sha)
 	}
-	return author, nil
+	// Find the current commit Sha from the list of commits
+	for i := range len(commits) {
+		if commits[i].Sha == sha && i < len(commits)-1 {
+			log.Logger().Infof("Found assumed parent commit %s for commit %s", commits[i+1].Sha, sha)
+			// Assume the parent commit author is the next in the list
+			author := commits[i+1].Author.Login
+			if author == "" {
+				log.Logger().Warnf("no author found for commit %s", sha)
+			}
+			return author, nil
+		}
+	}
+	return "", fmt.Errorf("no parent commit found for commit %s", sha)
 }
 
 // AssignUsersToIssue adds users as an assignee to the PR Issue
