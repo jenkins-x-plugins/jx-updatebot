@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/jenkins-x-plugins/jx-gitops/pkg/cmd/git/setup"
@@ -448,24 +450,53 @@ func (o *Options) AssignUsersToPullRequestIssue(rule *v1alpha1.Rule, pullRequest
 	return nil
 }
 
-// FindCommitAuthor finds the author for the given commit SHA
+// FindCommitAuthor finds the author of the commit, or the author of the PR if the commit is a merge commit
 func (o *Options) FindCommitAuthor(gitURL, sha, gitKind string) (string, error) {
+	if gitURL == "" || sha == "" {
+		log.Logger().Warnf("cannot find commit author with empty gitURL or sha")
+		return "", nil
+	}
+
 	ctx := context.Background()
 	scmClient, repoFullName, err := o.GetScmClient(gitURL, gitKind)
+	log.Logger().Infof("Repository URL: %s, extracted repo name: %s", gitURL, repoFullName)
 	if err != nil {
 		return "", fmt.Errorf("failed to create ScmClient: %w", err)
 	}
-
+	log.Logger().Infof("Looking for commit %s in repo %s", sha, repoFullName)
 	commit, _, err := scmClient.Git.FindCommit(ctx, repoFullName, sha)
 	if err != nil {
 		return "", fmt.Errorf("failed to find commit %s: %w", sha, err)
 	}
 
-	author := commit.Author.Login
-	if author == "" {
-		log.Logger().Warnf("no author found for commit %s", sha)
+	if commit == nil {
+		return "", fmt.Errorf("no commit found for SHA %s", sha)
 	}
-	return author, nil
+
+	isMergeCommit, err := checkMergeCommit(commit)
+	if err != nil {
+		return "", fmt.Errorf("failed to check if commit is a merge commit: %w", err)
+	}
+
+	if !isMergeCommit {
+		log.Logger().Infof("commit %s is not a merge commit - using current author", sha)
+		commitAuthor := commit.Author.Login
+		if commitAuthor == "" {
+			log.Logger().Warnf("no author found for commit %s", sha)
+		}
+		return commitAuthor, nil
+	}
+
+	log.Logger().Infof("commit %s is a merge commit - finding PR author", sha)
+	prNumber, err := MergeCommitPullRequestNumber(commit)
+	if err != nil {
+		return "", fmt.Errorf("failed to get PR number from merge commit: %w", err)
+	}
+	prAuthor, err := FindPullRequestAuthor(ctx, scmClient, repoFullName, prNumber)
+	if err != nil {
+		return "", fmt.Errorf("failed to find PR author: %w", err)
+	}
+	return prAuthor, nil
 }
 
 // AssignUsersToIssue adds users as an assignee to the PR Issue
@@ -475,9 +506,51 @@ func (o *Options) AssignUsersToIssue(pullRequest *scm.PullRequest, users []strin
 	if err != nil {
 		return fmt.Errorf("failed to create ScmClient: %w", err)
 	}
+	log.Logger().Infof("Assigning users %v to PR %d in repo %s", users, pullRequest.Number, repoFullName)
 	_, err = scmClient.PullRequests.AssignIssue(ctx, repoFullName, pullRequest.Number, users)
 	if err != nil {
 		return fmt.Errorf("failed to assign user to PR %d: %w", pullRequest.Number, err)
 	}
 	return nil
+}
+
+func checkMergeCommit(commit *scm.Commit) (bool, error) {
+	if commit == nil {
+		return false, fmt.Errorf("commit is nil")
+	}
+	if strings.HasPrefix(commit.Message, "Merge pull request") {
+		log.Logger().Infof("commit %s is a merge commit", commit.Sha)
+		return true, nil
+	}
+	log.Logger().Infof("commit %s is not a merge commit", commit.Sha)
+	return false, nil
+}
+
+func MergeCommitPullRequestNumber(commit *scm.Commit) (string, error) {
+	match := regexp.MustCompile(`\B#(\d+)\b`).FindStringSubmatch(commit.Message)
+	if match == nil {
+		return "", fmt.Errorf("no pull rquest number found: %s", commit.Message)
+	}
+	log.Logger().Infof("found PR number %s in commit message %s", match[1], commit.Message)
+	return match[1], nil
+}
+
+func FindPullRequestAuthor(ctx context.Context, scmClient *scm.Client, repoFullName, prNumberStr string) (string, error) {
+	prNumber, err := strconv.Atoi(prNumberStr)
+	if err != nil {
+		return "", fmt.Errorf("invalid pull request number %q: %w", prNumberStr, err)
+	}
+	pr, _, err := scmClient.PullRequests.Find(ctx, repoFullName, prNumber)
+	if err != nil {
+		return "", fmt.Errorf("failed to find PR %d: %w", prNumber, err)
+	}
+	if pr == nil {
+		return "", fmt.Errorf("no PR found for number %d", prNumber)
+	}
+	if pr.Author.Login == "" {
+		return "", fmt.Errorf("PR %d has no author", prNumber)
+	}
+
+	log.Logger().Infof("found PR author %s for PR %d", pr.Author.Login, prNumber)
+	return pr.Author.Login, nil
 }
