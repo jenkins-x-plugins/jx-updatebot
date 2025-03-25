@@ -331,19 +331,18 @@ func (o *Options) SetCommitDetails(dir, commitMessage, commitTitle, application 
 				} else if gitURL != "" {
 					if application == "" {
 						gitURLPart := strings.Split(gitURL, "/")
-						o.Application = gitURLPart[len(gitURLPart)-2] + "/" +
+						application = gitURLPart[len(gitURLPart)-2] + "/" +
 							strings.TrimSuffix(gitURLPart[len(gitURLPart)-1], ".git")
 					}
 					if commitMessage == "" {
 						o.CommitMessage = fmt.Sprintf("from: %s\n", gitURL)
 					}
-				}
-
-				if commitTitle == "" {
-					if application == "" {
-						o.CommitTitle = fmt.Sprintf("chore(deps): upgrade to version %s", o.Version)
-					} else {
-						o.CommitTitle = fmt.Sprintf("chore(deps): upgrade %s to version %s", o.Application, o.Version)
+					if commitTitle == "" {
+						if application == "" {
+							o.CommitTitle = fmt.Sprintf("chore(deps): upgrade to version %s", o.Version)
+						} else {
+							o.CommitTitle = fmt.Sprintf("chore(deps): upgrade %s to version %s", application, o.Version)
+						}
 					}
 				}
 				return nil
