@@ -324,28 +324,26 @@ func (o *Options) SetChangeLog(addChangeLog string) error {
 func (o *Options) SetCommitDetails(dir string) error {
 	if o.CommitMessage == "" || o.CommitTitle == "" || o.Application == "" {
 		if o.Application == "" || o.CommitMessage == "" {
-			{
-				gitURL, err := gitdiscovery.FindGitURLFromDir(dir, true)
-				if err != nil {
-					log.Logger().Warnf("failed to find git URL %s", err.Error())
-				} else if gitURL != "" {
-					if o.Application == "" {
-						gitURLPart := strings.Split(gitURL, "/")
-						o.Application = gitURLPart[len(gitURLPart)-2] + "/" +
-							strings.TrimSuffix(gitURLPart[len(gitURLPart)-1], ".git")
-					}
-					if o.CommitMessage == "" {
-						o.CommitMessage = fmt.Sprintf("from: %s\n", gitURL)
-					}
-					if o.CommitTitle == "" {
-						if o.Application == "" {
-							o.CommitTitle = fmt.Sprintf("chore(deps): upgrade to version %s", o.Version)
-						} else {
-							o.CommitTitle = fmt.Sprintf("chore(deps): upgrade %s to version %s", o.Application, o.Version)
-						}
-					}
+			gitURL, err := gitdiscovery.FindGitURLFromDir(dir, true)
+			if err != nil {
+				log.Logger().Warnf("failed to find git URL %s", err.Error())
+			} else if gitURL != "" {
+				if o.Application == "" {
+					gitURLPart := strings.Split(gitURL, "/")
+					o.Application = gitURLPart[len(gitURLPart)-2] + "/" +
+						strings.TrimSuffix(gitURLPart[len(gitURLPart)-1], ".git")
 				}
-				return nil
+				if o.CommitMessage == "" {
+					o.CommitMessage = fmt.Sprintf("from: %s\n", gitURL)
+				}
+			}
+		}
+
+		if o.CommitTitle == "" {
+			if o.Application == "" {
+				o.CommitTitle = fmt.Sprintf("chore(deps): upgrade to version %s", o.Version)
+			} else {
+				o.CommitTitle = fmt.Sprintf("chore(deps): upgrade %s to version %s", o.Application, o.Version)
 			}
 		}
 	}
