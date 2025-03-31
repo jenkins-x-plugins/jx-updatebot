@@ -3,6 +3,7 @@ package environment
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
@@ -145,7 +146,9 @@ func (o *Options) upgradeRepository(env *v1.Environment, gitURL string) error {
 
 	o.Function = func() error {
 		dir := o.OutDir
-		return o.gitopsUpgrade(dir)
+		relNotes, err := o.gitopsUpgrade(dir)
+		o.CommitMessage += relNotes
+		return err
 	}
 
 	_, err := o.EnvironmentPullRequestOptions.Create(gitURL, "", o.Labels, o.AutoMerge)
@@ -155,8 +158,13 @@ func (o *Options) upgradeRepository(env *v1.Environment, gitURL string) error {
 	return nil
 }
 
-func (o *Options) gitopsUpgrade(dir string) error {
-	args := []string{"gitops", "upgrade", "--ignore-yaml-error"}
+func (o *Options) gitopsUpgrade(dir string) (string, error) {
+	releaseNotesFile, err := os.CreateTemp("", "release-notes")
+	if err != nil {
+		return "", fmt.Errorf("failed create temporary file for release notes: %w", err)
+	}
+	defer removeTempFile(releaseNotesFile)
+	args := []string{"gitops", "upgrade", "--ignore-yaml-error", "--release-notes-file", releaseNotesFile.Name()}
 	if o.Strategy != "" {
 		args = append(args, "--strategy", o.Strategy)
 	}
@@ -167,11 +175,26 @@ func (o *Options) gitopsUpgrade(dir string) error {
 		Out:  os.Stdout,
 		Err:  os.Stderr,
 	}
-	_, err := o.CommandRunner(c)
+	_, err = o.CommandRunner(c)
 	if err != nil {
-		return fmt.Errorf("failed to run command %s: %w", c.CLI(), err)
+		return "", fmt.Errorf("failed to run command %s: %w", c.CLI(), err)
 	}
-	return nil
+	releaseNotes, err := io.ReadAll(releaseNotesFile)
+	if err != nil {
+		return "", err
+	}
+	return string(releaseNotes), nil
+}
+
+func removeTempFile(file *os.File) {
+	err := file.Close()
+	if err != nil {
+		log.Logger().Warnf("Failed to close release notes file %s: %s", file.Name(), err)
+	}
+	err = os.Remove(file.Name())
+	if err != nil {
+		log.Logger().Warnf("Failed to release release notes file %s: %s", file.Name(), err)
+	}
 }
 
 func (o *Options) gitSetup() error {
