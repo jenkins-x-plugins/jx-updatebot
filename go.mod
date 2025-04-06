@@ -7,10 +7,10 @@ require (
 	github.com/helmfile/helmfile v0.170.0
 	github.com/jenkins-x-plugins/jx-gitops v0.23.11
 	github.com/jenkins-x-plugins/jx-pipeline v0.7.14
-	github.com/jenkins-x-plugins/jx-promote v0.6.12
+	github.com/jenkins-x-plugins/jx-promote v0.6.15
 	github.com/jenkins-x/go-scm v1.14.53
 	github.com/jenkins-x/jx-api/v4 v4.7.9
-	github.com/jenkins-x/jx-helpers/v3 v3.9.1
+	github.com/jenkins-x/jx-helpers/v3 v3.9.4
 	github.com/jenkins-x/jx-logging/v3 v3.0.17
 	github.com/jenkins-x/lighthouse-client v0.0.1437
 	github.com/shurcooL/githubv4 v0.0.0-20191102174205-af46314aec7b
