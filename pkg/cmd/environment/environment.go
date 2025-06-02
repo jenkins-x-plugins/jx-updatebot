@@ -56,6 +56,7 @@ func NewCmdUpgradeEnvironment() (*cobra.Command, *Options) {
 	cmd.Flags().StringVar(&o.CommitTitle, "pull-request-title", "chore: upgrade the cluster git repository from the version stream", "the PR title")
 	cmd.Flags().StringVar(&o.CommitMessage, "pull-request-body", "", "the PR body")
 	cmd.Flags().BoolVarP(&o.AutoMerge, "auto-merge", "", false, "should we automatically merge if the PR pipeline is green")
+	cmd.Flags().BoolVarP(&o.ReusePullRequest, "reuse-pull-request", "", false, "should we reuse existing pull request")
 	cmd.Flags().BoolVarP(&o.GitSetup, "git-setup", "", false, "should we setup git first so that we can create Pull Requests")
 
 	o.EnvironmentPullRequestOptions.ScmClientFactory.AddFlags(cmd)
@@ -131,6 +132,11 @@ func (o *Options) Validate() error {
 
 	// lazy create the git client
 	o.EnvironmentPullRequestOptions.Git()
+
+	if o.ReusePullRequest && len(o.Labels) > 0 {
+		o.PullRequestFilter = &environments.PullRequestFilter{Labels: o.Labels}
+	}
+
 	return nil
 }
 
