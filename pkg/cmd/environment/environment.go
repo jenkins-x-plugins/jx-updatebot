@@ -153,6 +153,10 @@ func (o *Options) upgradeRepository(env *v1.Environment, gitURL string) error {
 	o.Function = func() error {
 		dir := o.OutDir
 		relNotes, err := o.gitopsUpgrade(dir)
+		if relNotes != "" && o.AutoMerge {
+			log.Logger().Info("not merging automatically since there is a release note that needs to be read")
+			o.AutoMerge = false
+		}
 		o.CommitMessage += relNotes
 		return err
 	}
