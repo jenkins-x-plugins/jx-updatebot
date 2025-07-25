@@ -1,4 +1,3 @@
-filepath: ""
 helmfiles:
 - path: helmfiles/jx-staging/helmfile.yaml
 - path: helmfiles/jx/helmfile.yaml
@@ -11,5 +10,3 @@ releases:
 - chart: jx3/jx-pipelines-visualizer
   version: 1.4.0
   name: jx-pipelines-visualizer
-templates: {}
-renderedvalues: {}

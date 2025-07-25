@@ -1,4 +1,3 @@
-filepath: ""
 environments:
   default:
     values:
@@ -14,5 +13,3 @@ releases:
   values:
   - ../../versionStream/charts/jx3/jx-pipelines-visualizer/values.yaml.gotmpl
   - jx-values.yaml
-templates: {}
-renderedvalues: {}
