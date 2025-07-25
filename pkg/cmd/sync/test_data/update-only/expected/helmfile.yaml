@@ -1,4 +1,3 @@
-filepath: ""
 helmfiles:
 - path: helmfiles/jx-production/helmfile.yaml
 - path: helmfiles/nginx/helmfile.yaml
@@ -6,5 +5,3 @@ namespace: jx
 repositories:
 - name: jx3
   url: https://storage.googleapis.com/jenkinsxio/charts
-templates: {}
-renderedvalues: {}

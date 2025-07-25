@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/helmfile/helmfile/pkg/state"
 	"github.com/jenkins-x-plugins/jx-gitops/pkg/helmfiles"
 	"github.com/jenkins-x-plugins/jx-promote/pkg/environments"
 	v1 "github.com/jenkins-x/jx-api/v4/pkg/apis/jenkins.io/v1"
@@ -18,7 +17,6 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/options"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/versionstream"
-	"github.com/jenkins-x/jx-helpers/v3/pkg/yaml2s"
 
 	"github.com/spf13/cobra"
 )
@@ -238,28 +236,29 @@ func (o *Options) SyncVersions(sourceDir, targetDir string) error {
 func (o *Options) syncHelmfileVersions(sourceHelmfiles []helmfiles.Helmfile, editor *helmfiles.Editor) error {
 	for i := range sourceHelmfiles {
 		src := &sourceHelmfiles[i]
-		helmState := &state.HelmState{}
 		path := src.Filepath
-		err := yaml2s.LoadFile(path, helmState)
+		helmStates, err := helmfiles.LoadHelmfile(path)
 		if err != nil {
 			return fmt.Errorf("failed to load helmfile %s: %w", path, err)
 		}
 
-		for i := range helmState.Releases {
-			rel := &helmState.Releases[i]
-			details := helmfiles.NewChartDetails(helmState, rel, o.Prefixes)
-			if o.UpdateOnly {
-				details.UpdateOnly = true
-			}
-			if !o.ChartFilter.Matches(details) {
-				continue
-			}
-			if o.Target.Namespace != "" {
-				details.Namespace = o.Target.Namespace
-			}
-			err = editor.AddChart(details)
-			if err != nil {
-				return fmt.Errorf("failed to add chart %s: %w", details.String(), err)
+		for _, helmState := range helmStates {
+			for i := range helmState.Releases {
+				rel := &helmState.Releases[i]
+				details := helmfiles.NewChartDetails(helmState, rel, o.Prefixes)
+				if o.UpdateOnly {
+					details.UpdateOnly = true
+				}
+				if !o.ChartFilter.Matches(details) {
+					continue
+				}
+				if o.Target.Namespace != "" {
+					details.Namespace = o.Target.Namespace
+				}
+				err = editor.AddChart(details)
+				if err != nil {
+					return fmt.Errorf("failed to add chart %s: %w", details.String(), err)
+				}
 			}
 		}
 	}
