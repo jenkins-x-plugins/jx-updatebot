@@ -414,10 +414,10 @@ func (o *Options) ProcessAndCreatePullRequests(rule *v1alpha1.Rule, baseBranch s
 		}
 		if pr != nil {
 			o.AddPullRequest(pr)
-		}
-		err = o.AssignUsersToPullRequestIssue(rule, pr, ruleURL, o.PipelineRepoURL, o.PipelineCommitSha, o.GitKind)
-		if err != nil {
-			return fmt.Errorf("failed to assign users to PR: %w", err)
+			err = o.AssignUsersToPullRequestIssue(rule, pr, ruleURL, o.PipelineRepoURL, o.PipelineCommitSha, o.GitKind)
+			if err != nil {
+				return fmt.Errorf("failed to assign users to PR: %w", err)
+			}
 		}
 	}
 	return nil
