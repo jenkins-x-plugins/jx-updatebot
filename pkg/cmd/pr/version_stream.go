@@ -1,11 +1,13 @@
 package pr
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/blang/semver"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
 	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
@@ -13,6 +15,10 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/versionstream"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
+	"oras.land/oras-go/v2/registry/remote"
+	"oras.land/oras-go/v2/registry/remote/auth"
+	"oras.land/oras-go/v2/registry/remote/credentials"
+	"oras.land/oras-go/v2/registry/remote/retry"
 )
 
 // ApplyVersionStream applies the version stream change
@@ -123,16 +129,26 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 				log.Logger().Debugf("no upgrade is done of chart %s since no version is set", name)
 				continue
 			}
-			info, err := o.Helmer.SearchCharts(name, true)
-			if err != nil {
-				return fmt.Errorf("failed to search for chart %s: %w", name, err)
+			version := ""
+			if strings.HasPrefix(ci.RepoURL, "oci://") {
+				// shim for lack of support for search charts in helm cli
+				ociRepo := scm.Join(ci.RepoURL, n)
+				version, err = ociFindLatestVersion(ociRepo)
+				if err != nil {
+					return fmt.Errorf("failed to search for chart %s: %w", ociRepo, err)
+				}
+			} else {
+				info, err := o.Helmer.SearchCharts(name, true)
+				if err != nil {
+					return fmt.Errorf("failed to search for chart %s: %w", name, err)
+				}
+				if len(info) == 0 {
+					log.Logger().Warnf("no version found for chart %s", name)
+					continue
+				}
+				chartSummary := info[0]
+				version = chartSummary.ChartVersion
 			}
-			if len(info) == 0 {
-				log.Logger().Warnf("no version found for chart %s", name)
-				continue
-			}
-			chartSummary := info[0]
-			version := chartSummary.ChartVersion
 			if version == "" {
 				log.Logger().Warnf("no chart version found for chart %s", name)
 				continue
@@ -161,6 +177,48 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 		}
 	}
 	return nil
+}
+
+// This method only returns the minimal answer needed
+func ociFindLatestVersion(ociRepo string) (string, error) {
+	repo, err := remote.NewRepository(strings.TrimPrefix(ociRepo, "oci://"))
+	if err != nil {
+		return "", err
+	}
+
+	docker, err := credentials.NewStoreFromDocker(credentials.StoreOptions{
+		AllowPlaintextPut:        false,
+		DetectDefaultNativeStore: false,
+	})
+	if err != nil {
+		return "", err
+	}
+	// Note: The below code can be omitted if authentication is not required.
+	repo.Client = &auth.Client{
+		Client:     retry.DefaultClient,
+		Cache:      auth.NewCache(),
+		Credential: docker.Get,
+	}
+	latestVersion := ""
+	err = repo.Tags(context.Background(), "", func(tags []string) error {
+		versions := make([]semver.Version, len(tags))
+		for i, tag := range tags {
+			// Change underscore (_) back to plus (+) for Helm
+			version, err := semver.Make(strings.ReplaceAll(tag, "_", "+"))
+			if err != nil {
+				log.Logger().WithError(err).Debugf("ignore tag that doesn't look like version: %s", tag)
+				continue
+			}
+			versions[i] = version
+		}
+		semver.Sort(versions)
+		latestVersion = versions[len(versions)-1].String()
+		return nil
+	})
+	if err != nil {
+		return "", err
+	}
+	return latestVersion, nil
 }
 
 type chartInfo struct {

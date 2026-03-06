@@ -2,6 +2,7 @@ module github.com/jenkins-x-plugins/jx-updatebot
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/cpuguy83/go-md2man v1.0.10
 	github.com/google/go-cmp v0.7.0
 	github.com/jenkins-x-plugins/jx-gitops v1.0.24
@@ -19,6 +20,7 @@ require (
 	github.com/yargevad/filepathx v0.0.0-20161019152617-907099cb5a62
 	golang.org/x/oauth2 v0.30.0
 	k8s.io/apimachinery v0.33.2
+	oras.land/oras-go/v2 v2.6.1
 	sigs.k8s.io/kustomize/kyaml v0.19.0
 )
 
@@ -102,7 +104,6 @@ require (
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
-	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/bluekeyes/go-gitdiff v0.8.0 // indirect
@@ -319,7 +320,7 @@ require (
 	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac // indirect
 	golang.org/x/mod v0.29.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/term v0.37.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
@@ -352,7 +353,6 @@ require (
 	k8s.io/kubectl v0.33.2 // indirect
 	k8s.io/utils v0.0.0-20241210054802-24370beab758 // indirect
 	knative.dev/pkg v0.0.0-20250415155312-ed3e2158b883 // indirect
-	oras.land/oras-go/v2 v2.6.0 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/kustomize/api v0.19.0 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
@@ -360,4 +360,4 @@ require (
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
-go 1.24.4
+go 1.25.0
