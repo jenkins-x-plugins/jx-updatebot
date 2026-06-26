@@ -131,7 +131,7 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 			}
 			version := ""
 			if strings.HasPrefix(ci.RepoURL, "oci://") {
-				// shim for lack of support for search charts in helm cli
+				// shim for lack of support for searching OCI charts in helm cli
 				ociRepo := scm.Join(ci.RepoURL, n)
 				version, err = ociFindLatestVersion(ociRepo)
 				if err != nil {
@@ -201,24 +201,23 @@ func ociFindLatestVersion(ociRepo string) (string, error) {
 	}
 	latestVersion := ""
 	err = repo.Tags(context.Background(), "", func(tags []string) error {
-		versions := make([]semver.Version, len(tags))
-		for i, tag := range tags {
+		var latestFound semver.Version
+		for _, tag := range tags {
 			// Change underscore (_) back to plus (+) for Helm
-			version, err := semver.Make(strings.ReplaceAll(tag, "_", "+"))
+			version, err := semver.ParseTolerant(strings.ReplaceAll(tag, "_", "+"))
 			if err != nil {
 				log.Logger().WithError(err).Debugf("ignore tag that doesn't look like version: %s", tag)
 				continue
 			}
-			versions[i] = version
+			log.Logger().Debugf("considering tag that does look like version: %s", tag)
+			if version.GT(latestFound) {
+				latestFound = version
+				latestVersion = strings.ReplaceAll(tag, "_", "+")
+			}
 		}
-		semver.Sort(versions)
-		latestVersion = versions[len(versions)-1].String()
 		return nil
 	})
-	if err != nil {
-		return "", err
-	}
-	return latestVersion, nil
+	return latestVersion, err
 }
 
 type chartInfo struct {
