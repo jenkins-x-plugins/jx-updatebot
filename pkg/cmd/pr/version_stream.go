@@ -129,11 +129,20 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 				log.Logger().Debugf("no upgrade is done of chart %s since no version is set", name)
 				continue
 			}
+			var upperLimit *semver.Version
+			if sv.UpperLimit != "" {
+				upperLimit = &semver.Version{}
+				*upperLimit, err = semver.ParseTolerant(sv.UpperLimit)
+				if err != nil {
+					log.Logger().WithError(err).Errorf("upperLimit '%s' can not be parsed. Skipping", sv.UpperLimit)
+					continue
+				}
+			}
 			version := ""
 			if strings.HasPrefix(ci.RepoURL, "oci://") {
 				// shim for lack of support for searching OCI charts in helm cli
 				ociRepo := scm.Join(ci.RepoURL, n)
-				version, err = ociFindLatestVersion(ociRepo)
+				version, err = ociFindLatestVersion(ociRepo, upperLimit)
 				if err != nil {
 					return fmt.Errorf("failed to search for chart %s: %w", ociRepo, err)
 				}
@@ -146,8 +155,26 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 					log.Logger().Warnf("no version found for chart %s", name)
 					continue
 				}
-				chartSummary := info[0]
-				version = chartSummary.ChartVersion
+				for i := range info {
+					chartSummary := info[i]
+					if upperLimit != nil {
+						parsedVersion, err := semver.ParseTolerant(chartSummary.ChartVersion)
+						if err != nil {
+							log.Logger().WithError(err).
+								Debugf("ignore version %s since it is malformed and upperLimit is set for chart %s",
+									chartSummary.ChartVersion, name)
+							continue
+						}
+						if parsedVersion.GE(*upperLimit) {
+							log.Logger().WithError(err).
+								Debugf("ignore version %s since it conflicts with upperLimit for chart %s",
+									chartSummary.ChartVersion, name)
+							continue
+						}
+					}
+					version = chartSummary.ChartVersion
+					break
+				}
 			}
 			if version == "" {
 				log.Logger().Warnf("no chart version found for chart %s", name)
@@ -180,7 +207,7 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 }
 
 // This method only returns the minimal answer needed
-func ociFindLatestVersion(ociRepo string) (string, error) {
+func ociFindLatestVersion(ociRepo string, upperLimit *semver.Version) (string, error) {
 	repo, err := remote.NewRepository(strings.TrimPrefix(ociRepo, "oci://"))
 	if err != nil {
 		return "", err
@@ -210,7 +237,7 @@ func ociFindLatestVersion(ociRepo string) (string, error) {
 				continue
 			}
 			log.Logger().Debugf("considering tag that does look like version: %s", tag)
-			if version.GT(latestFound) {
+			if version.GT(latestFound) && (upperLimit == nil || version.LT(*upperLimit)) {
 				latestFound = version
 				latestVersion = strings.ReplaceAll(tag, "_", "+")
 			}
