@@ -18,9 +18,10 @@ func (o *Options) ModifyApplicationFiles(dir, repoURL, version string) error {
 		}
 		kind := kyamls.GetKind(node, path)
 		var err error
-		if kind == "Application" {
+		switch kind {
+		case "Application":
 			err = argocd.SetAppVersion(node, path, version)
-		} else if kind == "ApplicationSet" {
+		case "ApplicationSet":
 			err = argocd.SetAppSetVersion(node, path, version)
 		}
 		if err != nil {
