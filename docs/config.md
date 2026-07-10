@@ -531,6 +531,28 @@ bool
 Note: Not all git servers support this.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>pullRequestAssignees</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>PullRequestAssignees</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>assignAuthorToPullRequests</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>AssignAuthorToPullRequests governs if downstream pull requests are automatically assigned to the upstream author</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="updatebot.jenkins-x.io/v1alpha1.UpdateConfigSpec">UpdateConfigSpec
@@ -621,5 +643,5 @@ string
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>bf6195b</code>.
+on git commit <code>f04931e</code>.
 </em></p>
