@@ -93,7 +93,7 @@ func (o *Options) ApplyRegex(dir, gitURL string, change v1alpha1.Change, regex *
 			})
 
 			if text2 != text {
-				err = os.WriteFile(f, []byte(text2), files.DefaultFileWritePermissions)
+				err = os.WriteFile(f, []byte(text2), files.DefaultFileWritePermissions) //nolint:gosec // f is a glob match within the cloned repo dir; rewriting matched files is the intended behaviour
 				if err != nil {
 					return fmt.Errorf("failed to save file %s: %w", f, err)
 				}
