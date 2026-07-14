@@ -134,7 +134,7 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 				upperLimit = &semver.Version{}
 				*upperLimit, err = semver.ParseTolerant(sv.UpperLimit)
 				if err != nil {
-					log.Logger().WithError(err).Errorf("upperLimit '%s' can not be parsed. Skipping", sv.UpperLimit)
+					log.Logger().WithError(err).Errorf("upperLimit '%s' cannot be parsed. Skipping", sv.UpperLimit)
 					continue
 				}
 			}
@@ -166,9 +166,8 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 							continue
 						}
 						if parsedVersion.GE(*upperLimit) {
-							log.Logger().WithError(err).
-								Debugf("ignore version %s since it conflicts with upperLimit for chart %s",
-									chartSummary.ChartVersion, name)
+							log.Logger().Debugf("ignore version %s since it conflicts with upperLimit for chart %s",
+								chartSummary.ChartVersion, name)
 							continue
 						}
 					}
@@ -227,8 +226,8 @@ func ociFindLatestVersion(ociRepo string, upperLimit *semver.Version) (string, e
 		Credential: docker.Get,
 	}
 	latestVersion := ""
+	var latestFound semver.Version
 	err = repo.Tags(context.Background(), "", func(tags []string) error {
-		var latestFound semver.Version
 		for _, tag := range tags {
 			// Change underscore (_) back to plus (+) for Helm
 			version, err := semver.ParseTolerant(strings.ReplaceAll(tag, "_", "+"))
