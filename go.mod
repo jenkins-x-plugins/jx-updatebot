@@ -4,6 +4,7 @@ go 1.26.3
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/cpuguy83/go-md2man v1.0.10
 	github.com/google/go-cmp v0.7.0
 	github.com/jenkins-x-plugins/jx-gitops v1.3.3
@@ -21,6 +22,7 @@ require (
 	github.com/yargevad/filepathx v0.0.0-20161019152617-907099cb5a62
 	golang.org/x/oauth2 v0.36.0
 	k8s.io/apimachinery v0.36.2
+	oras.land/oras-go/v2 v2.6.1
 	sigs.k8s.io/kustomize/kyaml v0.21.1
 )
 
@@ -102,7 +104,6 @@ require (
 	github.com/aws/smithy-go v1.27.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
-	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/bluekeyes/go-gitdiff v0.8.1 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
@@ -360,7 +361,6 @@ require (
 	k8s.io/kubectl v0.36.2 // indirect
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
 	knative.dev/pkg v0.0.0-20260602142205-ac97e43f6622 // indirect
-	oras.land/oras-go/v2 v2.6.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/kustomize/api v0.21.1 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect

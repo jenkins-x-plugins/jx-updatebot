@@ -1,11 +1,13 @@
 package pr
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/blang/semver"
 	"github.com/jenkins-x-plugins/jx-updatebot/pkg/apis/updatebot/v1alpha1"
 	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/helmer"
@@ -13,6 +15,10 @@ import (
 	"github.com/jenkins-x/jx-helpers/v3/pkg/stringhelpers"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/versionstream"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
+	"oras.land/oras-go/v2/registry/remote"
+	"oras.land/oras-go/v2/registry/remote/auth"
+	"oras.land/oras-go/v2/registry/remote/credentials"
+	"oras.land/oras-go/v2/registry/remote/retry"
 )
 
 // ApplyVersionStream applies the version stream change
@@ -123,16 +129,52 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 				log.Logger().Debugf("no upgrade is done of chart %s since no version is set", name)
 				continue
 			}
-			info, err := o.Helmer.SearchCharts(name, true)
-			if err != nil {
-				return fmt.Errorf("failed to search for chart %s: %w", name, err)
+			var upperLimit *semver.Version
+			if sv.UpperLimit != "" {
+				upperLimit = &semver.Version{}
+				*upperLimit, err = semver.ParseTolerant(sv.UpperLimit)
+				if err != nil {
+					log.Logger().WithError(err).Errorf("upperLimit '%s' cannot be parsed. Skipping", sv.UpperLimit)
+					continue
+				}
 			}
-			if len(info) == 0 {
-				log.Logger().Warnf("no version found for chart %s", name)
-				continue
+			version := ""
+			if strings.HasPrefix(ci.RepoURL, "oci://") {
+				// shim for lack of support for searching OCI charts in helm cli
+				ociRepo := scm.Join(ci.RepoURL, n)
+				version, err = ociFindLatestVersion(ociRepo, upperLimit)
+				if err != nil {
+					return fmt.Errorf("failed to search for chart %s: %w", ociRepo, err)
+				}
+			} else {
+				info, err := o.Helmer.SearchCharts(name, true)
+				if err != nil {
+					return fmt.Errorf("failed to search for chart %s: %w", name, err)
+				}
+				if len(info) == 0 {
+					log.Logger().Warnf("no version found for chart %s", name)
+					continue
+				}
+				for i := range info {
+					chartSummary := info[i]
+					if upperLimit != nil {
+						parsedVersion, err := semver.ParseTolerant(chartSummary.ChartVersion)
+						if err != nil {
+							log.Logger().WithError(err).
+								Debugf("ignore version %s since it is malformed and upperLimit is set for chart %s",
+									chartSummary.ChartVersion, name)
+							continue
+						}
+						if parsedVersion.GE(*upperLimit) {
+							log.Logger().Debugf("ignore version %s since it conflicts with upperLimit for chart %s",
+								chartSummary.ChartVersion, name)
+							continue
+						}
+					}
+					version = chartSummary.ChartVersion
+					break
+				}
 			}
-			chartSummary := info[0]
-			version := chartSummary.ChartVersion
 			if version == "" {
 				log.Logger().Warnf("no chart version found for chart %s", name)
 				continue
@@ -161,6 +203,47 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 		}
 	}
 	return nil
+}
+
+// This method only returns the minimal answer needed
+func ociFindLatestVersion(ociRepo string, upperLimit *semver.Version) (string, error) {
+	repo, err := remote.NewRepository(strings.TrimPrefix(ociRepo, "oci://"))
+	if err != nil {
+		return "", err
+	}
+
+	docker, err := credentials.NewStoreFromDocker(credentials.StoreOptions{
+		AllowPlaintextPut:        false,
+		DetectDefaultNativeStore: false,
+	})
+	if err != nil {
+		return "", err
+	}
+	// Note: The below code can be omitted if authentication is not required.
+	repo.Client = &auth.Client{
+		Client:     retry.DefaultClient,
+		Cache:      auth.NewCache(),
+		Credential: docker.Get,
+	}
+	latestVersion := ""
+	var latestFound semver.Version
+	err = repo.Tags(context.Background(), "", func(tags []string) error {
+		for _, tag := range tags {
+			// Change underscore (_) back to plus (+) for Helm
+			version, err := semver.ParseTolerant(strings.ReplaceAll(tag, "_", "+"))
+			if err != nil {
+				log.Logger().WithError(err).Debugf("ignore tag that doesn't look like version: %s", tag)
+				continue
+			}
+			log.Logger().Debugf("considering tag that does look like version: %s", tag)
+			if version.GT(latestFound) && (upperLimit == nil || version.LT(*upperLimit)) {
+				latestFound = version
+				latestVersion = strings.ReplaceAll(tag, "_", "+")
+			}
+		}
+		return nil
+	})
+	return latestVersion, err
 }
 
 type chartInfo struct {
