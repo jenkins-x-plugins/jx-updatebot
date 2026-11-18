@@ -165,6 +165,11 @@ func (o *Options) applyVersionStreamCharts(dir string, vs *v1alpha1.VersionStrea
 									chartSummary.ChartVersion, name)
 							continue
 						}
+						// A pre-release is considered less than a released version, so without this 1.16.0-beta is accepted
+						// with upperLimit: 1.16.0
+						if upperLimit.Pre == nil {
+							parsedVersion.Pre = nil
+						}
 						if parsedVersion.GE(*upperLimit) {
 							log.Logger().Debugf("ignore version %s since it conflicts with upperLimit for chart %s",
 								chartSummary.ChartVersion, name)
@@ -236,7 +241,18 @@ func ociFindLatestVersion(ociRepo string, upperLimit *semver.Version) (string, e
 				continue
 			}
 			log.Logger().Debugf("considering tag that does look like version: %s", tag)
-			if version.GT(latestFound) && (upperLimit == nil || version.LT(*upperLimit)) {
+			if version.GT(latestFound) {
+				if upperLimit != nil {
+					comparableVersion := version
+					// A pre-release is considered less than a released version, so without this 1.16.0-beta is accepted
+					// with upperLimit: 1.16.0
+					if upperLimit.Pre == nil {
+						comparableVersion.Pre = nil
+					}
+					if comparableVersion.GE(*upperLimit) {
+						continue
+					}
+				}
 				latestFound = version
 				latestVersion = strings.ReplaceAll(tag, "_", "+")
 			}
